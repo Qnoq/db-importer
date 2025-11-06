@@ -16,7 +16,9 @@ RUN go mod download
 COPY . .
 
 # Build the application with optimizations
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+# Use TARGETARCH to build for the correct architecture (amd64 or arm64)
+ARG TARGETARCH
+RUN CGO_ENABLED=0 GOOS=linux go build \
     -ldflags='-w -s -extldflags "-static"' \
     -a \
     -o /app/db-importer \
