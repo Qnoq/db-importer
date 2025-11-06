@@ -5,6 +5,17 @@ go 1.21
 require github.com/blastrain/vitess-sqlparser v0.0.0-20201030050434-a139afbb1aba
 
 require (
+	github.com/benbjohnson/clock v1.3.5 // indirect
+	github.com/cznic/mathutil v0.0.0-20181122101859-297441e03548 // indirect
 	github.com/juju/errors v0.0.0-20170703010042-c7d06af17c68 // indirect
-	golang.org/x/text v0.0.0-20180302201248-b7ef84aaf62a // indirect
+	github.com/pingcap/errors v0.11.5-0.20210425183316-da1aaba5fb63 // indirect
+	github.com/pingcap/failpoint v0.0.0-20220801062533-2eaa32854a6c // indirect
+	github.com/pingcap/log v1.1.0 // indirect
+	github.com/pingcap/tidb/parser v0.0.0-20231013125129-93a834a6bf8d // indirect
+	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
+	go.uber.org/atomic v1.11.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
+	go.uber.org/zap v1.25.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 )

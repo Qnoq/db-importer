@@ -135,12 +135,12 @@ func parseSchemaHandler(w http.ResponseWriter, r *http.Request) {
 
 	sqlContent := string(content)
 
-	// Try Vitess parser first (works well for MySQL)
-	tables := parser.ParseWithVitess(sqlContent)
+	// Try TiDB parser first (robust MySQL/PostgreSQL parser)
+	tables := parser.ParseWithTiDB(sqlContent)
 
 	// If no tables found, fallback to regex parsers
 	if len(tables) == 0 {
-		logger.Debug("Vitess parser found no tables, trying PostgreSQL parser")
+		logger.Debug("TiDB parser found no tables, trying PostgreSQL parser")
 		tables = parser.ParsePostgreSQL(sqlContent)
 
 		if len(tables) == 0 {
