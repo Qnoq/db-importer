@@ -1,53 +1,161 @@
 <template>
   <div class="px-4 py-6">
-    <div class="bg-white shadow rounded-lg p-6">
-      <h2 class="text-2xl font-semibold mb-4">Step 1: Upload SQL Schema</h2>
-      <p class="text-gray-600 mb-6">
-        Upload your MySQL/MariaDB or PostgreSQL dump file (.sql)
-      </p>
+    <!-- Progress Steps -->
+    <div class="mb-8">
+      <div class="flex items-center justify-center space-x-4">
+        <div class="flex items-center">
+          <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold shadow-md">
+            1
+          </div>
+          <span class="ml-3 text-sm font-medium text-blue-600">Upload Schema</span>
+        </div>
+        <div class="w-16 h-0.5 bg-gray-300"></div>
+        <div class="flex items-center">
+          <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-semibold">
+            2
+          </div>
+          <span class="ml-3 text-sm font-medium text-gray-500">Select Table</span>
+        </div>
+        <div class="w-16 h-0.5 bg-gray-300"></div>
+        <div class="flex items-center">
+          <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-semibold">
+            3
+          </div>
+          <span class="ml-3 text-sm font-medium text-gray-500">Upload Data</span>
+        </div>
+        <div class="w-16 h-0.5 bg-gray-300"></div>
+        <div class="flex items-center">
+          <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-semibold">
+            4
+          </div>
+          <span class="ml-3 text-sm font-medium text-gray-500">Map & Generate</span>
+        </div>
+      </div>
+    </div>
 
+    <div class="bg-white shadow-lg rounded-xl p-8 border border-gray-200">
+      <div class="mb-8">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">Upload SQL Schema</h2>
+        <p class="text-gray-600">
+          Upload your MySQL/MariaDB or PostgreSQL dump file to get started
+        </p>
+      </div>
+
+      <!-- Upload Area -->
       <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-3">
+          SQL Schema File
+        </label>
+        <div
+          class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 transition cursor-pointer bg-gray-50"
+          @click="$refs.fileInput?.click()"
+          @dragover.prevent
+          @drop.prevent="handleDrop"
+        >
+          <div class="flex flex-col items-center">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+              <i class="pi pi-cloud-upload text-blue-600 text-3xl"></i>
+            </div>
+            <p class="text-lg font-medium text-gray-700 mb-1">
+              Drop your SQL file here, or click to browse
+            </p>
+            <p class="text-sm text-gray-500">
+              Supports MySQL, MariaDB, and PostgreSQL dump files
+            </p>
+            <p class="text-xs text-gray-400 mt-2">
+              Maximum file size: 50MB
+            </p>
+          </div>
+        </div>
         <input
           type="file"
           accept=".sql"
           @change="handleFileUpload"
           ref="fileInput"
-          class="block w-full text-sm text-gray-500
-            file:mr-4 file:py-2 file:px-4
-            file:rounded-md file:border-0
-            file:text-sm file:font-semibold
-            file:bg-blue-50 file:text-blue-700
-            hover:file:bg-blue-100"
+          class="hidden"
         />
       </div>
 
-      <div v-if="loading" class="flex items-center justify-center py-8">
-        <i class="pi pi-spin pi-spinner text-4xl text-blue-600"></i>
+      <!-- Loading State -->
+      <div v-if="loading" class="flex flex-col items-center justify-center py-12">
+        <i class="pi pi-spin pi-spinner text-5xl text-blue-600 mb-4"></i>
+        <p class="text-gray-600 font-medium">Parsing your SQL schema...</p>
+        <p class="text-sm text-gray-500 mt-2">This may take a few seconds</p>
       </div>
 
-      <div v-if="error" class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
-        <p class="text-red-700">{{ error }}</p>
+      <!-- Error State -->
+      <div v-if="error" class="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 mb-4 flex items-start">
+        <i class="pi pi-exclamation-circle text-red-500 text-xl mr-3 mt-0.5"></i>
+        <div>
+          <p class="font-medium text-red-800">Upload Failed</p>
+          <p class="text-red-700 text-sm mt-1">{{ error }}</p>
+        </div>
       </div>
 
-      <div v-if="store.hasSchema && !loading" class="mt-6">
-        <h3 class="text-lg font-semibold mb-3">Detected Tables ({{ store.tables.length }})</h3>
-        <div class="bg-gray-50 rounded-md p-4 max-h-96 overflow-y-auto">
-          <ul class="space-y-2">
-            <li v-for="table in store.tables" :key="table.name" class="flex items-center">
-              <i class="pi pi-table text-blue-600 mr-2"></i>
-              <span class="font-medium">{{ table.name }}</span>
-              <span class="ml-2 text-gray-500 text-sm">({{ table.fields.length }} columns)</span>
-            </li>
-          </ul>
+      <!-- Success State -->
+      <div v-if="store.hasSchema && !loading" class="space-y-6">
+        <!-- Success Banner -->
+        <div class="bg-green-50 border-l-4 border-green-500 rounded-lg p-4 flex items-start">
+          <i class="pi pi-check-circle text-green-500 text-xl mr-3 mt-0.5"></i>
+          <div class="flex-1">
+            <p class="font-medium text-green-800">Schema parsed successfully!</p>
+            <p class="text-green-700 text-sm mt-1">
+              Found {{ store.tables.length }} table{{ store.tables.length !== 1 ? 's' : '' }} in your database dump
+            </p>
+          </div>
         </div>
 
-        <button
-          @click="goToSelectTable"
-          class="mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition"
-        >
-          Continue to Table Selection
-          <i class="pi pi-arrow-right ml-2"></i>
-        </button>
+        <!-- Tables Preview -->
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Detected Tables</h3>
+            <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+              {{ store.tables.length }} tables
+            </span>
+          </div>
+
+          <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg p-4 max-h-96 overflow-y-auto border border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              <div
+                v-for="table in store.tables"
+                :key="table.name"
+                class="bg-white rounded-lg p-3 border border-gray-200 hover:border-blue-300 hover:shadow-md transition"
+              >
+                <div class="flex items-center">
+                  <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
+                    <i class="pi pi-table text-blue-600 text-sm"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-medium text-gray-900 truncate" :title="table.name">
+                      {{ table.name }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      {{ table.fields.length }} column{{ table.fields.length !== 1 ? 's' : '' }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Continue Button -->
+        <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+          <button
+            @click="$refs.fileInput?.click()"
+            class="text-blue-600 hover:text-blue-700 font-medium flex items-center transition"
+          >
+            <i class="pi pi-refresh mr-2"></i>
+            Upload a different file
+          </button>
+          <button
+            @click="goToSelectTable"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition shadow-md hover:shadow-lg flex items-center"
+          >
+            Continue to Table Selection
+            <i class="pi pi-arrow-right ml-2"></i>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -66,10 +174,7 @@ const error = ref('')
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
-async function handleFileUpload(event: Event) {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-
+async function processFile(file: File) {
   if (!file) return
 
   error.value = ''
@@ -99,6 +204,23 @@ async function handleFileUpload(event: Event) {
     error.value = err instanceof Error ? err.message : 'An error occurred'
   } finally {
     loading.value = false
+  }
+}
+
+async function handleFileUpload(event: Event) {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (file) {
+    await processFile(file)
+  }
+}
+
+function handleDrop(event: DragEvent) {
+  const file = event.dataTransfer?.files?.[0]
+  if (file && file.name.endsWith('.sql')) {
+    processFile(file)
+  } else {
+    error.value = 'Please upload a valid .sql file'
   }
 }
 
