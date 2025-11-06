@@ -1,4 +1,5 @@
 # Backend Go
+backend/db-importer
 backend/*.exe
 backend/*.exe~
 backend/*.dll
