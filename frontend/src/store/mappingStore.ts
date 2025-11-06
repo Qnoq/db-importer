@@ -144,6 +144,7 @@ export const useMappingStore = defineStore('mapping', {
     hasSchema: (state) => state.tables.length > 0,
     hasSelectedTable: (state) => state.selectedTable !== null,
     hasExcelData: (state) => state.excelData.length > 0,
+    hasData: (state) => state.excelData.length > 0,
 
     // Get the number of mapped columns
     mappedColumnsCount: (state) => {

@@ -1,10 +1,13 @@
 <template>
   <div class="px-4 py-6">
-    <div class="bg-white shadow rounded-lg p-6">
+    <!-- Progress Stepper with Navigation -->
+    <StepperNav />
+
+    <div class="bg-white shadow-lg rounded-xl p-8 border border-gray-200">
       <!-- Header -->
-      <div class="flex justify-between items-center mb-4">
+      <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-2xl font-semibold">Step 4: Map Columns</h2>
+          <h2 class="text-3xl font-bold text-gray-900 mb-2">Map Columns</h2>
           <p class="text-gray-600 mt-1">
             Match your Excel/CSV columns to database fields and apply transformations
           </p>
@@ -412,6 +415,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import StepperNav from '../components/StepperNav.vue'
 import { useMappingStore, Field } from '../store/mappingStore'
 import { transformations, applyTransformation, suggestTransformations, type TransformationType } from '../utils/transformations'
 import { validateDataset, validateCell, getCellClass, getValidationIcon, type ValidationResult } from '../utils/dataValidation'
