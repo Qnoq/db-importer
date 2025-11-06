@@ -72,6 +72,17 @@
           </ul>
         </div>
 
+        <!-- Server validation errors -->
+        <div v-if="serverValidationErrors.length > 0" class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
+          <h3 class="font-semibold text-red-800 mb-2">
+            <i class="pi pi-times-circle mr-2"></i>
+            Validation Errors
+          </h3>
+          <ul class="list-disc list-inside text-sm text-red-700 space-y-1 max-h-60 overflow-y-auto">
+            <li v-for="(err, index) in serverValidationErrors" :key="index">{{ err }}</li>
+          </ul>
+        </div>
+
         <div class="flex gap-4">
           <button
             @click="generateSQL"
@@ -106,13 +117,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useMappingStore } from '../store/mappingStore'
+import { useMappingStore, Field } from '../store/mappingStore'
 
 const router = useRouter()
 const store = useMappingStore()
 const localMapping = ref<Record<string, string>>({})
 const loading = ref(false)
 const error = ref('')
+const serverValidationErrors = ref<string[]>([])
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -121,22 +133,85 @@ onMounted(() => {
   autoMap()
 })
 
+// Levenshtein distance algorithm for better string matching
+function levenshteinDistance(str1: string, str2: string): number {
+  const len1 = str1.length
+  const len2 = str2.length
+  const matrix: number[][] = []
+
+  for (let i = 0; i <= len1; i++) {
+    matrix[i] = [i]
+  }
+
+  for (let j = 0; j <= len2; j++) {
+    matrix[0][j] = j
+  }
+
+  for (let i = 1; i <= len1; i++) {
+    for (let j = 1; j <= len2; j++) {
+      if (str1[i - 1] === str2[j - 1]) {
+        matrix[i][j] = matrix[i - 1][j - 1]
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1, // substitution
+          matrix[i][j - 1] + 1,     // insertion
+          matrix[i - 1][j] + 1      // deletion
+        )
+      }
+    }
+  }
+
+  return matrix[len1][len2]
+}
+
+// Calculate similarity score (0 to 1, higher is better)
+function calculateSimilarity(str1: string, str2: string): number {
+  const distance = levenshteinDistance(str1, str2)
+  const maxLen = Math.max(str1.length, str2.length)
+  return 1 - distance / maxLen
+}
+
 function autoMap() {
   const mapping: Record<string, string> = {}
 
   for (const header of store.excelHeaders) {
-    const normalizedHeader = header.toLowerCase().trim()
+    const normalizedHeader = header.toLowerCase().trim().replace(/[_\s-]/g, '')
 
-    // Find best match
-    const match = store.selectedTable?.fields.find(field => {
-      const normalizedField = field.name.toLowerCase().trim()
-      return normalizedField === normalizedHeader ||
-             normalizedField.includes(normalizedHeader) ||
-             normalizedHeader.includes(normalizedField)
-    })
+    let bestMatch: Field | null = null
+    let bestScore = 0
 
-    if (match) {
-      mapping[header] = match.name
+    // Find best match using multiple strategies
+    for (const field of store.selectedTable?.fields || []) {
+      const normalizedField = field.name.toLowerCase().trim().replace(/[_\s-]/g, '')
+
+      let score = 0
+
+      // Exact match (highest priority)
+      if (normalizedField === normalizedHeader) {
+        score = 1.0
+      }
+      // Contains match
+      else if (normalizedField.includes(normalizedHeader) || normalizedHeader.includes(normalizedField)) {
+        score = 0.8
+      }
+      // Levenshtein similarity
+      else {
+        const similarity = calculateSimilarity(normalizedHeader, normalizedField)
+        // Only consider if similarity is above threshold
+        if (similarity > 0.6) {
+          score = similarity * 0.7 // Lower weight for fuzzy matches
+        }
+      }
+
+      if (score > bestScore) {
+        bestScore = score
+        bestMatch = field
+      }
+    }
+
+    // Only map if we found a reasonably good match
+    if (bestMatch && bestScore > 0.6) {
+      mapping[header] = bestMatch.name
     }
   }
 
@@ -170,18 +245,25 @@ const canGenerate = computed(() => {
   return Object.values(localMapping.value).some(v => v !== '')
 })
 
+interface FieldInfo {
+  name: string
+  type: string
+  nullable: boolean
+}
+
 async function generateSQL() {
   if (!store.selectedTable) return
 
   error.value = ''
+  serverValidationErrors.value = []
   loading.value = true
 
   try {
     // Build ordered rows based on mapping
-    const mappedRows: any[][] = []
+    const mappedRows: unknown[][] = []
 
     for (const row of store.excelData) {
-      const mappedRow: any[] = []
+      const mappedRow: unknown[] = []
 
       for (const excelHeader of store.excelHeaders) {
         const dbColumn = localMapping.value[excelHeader]
@@ -196,6 +278,22 @@ async function generateSQL() {
       }
     }
 
+    // Build fields array for validation
+    const fields: FieldInfo[] = []
+    for (const excelHeader of store.excelHeaders) {
+      const dbColumn = localMapping.value[excelHeader]
+      if (dbColumn) {
+        const field = store.selectedTable.fields.find(f => f.name === dbColumn)
+        if (field) {
+          fields.push({
+            name: field.name,
+            type: field.type,
+            nullable: field.nullable
+          })
+        }
+      }
+    }
+
     const response = await fetch(`${API_URL}/generate-sql`, {
       method: 'POST',
       headers: {
@@ -204,12 +302,23 @@ async function generateSQL() {
       body: JSON.stringify({
         table: store.selectedTable.name,
         mapping: localMapping.value,
-        rows: mappedRows
+        rows: mappedRows,
+        fields: fields
       })
     })
 
     if (!response.ok) {
-      throw new Error('Failed to generate SQL')
+      if (response.status === 422) {
+        // Validation errors
+        const errorData = await response.json()
+        serverValidationErrors.value = errorData.errors || []
+        error.value = errorData.error || 'Data validation failed'
+        loading.value = false
+        return
+      }
+
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || errorData.error || 'Failed to generate SQL')
     }
 
     const sql = await response.text()
