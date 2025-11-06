@@ -139,6 +139,15 @@ function canNavigateTo(stepId: string): boolean {
 function goToStep(stepId: string) {
   if (!canNavigateTo(stepId)) return
 
+  // Don't allow navigating forward, only backward
+  const currentIndex = steps.findIndex(s => s.id === currentStep.value)
+  const targetIndex = steps.findIndex(s => s.id === stepId)
+
+  // Only allow going to previous steps or current step
+  if (targetIndex > currentIndex) {
+    return
+  }
+
   const step = steps.find(s => s.id === stepId)
   if (step) {
     router.push(step.path)

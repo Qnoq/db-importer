@@ -161,7 +161,8 @@ async function processFile(file: File) {
     })
 
     if (!response.ok) {
-      throw new Error('Failed to parse schema')
+      const errorData = await response.json().catch(() => null)
+      throw new Error(errorData?.error || `Server error: ${response.status}`)
     }
 
     const data = await response.json()
@@ -172,7 +173,11 @@ async function processFile(file: File) {
 
     store.setTables(data.tables)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'An error occurred'
+    if (err instanceof TypeError && err.message.includes('fetch')) {
+      error.value = 'Cannot connect to backend server. Please ensure the backend is running on ' + API_URL
+    } else {
+      error.value = err instanceof Error ? err.message : 'An error occurred'
+    }
   } finally {
     loading.value = false
   }
