@@ -1,37 +1,7 @@
 <template>
   <div class="px-4 py-6">
-    <!-- Progress Steps -->
-    <div class="mb-8">
-      <div class="flex items-center justify-center space-x-4">
-        <div class="flex items-center">
-          <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold shadow-md">
-            1
-          </div>
-          <span class="ml-3 text-sm font-medium text-blue-600">Upload Schema</span>
-        </div>
-        <div class="w-16 h-0.5 bg-gray-300"></div>
-        <div class="flex items-center">
-          <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-semibold">
-            2
-          </div>
-          <span class="ml-3 text-sm font-medium text-gray-500">Select Table</span>
-        </div>
-        <div class="w-16 h-0.5 bg-gray-300"></div>
-        <div class="flex items-center">
-          <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-semibold">
-            3
-          </div>
-          <span class="ml-3 text-sm font-medium text-gray-500">Upload Data</span>
-        </div>
-        <div class="w-16 h-0.5 bg-gray-300"></div>
-        <div class="flex items-center">
-          <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-semibold">
-            4
-          </div>
-          <span class="ml-3 text-sm font-medium text-gray-500">Map & Generate</span>
-        </div>
-      </div>
-    </div>
+    <!-- Progress Stepper with Navigation -->
+    <StepperNav />
 
     <div class="bg-white shadow-lg rounded-xl p-8 border border-gray-200">
       <div class="mb-8">
@@ -165,6 +135,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMappingStore } from '../store/mappingStore'
+import StepperNav from '../components/StepperNav.vue'
 
 const router = useRouter()
 const store = useMappingStore()

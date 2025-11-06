@@ -1,7 +1,10 @@
 <template>
   <div class="px-4 py-6">
-    <div class="bg-white shadow rounded-lg p-6">
-      <h2 class="text-2xl font-semibold mb-4">Step 2: Select Target Table</h2>
+    <!-- Progress Stepper with Navigation -->
+    <StepperNav />
+
+    <div class="bg-white shadow-lg rounded-xl p-8 border border-gray-200">
+      <h2 class="text-3xl font-bold text-gray-900 mb-2">Select Target Table</h2>
       <p class="text-gray-600 mb-6">
         Choose the table where you want to import data
       </p>
@@ -201,6 +204,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMappingStore } from '../store/mappingStore'
+import StepperNav from '../components/StepperNav.vue'
 
 const router = useRouter()
 const store = useMappingStore()
