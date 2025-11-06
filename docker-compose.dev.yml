@@ -4,19 +4,19 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     container_name: db-importer-backend-dev
     ports:
       - "8080:8080"
     volumes:
       - ./backend:/app
+      - go-modules:/go/pkg/mod  # Cache Go modules
     environment:
       - PORT=8080
       - ALLOWED_ORIGINS=*
       - MAX_UPLOAD_SIZE=52428800
       - DEBUG_LOG=true
       - RATE_LIMIT_ENABLED=false
-    command: go run main.go
     networks:
       - db-importer-network
     restart: unless-stopped
@@ -43,3 +43,6 @@ services:
 networks:
   db-importer-network:
     driver: bridge
+
+volumes:
+  go-modules:  # Persist Go modules cache for faster rebuilds
