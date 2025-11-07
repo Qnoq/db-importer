@@ -27,20 +27,50 @@
 
       <div v-else>
         <!-- Auto-mapping Success Banner -->
-        <div v-if="autoMappingStats" class="mb-4 bg-green-50 border border-green-200 rounded-md p-4">
+        <div v-if="autoMappingStats" class="mb-4 rounded-md p-4"
+             :class="autoMappingStats.mapped > autoMappingStats.total / 2
+                     ? 'bg-green-50 border border-green-200'
+                     : 'bg-yellow-50 border border-yellow-200'">
           <div class="flex items-start gap-3">
             <div class="flex-shrink-0">
-              <i class="pi pi-check-circle text-green-600 text-2xl"></i>
+              <i class="text-2xl" :class="autoMappingStats.mapped > autoMappingStats.total / 2
+                                          ? 'pi pi-check-circle text-green-600'
+                                          : 'pi pi-exclamation-triangle text-yellow-600'"></i>
             </div>
             <div class="flex-1">
-              <h3 class="font-semibold text-green-900 mb-1">
-                Auto-mapping successful!
+              <h3 class="font-semibold mb-1" :class="autoMappingStats.mapped > autoMappingStats.total / 2
+                                                     ? 'text-green-900'
+                                                     : 'text-yellow-900'">
+                <template v-if="autoMappingStats.mapped > autoMappingStats.total / 2">
+                  Auto-mapping successful!
+                </template>
+                <template v-else>
+                  Limited auto-mapping
+                </template>
               </h3>
-              <p class="text-sm text-green-800">
+              <p class="text-sm" :class="autoMappingStats.mapped > autoMappingStats.total / 2
+                                         ? 'text-green-800'
+                                         : 'text-yellow-800'">
                 The system automatically mapped <strong>{{ autoMappingStats.mapped }} of {{ autoMappingStats.total }} columns</strong>
                 by comparing your Excel column names with database field names.
               </p>
-              <p class="text-sm text-green-700 mt-2">
+
+              <!-- Low match warning -->
+              <div v-if="autoMappingStats.mapped < autoMappingStats.total / 2" class="mt-3 bg-yellow-100 rounded-lg p-3">
+                <p class="text-sm text-yellow-900 font-medium mb-1">
+                  💡 Tip: Improve auto-mapping
+                </p>
+                <p class="text-sm text-yellow-800">
+                  Only <strong>{{ Math.round((autoMappingStats.mapped / autoMappingStats.total) * 100) }}%</strong> of columns were auto-mapped.
+                  For better results, <strong>rename your Excel headers to match database field names</strong>
+                  (e.g., <code class="bg-white px-1 rounded text-xs">{{ store.selectedTable?.fields[0]?.name }}</code>,
+                  <code class="bg-white px-1 rounded text-xs">{{ store.selectedTable?.fields[1]?.name }}</code>).
+                </p>
+              </div>
+
+              <p class="text-sm mt-2" :class="autoMappingStats.mapped > autoMappingStats.total / 2
+                                              ? 'text-green-700'
+                                              : 'text-yellow-700'">
                 <i class="pi pi-info-circle mr-1"></i>
                 Review the mappings below and adjust if needed.
                 <template v-if="getAutoIncrementFieldNames().length > 0">
