@@ -15,15 +15,8 @@
             </div>
           </div>
 
+          <!-- Future: Add quick action buttons here if needed -->
           <div class="flex items-center space-x-4">
-            <a
-              href="https://github.com/yourusername/db-importer"
-              target="_blank"
-              class="text-gray-500 hover:text-gray-700 transition"
-              title="View on GitHub"
-            >
-              <i class="pi pi-github text-xl"></i>
-            </a>
           </div>
         </div>
       </div>
@@ -41,10 +34,9 @@
           </p>
           <div class="flex items-center space-x-4">
             <span>v1.0.0</span>
-            <span>•</span>
-            <a href="#" class="hover:text-gray-700 transition">Documentation</a>
-            <span>•</span>
-            <a href="#" class="hover:text-gray-700 transition">Support</a>
+            <!-- Future: Add support link when ready -->
+            <!-- <span>•</span>
+            <a href="#" class="hover:text-gray-700 transition">Support</a> -->
           </div>
         </div>
       </div>
