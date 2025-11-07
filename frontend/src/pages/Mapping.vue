@@ -151,23 +151,24 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="md:col-span-1 flex gap-2 justify-end">
+                <div class="md:col-span-1 flex gap-1 justify-end items-center">
                   <button
-                    v-if="columnTransformations[header] && columnTransformations[header] !== 'none'"
+                    v-if="columnTransformations[header] && columnTransformations[header] !== 'none' && localMapping[header]"
                     @click="showTransformPreview(header)"
                     class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                     title="Preview transformation"
                   >
-                    <i class="pi pi-eye"></i>
+                    <i class="pi pi-eye text-sm"></i>
                   </button>
-                  <button
-                    v-if="localMapping[header]"
-                    @click="localMapping[header] = ''; onMappingChange()"
-                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
-                    title="Remove mapping"
-                  >
-                    <i class="pi pi-times"></i>
-                  </button>
+                  <label class="flex items-center gap-1.5 cursor-pointer group px-2 py-1 hover:bg-gray-100 rounded-lg transition">
+                    <input
+                      type="checkbox"
+                      :checked="!localMapping[header] || localMapping[header] === ''"
+                      @change="toggleSkip(header)"
+                      class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+                    />
+                    <span class="text-xs text-gray-600 group-hover:text-gray-900 font-medium">Skip</span>
+                  </label>
                 </div>
               </div>
             </div>
@@ -646,6 +647,38 @@ function getSampleValue(header: string): string {
 
   const strValue = String(sampleValue)
   return strValue.substring(0, 30) + (strValue.length > 30 ? '...' : '')
+}
+
+/**
+ * Toggle skip for a column
+ */
+function toggleSkip(header: string) {
+  if (localMapping.value[header]) {
+    // Currently mapped, skip it
+    localMapping.value[header] = ''
+    columnTransformations.value[header] = 'none'
+  } else {
+    // Currently skipped, try to auto-map it
+    const normalizedHeader = header.toLowerCase().trim().replace(/[_\s-]/g, '')
+    let bestMatch: Field | null = null
+    let bestScore = 0
+
+    for (const field of store.selectedTable?.fields || []) {
+      const normalizedField = field.name.toLowerCase().trim().replace(/[_\s-]/g, '')
+      const similarity = calculateSimilarity(normalizedHeader, normalizedField)
+
+      if (similarity > bestScore) {
+        bestScore = similarity
+        bestMatch = field
+      }
+    }
+
+    if (bestMatch && bestScore > 0.6) {
+      localMapping.value[header] = bestMatch.name
+    }
+  }
+
+  onMappingChange()
 }
 
 /**
