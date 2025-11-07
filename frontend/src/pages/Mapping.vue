@@ -12,13 +12,6 @@
             Match your Excel/CSV columns to database fields and apply transformations
           </p>
         </div>
-        <button
-          @click="showTemplateDialog = true"
-          class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md transition flex items-center gap-2"
-        >
-          <i class="pi pi-bookmark"></i>
-          Templates
-        </button>
       </div>
 
       <div v-if="!store.hasExcelData || !store.hasSelectedTable" class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
@@ -334,23 +327,6 @@
             <i class="pi pi-eye"></i>
             {{ showPreview ? 'Hide' : 'Show' }} Preview
           </button>
-
-          <button
-            @click="validateData"
-            class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-md transition flex items-center gap-2"
-          >
-            <i class="pi pi-shield"></i>
-            Validate Data
-          </button>
-
-          <button
-            @click="showSaveTemplateDialog = true"
-            :disabled="!canGenerate"
-            class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-md transition disabled:opacity-50 flex items-center gap-2"
-          >
-            <i class="pi pi-save"></i>
-            Save as Template
-          </button>
         </div>
 
         <!-- Loading Indicator -->
@@ -361,120 +337,6 @@
         <!-- Error Display -->
         <div v-if="error" class="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
           <p class="text-red-700">{{ error }}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Template Dialog -->
-    <div v-if="showTemplateDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showTemplateDialog = false">
-      <div class="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold">Mapping Templates</h3>
-          <button @click="showTemplateDialog = false" class="text-gray-600 hover:text-gray-800">
-            <i class="pi pi-times text-xl"></i>
-          </button>
-        </div>
-
-        <div v-if="availableTemplates.length === 0" class="text-center py-8 text-gray-500">
-          <i class="pi pi-inbox text-4xl mb-2"></i>
-          <p>No templates saved yet</p>
-          <p class="text-sm">Create your first template by mapping columns and clicking "Save as Template"</p>
-        </div>
-
-        <div v-else class="space-y-3">
-          <div
-            v-for="template in availableTemplates"
-            :key="template.id"
-            class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer transition"
-            @click="applyTemplate(template)"
-          >
-            <div class="flex justify-between items-start">
-              <div class="flex-1">
-                <h4 class="font-semibold">{{ template.name }}</h4>
-                <p v-if="template.description" class="text-sm text-gray-600 mt-1">{{ template.description }}</p>
-                <div class="flex gap-4 text-xs text-gray-500 mt-2">
-                  <span><i class="pi pi-table mr-1"></i>{{ template.tableName }}</span>
-                  <span><i class="pi pi-calendar mr-1"></i>{{ formatDate(template.updatedAt) }}</span>
-                  <span><i class="pi pi-arrows-h mr-1"></i>{{ Object.keys(template.mapping).length }} mappings</span>
-                </div>
-              </div>
-              <button
-                @click.stop="deleteTemplateConfirm(template.id)"
-                class="text-red-600 hover:text-red-700 p-2"
-              >
-                <i class="pi pi-trash"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="mt-6 flex gap-2">
-          <button
-            @click="exportTemplatesFile"
-            class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-md transition"
-          >
-            <i class="pi pi-download mr-2"></i>
-            Export All
-          </button>
-          <button
-            @click="$refs.importTemplateInput.click()"
-            class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 px-4 rounded-md transition"
-          >
-            <i class="pi pi-upload mr-2"></i>
-            Import
-          </button>
-          <input
-            ref="importTemplateInput"
-            type="file"
-            accept=".json"
-            @change="importTemplatesFile"
-            class="hidden"
-          />
-        </div>
-      </div>
-    </div>
-
-    <!-- Save Template Dialog -->
-    <div v-if="showSaveTemplateDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="showSaveTemplateDialog = false">
-      <div class="bg-white rounded-lg p-6 max-w-md w-full">
-        <h3 class="text-xl font-semibold mb-4">Save Mapping Template</h3>
-
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Template Name</label>
-            <input
-              v-model="newTemplateName"
-              type="text"
-              placeholder="e.g., Customer Import"
-              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Description (optional)</label>
-            <textarea
-              v-model="newTemplateDescription"
-              placeholder="Describe this template..."
-              rows="3"
-              class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-            ></textarea>
-          </div>
-
-          <div class="flex gap-2">
-            <button
-              @click="saveTemplate"
-              :disabled="!newTemplateName.trim()"
-              class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition disabled:opacity-50"
-            >
-              Save
-            </button>
-            <button
-              @click="showSaveTemplateDialog = false; newTemplateName = ''; newTemplateDescription = ''"
-              class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded-md transition"
-            >
-              Cancel
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -526,15 +388,6 @@ import StepperNav from '../components/StepperNav.vue'
 import { useMappingStore, Field } from '../store/mappingStore'
 import { transformations, applyTransformation, suggestTransformations, hasYearOnlyValues, type TransformationType } from '../utils/transformations'
 import { validateDataset, validateCell, getCellClass, getValidationIcon, type ValidationResult } from '../utils/dataValidation'
-import {
-  loadTemplates,
-  createTemplate,
-  deleteTemplate,
-  getTemplatesForTable,
-  exportTemplates,
-  importTemplates,
-  type MappingTemplate
-} from '../utils/mappingTemplates'
 
 const router = useRouter()
 const store = useMappingStore()
@@ -550,19 +403,12 @@ const loading = ref(false)
 const error = ref('')
 const serverValidationErrors = ref<string[]>([])
 const showPreview = ref(false)
-const showTemplateDialog = ref(false)
-const showSaveTemplateDialog = ref(false)
 const transformPreviewColumn = ref<string | null>(null)
 const autoMappingStats = ref<{
   total: number
   mapped: number
   skipped: number
 } | null>(null)
-
-// Template state
-const newTemplateName = ref('')
-const newTemplateDescription = ref('')
-const availableTemplates = ref<MappingTemplate[]>([])
 
 // Validation state
 const cellValidations = ref<Map<string, ValidationResult>>(new Map())
@@ -577,17 +423,8 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 onMounted(() => {
   // Initialize auto-mapping
   autoMap()
-  loadAvailableTemplates()
   validateData()
 })
-
-/**
- * Load templates for current table
- */
-function loadAvailableTemplates() {
-  if (!store.selectedTable) return
-  availableTemplates.value = getTemplatesForTable(store.selectedTable.name)
-}
 
 /**
  * Levenshtein distance algorithm for better string matching
@@ -1089,89 +926,6 @@ const canGenerate = computed(() => {
 })
 
 /**
- * Save template
- */
-function saveTemplate() {
-  if (!store.selectedTable || !newTemplateName.value.trim()) return
-
-  createTemplate(
-    newTemplateName.value.trim(),
-    store.selectedTable.name,
-    localMapping.value,
-    fieldTransformations.value,
-    newTemplateDescription.value.trim() || undefined
-  )
-
-  loadAvailableTemplates()
-  showSaveTemplateDialog.value = false
-  newTemplateName.value = ''
-  newTemplateDescription.value = ''
-}
-
-/**
- * Apply template
- */
-function applyTemplate(template: MappingTemplate) {
-  localMapping.value = { ...template.mapping }
-  if (template.transformations) {
-    fieldTransformations.value = { ...template.transformations }
-  }
-  updateMapping()
-  validateData()
-  showTemplateDialog.value = false
-}
-
-/**
- * Delete template
- */
-function deleteTemplateConfirm(id: string) {
-  if (confirm('Are you sure you want to delete this template?')) {
-    deleteTemplate(id)
-    loadAvailableTemplates()
-  }
-}
-
-/**
- * Export templates
- */
-function exportTemplatesFile() {
-  const json = exportTemplates()
-  const blob = new Blob([json], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = `mapping-templates-${Date.now()}.json`
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
-/**
- * Import templates
- */
-function importTemplatesFile(event: Event) {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (!file) return
-
-  const reader = new FileReader()
-  reader.onload = (e) => {
-    const json = e.target?.result as string
-    const result = importTemplates(json)
-
-    if (result.success) {
-      alert(`Successfully imported ${result.imported} template(s)`)
-      loadAvailableTemplates()
-    } else {
-      alert(`Import failed:\n${result.errors.join('\n')}`)
-    }
-  }
-  reader.readAsText(file)
-
-  // Reset input
-  target.value = ''
-}
-
-/**
  * Get transformation preview data
  */
 function getTransformPreview(fieldName: string) {
@@ -1185,14 +939,6 @@ function getTransformPreview(fieldName: string) {
     original: formatCellValue(row[columnIndex]),
     transformed: formatCellValue(applyTransformation(row[columnIndex], transform))
   }))
-}
-
-/**
- * Format date for display
- */
-function formatDate(isoString: string): string {
-  const date = new Date(isoString)
-  return date.toLocaleDateString()
 }
 
 interface FieldInfo {
