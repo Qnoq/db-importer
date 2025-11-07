@@ -179,10 +179,10 @@ export const useAuthStore = defineStore('auth', {
         // Calculate token expiration (15 minutes from now)
         const expiresAt = Date.now() + 15 * 60 * 1000
 
-        this.user = data.user
+        this.user = data.data.user
         this.tokens = {
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token,
+          accessToken: data.data.accessToken,
+          refreshToken: data.data.refreshToken,
           expiresAt
         }
         this.isAuthenticated = true
@@ -226,8 +226,8 @@ export const useAuthStore = defineStore('auth', {
         // Update tokens
         const expiresAt = Date.now() + 15 * 60 * 1000
         this.tokens = {
-          accessToken: data.access_token,
-          refreshToken: data.refresh_token,
+          accessToken: data.data.accessToken,
+          refreshToken: data.data.refreshToken,
           expiresAt
         }
 
