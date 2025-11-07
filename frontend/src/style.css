@@ -11,3 +11,26 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Fix PrimeVue component borders that Tailwind resets */
+.p-inputtext,
+.p-dropdown,
+.p-multiselect {
+  border: 1px solid #d1d5db !important;
+}
+
+.p-inputtext:hover,
+.p-dropdown:hover,
+.p-multiselect:hover {
+  border-color: #9ca3af !important;
+}
+
+.p-inputtext:focus,
+.p-dropdown:focus,
+.p-multiselect:focus,
+.p-dropdown.p-focus,
+.p-multiselect.p-focus {
+  border-color: #3b82f6 !important;
+  outline: 0 !important;
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
+}

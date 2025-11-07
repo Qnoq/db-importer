@@ -52,24 +52,48 @@
 
       <button
         v-if="canReset"
-        @click="handleReset"
+        @click="showResetDialog = true"
         class="text-red-600 hover:text-red-700 font-medium flex items-center transition"
       >
         <i class="pi pi-refresh mr-2"></i>
         Start Over
       </button>
     </div>
+
+    <!-- Reset Confirmation Dialog -->
+    <Dialog
+      v-model:visible="showResetDialog"
+      header="Confirm Reset"
+      :modal="true"
+      :style="{ width: '30rem' }"
+    >
+      <div class="flex items-start gap-3">
+        <i class="pi pi-exclamation-triangle text-3xl text-orange-500"></i>
+        <div>
+          <p class="text-gray-700 mb-2">Are you sure you want to start over?</p>
+          <p class="text-sm text-gray-600">This will clear all your current data and mappings.</p>
+        </div>
+      </div>
+
+      <template #footer>
+        <Button label="Cancel" text @click="showResetDialog = false" />
+        <Button label="Start Over" severity="danger" @click="confirmReset" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useMappingStore } from '../store/mappingStore'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
 
 const router = useRouter()
 const route = useRoute()
 const store = useMappingStore()
+const showResetDialog = ref(false)
 
 const steps = [
   { id: 'upload-schema', label: 'Upload Schema', path: '/' },
@@ -162,10 +186,9 @@ function goBack() {
   }
 }
 
-function handleReset() {
-  if (confirm('Are you sure you want to start over? This will clear all your current data and mappings.')) {
-    store.reset()
-    router.push('/')
-  }
+function confirmReset() {
+  store.reset()
+  router.push('/')
+  showResetDialog.value = false
 }
 </script>

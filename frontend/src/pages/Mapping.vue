@@ -117,7 +117,7 @@
                 Auto-map Columns
               </button>
               <button
-                @click="clearAllMappings"
+                @click="showClearDialog = true"
                 class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition flex items-center gap-2 shadow-sm"
               >
                 <i class="pi pi-times"></i>
@@ -408,6 +408,27 @@
         </div>
       </div>
     </div>
+
+    <!-- Clear Mappings Confirmation Dialog -->
+    <Dialog
+      v-model:visible="showClearDialog"
+      header="Confirm Clear All"
+      :modal="true"
+      :style="{ width: '30rem' }"
+    >
+      <div class="flex items-start gap-3">
+        <i class="pi pi-exclamation-triangle text-3xl text-orange-500"></i>
+        <div>
+          <p class="text-gray-700 mb-2">Are you sure you want to clear all column mappings?</p>
+          <p class="text-sm text-gray-600">This will remove all mappings and transformations.</p>
+        </div>
+      </div>
+
+      <template #footer>
+        <Button label="Cancel" text @click="showClearDialog = false" />
+        <Button label="Clear All" severity="danger" @click="confirmClearMappings" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
@@ -420,6 +441,8 @@ import { useAuthStore } from '../store/authStore'
 import { useImportStore } from '../store/importStore'
 import { transformations, applyTransformation, suggestTransformations, hasYearOnlyValues, type TransformationType } from '../utils/transformations'
 import { validateDataset, validateCell, getCellClass, getValidationIcon, type ValidationResult } from '../utils/dataValidation'
+import Dialog from 'primevue/dialog'
+import Button from 'primevue/button'
 
 const router = useRouter()
 const store = useMappingStore()
@@ -437,6 +460,7 @@ const loading = ref(false)
 const error = ref('')
 const serverValidationErrors = ref<string[]>([])
 const showPreview = ref(false)
+const showClearDialog = ref(false)
 const transformPreviewColumn = ref<string | null>(null)
 const autoMappingStats = ref<{
   total: number
@@ -614,12 +638,11 @@ function updateMapping() {
 /**
  * Clear all mappings
  */
-function clearAllMappings() {
-  if (confirm('Are you sure you want to clear all column mappings?')) {
-    localMapping.value = {}
-    columnTransformations.value = {}
-    updateMapping()
-  }
+function confirmClearMappings() {
+  localMapping.value = {}
+  fieldTransformations.value = {}
+  updateMapping()
+  showClearDialog.value = false
 }
 
 /**
