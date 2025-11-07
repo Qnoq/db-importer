@@ -1,6 +1,6 @@
-name: Deploy to Production
+name: Deploy to Production VPS
 
-# Trigger deployment on push to main branch
+# Automatic deployment when pushing to main branch
 on:
   push:
     branches:
@@ -8,29 +8,37 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to VPS
+    name: Deploy to Hostinger VPS
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🚀 Deploy to Production VPS
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT }}
-          script: |
-            cd ${{ secrets.VPS_APP_DIR }}
-            bash deploy/deploy.sh
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
 
-      - name: ✅ Deployment Status
+      - name: 🚀 Deploy to Hostinger VPS
+        uses: hostinger/deploy-on-vps@v2
+        with:
+          api-key: ${{ secrets.HOSTINGER_API_KEY }}
+          virtual-machine: ${{ vars.HOSTINGER_VM_ID }}
+          docker-compose-path: docker-compose.yml
+          environment-variables: |
+            PORT=${{ vars.PORT || '8080' }}
+            ALLOWED_ORIGINS=${{ vars.ALLOWED_ORIGINS }}
+            VITE_API_URL=${{ vars.VITE_API_URL }}
+            MAX_UPLOAD_SIZE=${{ vars.MAX_UPLOAD_SIZE || '52428800' }}
+            DEBUG_LOG=${{ vars.DEBUG_LOG || 'false' }}
+            RATE_LIMIT_ENABLED=${{ vars.RATE_LIMIT_ENABLED || 'true' }}
+            RATE_LIMIT_REQUESTS=${{ vars.RATE_LIMIT_REQUESTS || '50' }}
+            RATE_LIMIT_WINDOW=${{ vars.RATE_LIMIT_WINDOW || '60' }}
+
+      - name: ✅ Deployment Complete
         if: success()
         run: |
           echo "🎉 Deployment successful!"
-          echo "Application is now live at your domain"
+          echo "Application is now live on your VPS"
 
       - name: ❌ Deployment Failed
         if: failure()
         run: |
-          echo "Deployment failed. Check the logs above for details."
+          echo "⚠️ Deployment failed. Check the logs above."
           exit 1

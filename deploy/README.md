@@ -6,16 +6,17 @@ This directory contains everything you need to deploy db-importer to production.
 
 ## 🎯 Choose Your Deployment Method
 
-### Option 1: GitHub Actions (Recommended ⭐)
+### Option 1: Hostinger API (Recommended ⭐)
 
-**Automatic deployment when you push to GitHub**
+**Automatic deployment with Hostinger API - Easiest setup!**
 
 ✅ Push to GitHub → Automatically deploys
-✅ No manual commands needed
-✅ Free for public/private repos
-✅ View deployment status in GitHub UI
+✅ No SSH keys needed
+✅ Managed through Hostinger panel
+✅ Uses official Hostinger GitHub Action
+✅ 5-minute setup
 
-**Setup**: [GITHUB_ACTIONS_SETUP.md](./GITHUB_ACTIONS_SETUP.md)
+**Setup**: [HOSTINGER_API_SETUP.md](./HOSTINGER_API_SETUP.md)
 
 **Usage**:
 ```bash
@@ -24,7 +25,24 @@ git push origin main  # That's it! Auto-deploys 🎉
 
 ---
 
-### Option 2: Manual Script Deployment
+### Option 2: GitHub Actions with SSH
+
+**Automatic deployment with SSH (for non-Hostinger VPS)**
+
+✅ Push to GitHub → Automatically deploys
+✅ Works with any VPS provider
+✅ View deployment status in GitHub UI
+
+**Setup**: [GITHUB_ACTIONS_SETUP.md](./GITHUB_ACTIONS_SETUP.md)
+
+**Usage**:
+```bash
+git push origin main  # Auto-deploys
+```
+
+---
+
+### Option 3: Manual Script Deployment
 
 **Run deployment script from your machine**
 
@@ -86,12 +104,18 @@ See [GITHUB_ACTIONS_SETUP.md](./GITHUB_ACTIONS_SETUP.md) for detailed instructio
 
 ## 🔄 Which Method Should I Use?
 
-| Feature | GitHub Actions | Manual Script |
-|---------|----------------|---------------|
-| Automatic on push | ✅ Yes | ❌ No |
-| GitHub required | ✅ Yes | ❌ No |
-| Setup complexity | Medium | Easy |
-| Deployment visibility | GitHub UI | Terminal only |
-| Best for | Teams, CI/CD | Solo dev, quick deploys |
+| Feature | Hostinger API | GitHub Actions SSH | Manual Script |
+|---------|---------------|-------------------|---------------|
+| **Automatic on push** | ✅ Yes | ✅ Yes | ❌ No |
+| **Setup time** | 5 min | 10 min | 5 min |
+| **SSH keys needed** | ❌ No | ✅ Yes | ✅ Yes |
+| **GitHub required** | ✅ Yes | ✅ Yes | ❌ No |
+| **VPS provider** | Hostinger only | Any | Any |
+| **Deployment visibility** | GitHub UI | GitHub UI | Terminal |
+| **Security** | API token | SSH key | SSH key |
+| **Best for** | Hostinger users | Any VPS | Quick deploys |
 
-**Recommendation**: Use **GitHub Actions** for production. It's automatic and safer.
+**Recommendation**:
+- **Hostinger VPS?** → Use **Hostinger API** (easiest!)
+- **Other VPS?** → Use **GitHub Actions SSH**
+- **Quick tests?** → Use **Manual Script**
