@@ -2,9 +2,8 @@ FROM golang:1.23-alpine
 
 WORKDIR /app
 
-# Install development tools and air for hot reload
-RUN apk add --no-cache git ca-certificates && \
-    go install github.com/air-verse/air@latest
+# Install development tools
+RUN apk add --no-cache git ca-certificates
 
 # Copy go mod files
 COPY go.mod go.sum ./
@@ -18,5 +17,5 @@ COPY . .
 # Expose port
 EXPOSE 8080
 
-# Use air for hot reload in development, fallback to go run
-CMD ["sh", "-c", "if command -v air > /dev/null; then air; else go run main.go; fi"]
+# Run with go run (will restart container on code changes thanks to volume mount)
+CMD ["go", "run", "main.go"]
