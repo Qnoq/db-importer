@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  adminer:
+    image: adminer:latest
+    container_name: db-importer-adminer-dev
+    ports:
+      - "8082:8080"
+    networks:
+      - db-importer-network
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres
+
   postgres:
     image: postgres:15-alpine
     container_name: db-importer-postgres-dev
