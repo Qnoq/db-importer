@@ -346,6 +346,7 @@ func main() {
 
 	// Initialize database if configured
 	var authHandler *handler.AuthHandler
+	var importHandler *handler.ImportHandler
 	if appConfig.DatabaseURL != "" {
 		logger.Info("Initializing database connection", nil)
 
@@ -384,14 +385,17 @@ func main() {
 		// Initialize repositories
 		userRepo := repository.NewUserRepository(db)
 		refreshTokenRepo := repository.NewRefreshTokenRepository(db)
+		importRepo := repository.NewImportRepository(db)
 
 		// Initialize services
 		authService := service.NewAuthService(userRepo, refreshTokenRepo, jwtConfig)
+		importService := service.NewImportService(importRepo)
 
 		// Initialize handlers
 		authHandler = handler.NewAuthHandler(authService)
+		importHandler = handler.NewImportHandler(importService)
 
-		logger.Info("Authentication system initialized", nil)
+		logger.Info("Authentication and import systems initialized", nil)
 	} else {
 		logger.Info("Database not configured, running in stateless mode", nil)
 	}
@@ -451,6 +455,22 @@ func main() {
 		http.HandleFunc("/validate", corsMiddleware(logMiddleware(validateHandler)))
 	}
 
+	// Create required auth middleware for protected routes
+	var requireAuthMiddleware func(http.HandlerFunc) http.HandlerFunc
+	if authHandler != nil {
+		jwtConfig := utils.JWTConfig{
+			AccessSecret:  []byte(appConfig.JWTAccessSecret),
+			RefreshSecret: []byte(appConfig.JWTRefreshSecret),
+			AccessExpiry:  appConfig.JWTAccessExpiry,
+			RefreshExpiry: appConfig.JWTRefreshExpiry,
+		}
+		requireAuthMiddleware = func(next http.HandlerFunc) http.HandlerFunc {
+			return func(w http.ResponseWriter, r *http.Request) {
+				middleware.AuthMiddleware(jwtConfig)(http.HandlerFunc(next)).ServeHTTP(w, r)
+			}
+		}
+	}
+
 	// Register authentication endpoints if database is configured
 	if authHandler != nil {
 		logger.Info("Registering authentication endpoints", nil)
@@ -458,8 +478,18 @@ func main() {
 		http.HandleFunc("/auth/login", corsMiddleware(logMiddleware(authHandler.Login)))
 		http.HandleFunc("/auth/refresh", corsMiddleware(logMiddleware(authHandler.RefreshToken)))
 		http.HandleFunc("/auth/logout", corsMiddleware(logMiddleware(authHandler.Logout)))
-		// Protected route example
-		// http.HandleFunc("/auth/me", corsMiddleware(logMiddleware(middleware.AuthMiddleware(jwtConfig)(http.HandlerFunc(authHandler.Me)))))
+	}
+
+	// Register import endpoints if database is configured (all require authentication)
+	if importHandler != nil && requireAuthMiddleware != nil {
+		logger.Info("Registering import endpoints", nil)
+		http.HandleFunc("/api/v1/imports", corsMiddleware(logMiddleware(requireAuthMiddleware(importHandler.CreateImport))))
+		http.HandleFunc("/api/v1/imports/list", corsMiddleware(logMiddleware(requireAuthMiddleware(importHandler.ListImports))))
+		http.HandleFunc("/api/v1/imports/get", corsMiddleware(logMiddleware(requireAuthMiddleware(importHandler.GetImport))))
+		http.HandleFunc("/api/v1/imports/sql", corsMiddleware(logMiddleware(requireAuthMiddleware(importHandler.GetImportSQL))))
+		http.HandleFunc("/api/v1/imports/delete", corsMiddleware(logMiddleware(requireAuthMiddleware(importHandler.DeleteImport))))
+		http.HandleFunc("/api/v1/imports/stats", corsMiddleware(logMiddleware(requireAuthMiddleware(importHandler.GetStats))))
+		http.HandleFunc("/api/v1/imports/old", corsMiddleware(logMiddleware(requireAuthMiddleware(importHandler.DeleteOldImports))))
 	}
 
 	// Start server
