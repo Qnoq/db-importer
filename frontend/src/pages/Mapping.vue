@@ -181,20 +181,15 @@
                   <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                     Excel Column
                   </label>
-                  <select
-                    :value="getMappedExcelColumn(field.name)"
-                    @change="onFieldMappingChange(field.name, ($event.target as HTMLSelectElement).value)"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-                  >
-                    <option value="">-- Skip this field --</option>
-                    <option
-                      v-for="excelHeader in store.excelHeaders"
-                      :key="excelHeader"
-                      :value="excelHeader"
-                    >
-                      {{ excelHeader }}
-                    </option>
-                  </select>
+                  <Select
+                    :modelValue="getMappedExcelColumn(field.name)"
+                    @update:modelValue="(value) => onFieldMappingChange(field.name, value)"
+                    :options="getExcelColumnOptions()"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="-- Skip this field --"
+                    class="w-full"
+                  />
                   <p v-if="getMappedExcelColumn(field.name)" class="text-xs text-gray-500 mt-1">
                     Sample: {{ getSampleValue(getMappedExcelColumn(field.name)!) }}
                   </p>
@@ -205,20 +200,15 @@
                   <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                     Transformation
                   </label>
-                  <select
+                  <Select
                     v-model="fieldTransformations[field.name]"
-                    @change="onTransformationChange(field.name)"
+                    @update:modelValue="() => onTransformationChange(field.name)"
+                    :options="getTransformationOptions(field)"
+                    optionLabel="label"
+                    optionValue="value"
                     :disabled="!getMappedExcelColumn(field.name)"
-                    class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
-                  >
-                    <option
-                      v-for="transType in getTransformationOptionsForField(field)"
-                      :key="transType"
-                      :value="transType"
-                    >
-                      {{ transformations[transType].label }}
-                    </option>
-                  </select>
+                    class="w-full"
+                  />
                 </div>
 
                 <!-- Actions -->
@@ -239,11 +229,11 @@
                     <i class="pi pi-eye text-sm"></i>
                   </button>
                   <label class="flex items-center gap-1.5 cursor-pointer group px-2 py-1.5 hover:bg-gray-100 rounded-lg transition h-8">
-                    <input
-                      type="checkbox"
-                      :checked="!getMappedExcelColumn(field.name)"
-                      @change="toggleSkipField(field.name)"
-                      class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
+                    <Checkbox
+                      :modelValue="!getMappedExcelColumn(field.name)"
+                      @update:modelValue="() => toggleSkipField(field.name)"
+                      :binary="true"
+                      inputId="`skip-${field.name}`"
                     />
                     <span class="text-xs text-gray-600 group-hover:text-gray-900 font-medium whitespace-nowrap">Skip</span>
                   </label>
@@ -443,6 +433,8 @@ import { transformations, applyTransformation, suggestTransformations, hasYearOn
 import { validateDataset, validateCell, getCellClass, getValidationIcon, type ValidationResult } from '../utils/dataValidation'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
+import Select from 'primevue/select'
+import Checkbox from 'primevue/checkbox'
 
 const router = useRouter()
 const store = useMappingStore()
@@ -741,7 +733,34 @@ function toggleSkipField(fieldName: string) {
 }
 
 /**
- * Get transformation options for a field
+ * Get Excel column options for Select component
+ */
+function getExcelColumnOptions() {
+  return [
+    { label: '-- Skip this field --', value: '' },
+    ...store.excelHeaders.map(header => ({ label: header, value: header }))
+  ]
+}
+
+/**
+ * Get transformation options for a field (for Select component)
+ */
+function getTransformationOptions(field: Field) {
+  const excelCol = getMappedExcelColumn(field.name)
+  if (!excelCol) return [{ label: transformations.none.label, value: 'none' }]
+
+  const columnIndex = store.excelHeaders.indexOf(excelCol)
+  const columnData = store.excelData.map(row => row[columnIndex])
+  const transformationTypes = suggestTransformations(columnData, field.type)
+
+  return transformationTypes.map(type => ({
+    label: transformations[type].label,
+    value: type
+  }))
+}
+
+/**
+ * Get transformation options for a field (legacy - returns array of types)
  */
 function getTransformationOptionsForField(field: Field): TransformationType[] {
   const excelCol = getMappedExcelColumn(field.name)
