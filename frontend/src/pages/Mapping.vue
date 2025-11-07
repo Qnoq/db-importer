@@ -416,11 +416,15 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import StepperNav from '../components/StepperNav.vue'
 import { useMappingStore, Field } from '../store/mappingStore'
+import { useAuthStore } from '../store/authStore'
+import { useImportStore } from '../store/importStore'
 import { transformations, applyTransformation, suggestTransformations, hasYearOnlyValues, type TransformationType } from '../utils/transformations'
 import { validateDataset, validateCell, getCellClass, getValidationIcon, type ValidationResult } from '../utils/dataValidation'
 
 const router = useRouter()
 const store = useMappingStore()
+const authStore = useAuthStore()
+const importStore = useImportStore()
 
 // Mapping state (Excel column → DB field)
 const localMapping = ref<Record<string, string>>({})
@@ -1070,12 +1074,58 @@ async function generateSQL() {
     const blob = new Blob([sql], { type: 'text/plain' })
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
+    const filename = `import_${store.selectedTable.name}_${Date.now()}.sql`
     a.href = url
-    a.download = `import_${store.selectedTable.name}_${Date.now()}.sql`
+    a.download = filename
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     window.URL.revokeObjectURL(url)
+
+    // Save to import history if user is authenticated
+    if (authStore.isAuthenticated) {
+      try {
+        // Determine status based on validation results
+        let status: 'success' | 'warning' | 'failed' = 'success'
+        const errorCount = serverValidationErrors.value.length
+        const warningCount = validationStats.value?.warningCount || 0
+
+        if (errorCount > 0) {
+          status = 'failed'
+        } else if (warningCount > 0) {
+          status = 'warning'
+        }
+
+        // Build transformations list
+        const appliedTransformations: string[] = []
+        Object.entries(fieldTransformations.value).forEach(([field, transform]) => {
+          if (transform && transform !== 'none') {
+            appliedTransformations.push(`${field}: ${transform}`)
+          }
+        })
+
+        await importStore.createImport({
+          tableName: store.selectedTable.name,
+          rowCount: mappedRows.length,
+          status,
+          generatedSql: sql,
+          errorCount,
+          warningCount,
+          metadata: {
+            sourceFileName: store.excelFileName || 'unknown',
+            mappingSummary: localMapping.value,
+            transformations: appliedTransformations.length > 0 ? appliedTransformations : undefined,
+            databaseType: 'mysql', // Could be detected from schema
+            validationErrors: serverValidationErrors.value.length > 0 ? serverValidationErrors.value : undefined,
+            validationWarnings: validationStats.value?.warningCount ? ['Some data validation warnings occurred'] : undefined
+          }
+        })
+        console.log('Import saved to history successfully')
+      } catch (historyError) {
+        // Don't fail the whole operation if history save fails
+        console.error('Failed to save import to history:', historyError)
+      }
+    }
 
     loading.value = false
   } catch (err) {
