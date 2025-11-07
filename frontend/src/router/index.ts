@@ -62,8 +62,18 @@ router.beforeEach(async (to, from, next) => {
         await authStore.refreshAccessToken()
         console.log('Token refreshed successfully')
       } catch (error) {
-        console.error('Token refresh failed, logging out:', error)
-        authStore.logout()
+        console.error('Token refresh failed:', error)
+        // Clear auth state and redirect to login
+        await authStore.logout()
+
+        // Don't redirect if already going to login/register
+        if (to.name !== 'Login' && to.name !== 'Register') {
+          next({
+            name: 'Login',
+            query: { redirect: to.fullPath, reason: 'session_expired' }
+          })
+          return
+        }
       }
     }
     // If token will expire soon, proactively refresh it
@@ -73,6 +83,8 @@ router.beforeEach(async (to, from, next) => {
         console.log('Token proactively refreshed')
       } catch (error) {
         console.error('Proactive token refresh failed:', error)
+        // Don't logout for proactive refresh failures
+        // The token is still valid, just couldn't refresh yet
       }
     }
   }
