@@ -33,6 +33,32 @@
       </div>
 
       <div v-else>
+        <!-- Auto-mapping Success Banner -->
+        <div v-if="autoMappingStats" class="mb-4 bg-green-50 border border-green-200 rounded-md p-4">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0">
+              <i class="pi pi-check-circle text-green-600 text-2xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-green-900 mb-1">
+                Auto-mapping réussi !
+              </h3>
+              <p class="text-sm text-green-800">
+                Le système a automatiquement mappé <strong>{{ autoMappingStats.mapped }} colonnes sur {{ autoMappingStats.total }}</strong>
+                en comparant les noms de vos colonnes Excel avec les champs de la base de données.
+              </p>
+              <p class="text-sm text-green-700 mt-2">
+                <i class="pi pi-info-circle mr-1"></i>
+                Vérifiez les mappings ci-dessous et ajustez si nécessaire.
+                <template v-if="getAutoIncrementFieldNames().length > 0">
+                  Les champs ID (<strong>{{ getAutoIncrementFieldNames().join(', ') }}</strong>)
+                  ont été automatiquement ignorés car ils sont auto-incrémentés.
+                </template>
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Info Banner -->
         <div class="mb-4 bg-blue-50 border border-blue-200 rounded-md p-4 flex items-center justify-between">
           <div class="flex-1">
@@ -504,6 +530,11 @@ const showPreview = ref(false)
 const showTemplateDialog = ref(false)
 const showSaveTemplateDialog = ref(false)
 const transformPreviewColumn = ref<string | null>(null)
+const autoMappingStats = ref<{
+  total: number
+  mapped: number
+  skipped: number
+} | null>(null)
 
 // Template state
 const newTemplateName = ref('')
@@ -598,11 +629,22 @@ function isAutoIncrementField(field: Field): boolean {
 }
 
 /**
+ * Get list of auto-increment field names for display
+ */
+function getAutoIncrementFieldNames(): string[] {
+  if (!store.selectedTable) return []
+  return store.selectedTable.fields
+    .filter(field => isAutoIncrementField(field))
+    .map(field => field.name)
+}
+
+/**
  * Auto-map columns with Levenshtein
  */
 function autoMap() {
   const mapping: Record<string, string> = {}
   const transformsToApply: Record<string, TransformationType> = {}
+  let mappedCount = 0
 
   for (const header of store.excelHeaders) {
     const normalizedHeader = header.toLowerCase().trim().replace(/[_\s-]/g, '')
@@ -639,6 +681,7 @@ function autoMap() {
 
     if (bestMatch && bestScore > 0.6) {
       mapping[header] = bestMatch.name
+      mappedCount++
 
       // Get column data for suggestions
       const columnIndex = store.excelHeaders.indexOf(header)
@@ -656,6 +699,14 @@ function autoMap() {
 
   localMapping.value = mapping
   fieldTransformations.value = transformsToApply
+
+  // Store auto-mapping statistics for display
+  autoMappingStats.value = {
+    total: store.excelHeaders.length,
+    mapped: mappedCount,
+    skipped: store.excelHeaders.length - mappedCount
+  }
+
   updateMapping()
 }
 
