@@ -151,23 +151,30 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="md:col-span-1 flex gap-1 justify-end items-center">
+                <div class="md:col-span-1 flex gap-2 justify-end items-center">
                   <button
                     v-if="columnTransformations[header] && columnTransformations[header] !== 'none' && localMapping[header]"
                     @click="showTransformPreview(header)"
-                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                    class="flex items-center justify-center w-8 h-8 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                     title="Preview transformation"
                   >
                     <i class="pi pi-eye text-sm"></i>
                   </button>
-                  <label class="flex items-center gap-1.5 cursor-pointer group px-2 py-1 hover:bg-gray-100 rounded-lg transition">
+                  <button
+                    v-else
+                    class="flex items-center justify-center w-8 h-8 opacity-0 pointer-events-none"
+                    disabled
+                  >
+                    <i class="pi pi-eye text-sm"></i>
+                  </button>
+                  <label class="flex items-center gap-1.5 cursor-pointer group px-2 py-1.5 hover:bg-gray-100 rounded-lg transition h-8">
                     <input
                       type="checkbox"
                       :checked="!localMapping[header] || localMapping[header] === ''"
                       @change="toggleSkip(header)"
                       class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
                     />
-                    <span class="text-xs text-gray-600 group-hover:text-gray-900 font-medium">Skip</span>
+                    <span class="text-xs text-gray-600 group-hover:text-gray-900 font-medium whitespace-nowrap">Skip</span>
                   </label>
                 </div>
               </div>
@@ -476,6 +483,7 @@ const store = useMappingStore()
 // Mapping state
 const localMapping = ref<Record<string, string>>({})
 const columnTransformations = ref<Record<string, TransformationType>>({})
+const previousTransformations = ref<Record<string, TransformationType>>({}) // Store previous transformations when skipping
 
 // UI state
 const loading = ref(false)
@@ -654,11 +662,13 @@ function getSampleValue(header: string): string {
  */
 function toggleSkip(header: string) {
   if (localMapping.value[header]) {
-    // Currently mapped, skip it
+    // Currently mapped, skip it - save transformation before clearing
+    previousTransformations.value[header] = columnTransformations.value[header] || 'none'
     localMapping.value[header] = ''
     columnTransformations.value[header] = 'none'
   } else {
-    // Currently skipped, try to auto-map it
+    // Currently skipped, restore it
+    // Try to auto-map it
     const normalizedHeader = header.toLowerCase().trim().replace(/[_\s-]/g, '')
     let bestMatch: Field | null = null
     let bestScore = 0
@@ -675,6 +685,17 @@ function toggleSkip(header: string) {
 
     if (bestMatch && bestScore > 0.6) {
       localMapping.value[header] = bestMatch.name
+
+      // Restore previous transformation if it exists, otherwise suggest one
+      if (previousTransformations.value[header] && previousTransformations.value[header] !== 'none') {
+        columnTransformations.value[header] = previousTransformations.value[header]
+      } else {
+        // Suggest transformation based on field type
+        const columnIndex = store.excelHeaders.indexOf(header)
+        const columnData = store.excelData.map(row => row[columnIndex])
+        const suggestions = suggestTransformations(columnData, bestMatch.type)
+        columnTransformations.value[header] = suggestions[1] || 'none'
+      }
     }
   }
 
