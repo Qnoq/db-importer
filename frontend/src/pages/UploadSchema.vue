@@ -11,6 +11,25 @@
         </p>
       </div>
 
+      <!-- Important: Single Table Note -->
+      <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4">
+        <div class="flex items-start gap-3">
+          <i class="pi pi-info-circle text-blue-600 text-xl"></i>
+          <div class="flex-1">
+            <h3 class="font-semibold text-blue-900 mb-1">💡 Pro Tip: Export Only Your Target Table</h3>
+            <p class="text-sm text-blue-800 mb-2">
+              You only need the <strong>CREATE TABLE</strong> statement for the table you want to import data into.
+              No need to upload your entire database dump!
+            </p>
+            <div class="text-xs text-blue-700 bg-blue-100 rounded px-3 py-2 font-mono">
+              <strong>Example export command:</strong><br/>
+              <code class="block mt-1">mysqldump -u user -p --no-data database_name table_name > table.sql</code>
+              <code class="block mt-1">pg_dump -U user --schema-only -t table_name database > table.sql</code>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Upload Area -->
       <div class="mb-6">
         <label class="block text-sm font-medium text-gray-700 mb-3">
@@ -33,7 +52,7 @@
               Supports MySQL, MariaDB, and PostgreSQL dump files
             </p>
             <p class="text-xs text-gray-400 mt-2">
-              Maximum file size: 50MB
+              A single table schema is typically &lt; 50KB
             </p>
           </div>
         </div>
