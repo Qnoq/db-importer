@@ -396,12 +396,15 @@ func main() {
 		logger.Info("Database not configured, running in stateless mode", nil)
 	}
 
-	// Initialize rate limiter
+	// Initialize rate limiter with differentiated limits
+	// Guest: 3 requests per day (86400 seconds)
+	// Auth: unlimited (0)
 	if appConfig.RateLimitEnabled {
-		rateLimiter = middleware.NewRateLimiter(appConfig.RateLimitRequests, appConfig.RateLimitWindow)
-		logger.Info("Rate limiting enabled", map[string]interface{}{
-			"requests": appConfig.RateLimitRequests,
-			"window":   appConfig.RateLimitWindow,
+		rateLimiter = middleware.NewRateLimiter(3, 86400, 0, 3600)
+		logger.Info("Rate limiting enabled with differentiated limits", map[string]interface{}{
+			"guestRequests": 3,
+			"guestWindow":   "24h",
+			"authRequests":  "unlimited",
 		})
 	}
 
@@ -409,15 +412,40 @@ func main() {
 	corsMiddleware := enableCORS
 	logMiddleware := loggingMiddleware
 
+	// Create optional auth middleware for rate limiting (if database is configured)
+	var optionalAuthMiddleware func(http.Handler) http.Handler
+	if authHandler != nil {
+		jwtConfig := utils.JWTConfig{
+			AccessSecret:  []byte(appConfig.JWTAccessSecret),
+			RefreshSecret: []byte(appConfig.JWTRefreshSecret),
+			AccessExpiry:  appConfig.JWTAccessExpiry,
+			RefreshExpiry: appConfig.JWTRefreshExpiry,
+		}
+		optionalAuthMiddleware = middleware.OptionalAuthMiddleware(jwtConfig)
+	}
+
 	// Register handlers with middleware
 	http.HandleFunc("/health", corsMiddleware(healthHandler))
 
-	// Register existing handlers (stateless endpoints)
-	if appConfig.RateLimitEnabled {
+	// Register existing handlers (stateless endpoints) with optional auth + rate limiting
+	if appConfig.RateLimitEnabled && optionalAuthMiddleware != nil {
+		// Apply: CORS -> Logging -> OptionalAuth -> RateLimit -> Handler
+		http.HandleFunc("/parse-schema", corsMiddleware(logMiddleware(func(w http.ResponseWriter, r *http.Request) {
+			optionalAuthMiddleware(http.HandlerFunc(rateLimiter.RateLimit(parseSchemaHandler))).ServeHTTP(w, r)
+		})))
+		http.HandleFunc("/generate-sql", corsMiddleware(logMiddleware(func(w http.ResponseWriter, r *http.Request) {
+			optionalAuthMiddleware(http.HandlerFunc(rateLimiter.RateLimit(generateSQLHandler))).ServeHTTP(w, r)
+		})))
+		http.HandleFunc("/validate", corsMiddleware(logMiddleware(func(w http.ResponseWriter, r *http.Request) {
+			optionalAuthMiddleware(http.HandlerFunc(rateLimiter.RateLimit(validateHandler))).ServeHTTP(w, r)
+		})))
+	} else if appConfig.RateLimitEnabled {
+		// Rate limiting without auth
 		http.HandleFunc("/parse-schema", corsMiddleware(logMiddleware(rateLimiter.RateLimit(parseSchemaHandler))))
 		http.HandleFunc("/generate-sql", corsMiddleware(logMiddleware(rateLimiter.RateLimit(generateSQLHandler))))
 		http.HandleFunc("/validate", corsMiddleware(logMiddleware(rateLimiter.RateLimit(validateHandler))))
 	} else {
+		// No rate limiting
 		http.HandleFunc("/parse-schema", corsMiddleware(logMiddleware(parseSchemaHandler)))
 		http.HandleFunc("/generate-sql", corsMiddleware(logMiddleware(generateSQLHandler)))
 		http.HandleFunc("/validate", corsMiddleware(logMiddleware(validateHandler)))
