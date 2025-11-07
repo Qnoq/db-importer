@@ -17,13 +17,8 @@
 
           <!-- Authentication Actions -->
           <div class="flex items-center space-x-4">
-            <!-- Guest Mode Info -->
-            <div v-if="authStore.isGuest" class="hidden sm:flex items-center space-x-2">
-              <Tag severity="secondary" value="Guest Mode" icon="pi pi-user" />
-            </div>
-
             <!-- Authenticated User Menu -->
-            <div v-else-if="authStore.isAuthenticated" class="flex items-center space-x-2">
+            <div v-if="authStore.isAuthenticated" class="flex items-center space-x-2">
               <Avatar
                 :label="userInitials"
                 class="bg-blue-600 text-white"
@@ -46,21 +41,27 @@
               />
             </div>
 
-            <!-- Login/Register Buttons -->
-            <div v-else class="flex items-center space-x-2">
-              <Button
-                label="Sign In"
-                icon="pi pi-sign-in"
-                text
-                @click="router.push('/login')"
-                class="hidden sm:inline-flex"
-              />
-              <Button
-                label="Sign Up"
-                icon="pi pi-user-plus"
-                @click="router.push('/register')"
-                size="small"
-              />
+            <!-- Guest Mode: Badge + Login/Register Buttons -->
+            <div v-else class="flex items-center space-x-3">
+              <!-- Guest Mode Badge -->
+              <Tag severity="secondary" value="Guest Mode" icon="pi pi-user" class="hidden sm:flex" />
+
+              <!-- Login/Register Buttons -->
+              <div class="flex items-center space-x-2">
+                <Button
+                  label="Sign In"
+                  icon="pi pi-sign-in"
+                  text
+                  @click="router.push('/login')"
+                  class="hidden sm:inline-flex"
+                />
+                <Button
+                  label="Sign Up"
+                  icon="pi pi-user-plus"
+                  @click="router.push('/register')"
+                  size="small"
+                />
+              </div>
             </div>
           </div>
         </div>
