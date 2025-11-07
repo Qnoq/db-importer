@@ -1,6 +1,27 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: db-importer-postgres-dev
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=dbimporter
+      - POSTGRES_PASSWORD=dbimporter_dev_password
+      - POSTGRES_DB=dbimporter_dev
+    volumes:
+      - postgres-data-dev:/var/lib/postgresql/data
+    networks:
+      - db-importer-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dbimporter"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
   backend:
     build:
       context: ./backend
@@ -17,8 +38,20 @@ services:
       - MAX_UPLOAD_SIZE=52428800
       - DEBUG_LOG=true
       - RATE_LIMIT_ENABLED=false
+      - DATABASE_URL=postgres://dbimporter:dbimporter_dev_password@postgres:5432/dbimporter_dev?sslmode=disable
+      - JWT_ACCESS_SECRET=dev-secret-key-minimum-32-characters-long-for-jwt
+      - JWT_REFRESH_SECRET=dev-refresh-secret-key-minimum-32-characters-long
+      - JWT_ACCESS_EXPIRY=15m
+      - JWT_REFRESH_EXPIRY=168h
+      - DB_MAX_OPEN_CONNS=25
+      - DB_MAX_IDLE_CONNS=5
+      - DB_CONN_MAX_LIFETIME=5m
+      - DB_CONN_MAX_IDLE_TIME=10m
     networks:
       - db-importer-network
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   frontend:
@@ -46,3 +79,4 @@ networks:
 
 volumes:
   go-modules:  # Persist Go modules cache for faster rebuilds
+  postgres-data-dev:  # Persist PostgreSQL data in dev

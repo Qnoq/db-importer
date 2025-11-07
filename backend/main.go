@@ -4,14 +4,24 @@ import (
 	"db-importer/config"
 	"db-importer/errors"
 	"db-importer/generator"
+	"db-importer/internal/database"
+	"db-importer/internal/handler"
+	"db-importer/internal/repository"
+	"db-importer/internal/service"
+	"db-importer/internal/utils"
 	"db-importer/logger"
 	"db-importer/middleware"
 	"db-importer/parser"
 	"db-importer/version"
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"strings"
+
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 // Response structures
@@ -39,6 +49,7 @@ type ErrorResponse struct {
 // Global configuration
 var appConfig *config.Config
 var rateLimiter *middleware.RateLimiter
+var db *database.DB
 
 // CORS middleware with configurable origins
 func enableCORS(next http.HandlerFunc) http.HandlerFunc {
@@ -62,8 +73,8 @@ func enableCORS(next http.HandlerFunc) http.HandlerFunc {
 			})
 		}
 
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		w.Header().Set("Access-Control-Max-Age", "3600")
 
 		if r.Method == "OPTIONS" {
@@ -278,15 +289,45 @@ func validateHandler(w http.ResponseWriter, r *http.Request) {
 
 // Health check handler
 func healthHandler(w http.ResponseWriter, r *http.Request) {
+	// Check database health if available
+	dbStatus := "not_configured"
+	if db != nil {
+		if err := db.Health(r.Context()); err == nil {
+			dbStatus = "healthy"
+		} else {
+			dbStatus = "unhealthy"
+		}
+	}
+
 	response := map[string]interface{}{
-		"status":  "ok",
-		"version": version.GetVersion(),
+		"status":   "ok",
+		"version":  version.GetVersion(),
+		"database": dbStatus,
 		"config": map[string]interface{}{
 			"maxUploadSize":    appConfig.MaxUploadSize,
 			"rateLimitEnabled": appConfig.RateLimitEnabled,
 		},
 	}
 	errors.RespondWithJSON(w, http.StatusOK, response)
+}
+
+// runMigrations runs database migrations
+func runMigrations(databaseURL string) error {
+	m, err := migrate.New(
+		"file://migrations",
+		databaseURL,
+	)
+	if err != nil {
+		return err
+	}
+	defer m.Close()
+
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return err
+	}
+
+	log.Println("✅ Database migrations completed successfully")
+	return nil
 }
 
 func main() {
@@ -302,6 +343,58 @@ func main() {
 		"maxUploadSize":    appConfig.MaxUploadSize,
 		"rateLimitEnabled": appConfig.RateLimitEnabled,
 	})
+
+	// Initialize database if configured
+	var authHandler *handler.AuthHandler
+	if appConfig.DatabaseURL != "" {
+		logger.Info("Initializing database connection", nil)
+
+		// Run migrations
+		if err := runMigrations(appConfig.DatabaseURL); err != nil {
+			logger.Warn("Database migrations failed (continuing anyway)", map[string]interface{}{
+				"error": err.Error(),
+			})
+		}
+
+		// Initialize database
+		dbConfig := database.Config{
+			URL:             appConfig.DatabaseURL,
+			MaxOpenConns:    appConfig.DBMaxOpenConns,
+			MaxIdleConns:    appConfig.DBMaxIdleConns,
+			ConnMaxLifetime: appConfig.DBConnMaxLifetime,
+			ConnMaxIdleTime: appConfig.DBConnMaxIdleTime,
+		}
+
+		var err error
+		db, err = database.NewDB(dbConfig)
+		if err != nil {
+			logger.Error("Failed to connect to database", err)
+			log.Fatal(err)
+		}
+		defer db.Close()
+
+		// Initialize JWT config
+		jwtConfig := utils.JWTConfig{
+			AccessSecret:  []byte(appConfig.JWTAccessSecret),
+			RefreshSecret: []byte(appConfig.JWTRefreshSecret),
+			AccessExpiry:  appConfig.JWTAccessExpiry,
+			RefreshExpiry: appConfig.JWTRefreshExpiry,
+		}
+
+		// Initialize repositories
+		userRepo := repository.NewUserRepository(db)
+		refreshTokenRepo := repository.NewRefreshTokenRepository(db)
+
+		// Initialize services
+		authService := service.NewAuthService(userRepo, refreshTokenRepo, jwtConfig)
+
+		// Initialize handlers
+		authHandler = handler.NewAuthHandler(authService)
+
+		logger.Info("Authentication system initialized", nil)
+	} else {
+		logger.Info("Database not configured, running in stateless mode", nil)
+	}
 
 	// Initialize rate limiter
 	if appConfig.RateLimitEnabled {
@@ -319,6 +412,7 @@ func main() {
 	// Register handlers with middleware
 	http.HandleFunc("/health", corsMiddleware(healthHandler))
 
+	// Register existing handlers (stateless endpoints)
 	if appConfig.RateLimitEnabled {
 		http.HandleFunc("/parse-schema", corsMiddleware(logMiddleware(rateLimiter.RateLimit(parseSchemaHandler))))
 		http.HandleFunc("/generate-sql", corsMiddleware(logMiddleware(rateLimiter.RateLimit(generateSQLHandler))))
@@ -327,6 +421,17 @@ func main() {
 		http.HandleFunc("/parse-schema", corsMiddleware(logMiddleware(parseSchemaHandler)))
 		http.HandleFunc("/generate-sql", corsMiddleware(logMiddleware(generateSQLHandler)))
 		http.HandleFunc("/validate", corsMiddleware(logMiddleware(validateHandler)))
+	}
+
+	// Register authentication endpoints if database is configured
+	if authHandler != nil {
+		logger.Info("Registering authentication endpoints", nil)
+		http.HandleFunc("/auth/register", corsMiddleware(logMiddleware(authHandler.Register)))
+		http.HandleFunc("/auth/login", corsMiddleware(logMiddleware(authHandler.Login)))
+		http.HandleFunc("/auth/refresh", corsMiddleware(logMiddleware(authHandler.RefreshToken)))
+		http.HandleFunc("/auth/logout", corsMiddleware(logMiddleware(authHandler.Logout)))
+		// Protected route example
+		// http.HandleFunc("/auth/me", corsMiddleware(logMiddleware(middleware.AuthMiddleware(jwtConfig)(http.HandlerFunc(authHandler.Me)))))
 	}
 
 	// Start server
