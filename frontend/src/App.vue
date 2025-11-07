@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center space-x-6">
-            <div class="flex items-center space-x-3">
+            <router-link to="/" class="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer">
               <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
                 <i class="pi pi-database text-white text-xl"></i>
               </div>
@@ -15,7 +15,7 @@
                 </h1>
                 <p class="text-xs text-gray-500">Import data safely & efficiently</p>
               </div>
-            </div>
+            </router-link>
 
             <!-- Navigation Menu for Authenticated Users -->
             <nav v-if="authStore.isAuthenticated" class="hidden md:flex items-center space-x-4">
