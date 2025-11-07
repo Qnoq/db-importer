@@ -199,9 +199,9 @@ export const useAuthStore = defineStore('auth', {
         })
 
         if (!response.ok) {
-          // If refresh fails, log out
-          this.logout()
-          throw new Error('Token refresh failed')
+          const errorData = await response.json().catch(() => ({ error: 'Token refresh failed' }))
+          console.error('Token refresh failed:', errorData)
+          throw new Error(errorData.error || 'Token refresh failed')
         }
 
         const data = await response.json()
@@ -218,7 +218,7 @@ export const useAuthStore = defineStore('auth', {
 
         return data
       } catch (error: any) {
-        this.logout()
+        console.error('Token refresh error:', error)
         throw error
       }
     },

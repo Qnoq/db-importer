@@ -13,6 +13,11 @@
 
       <template #content>
         <form @submit.prevent="handleLogin" class="space-y-4">
+          <!-- Session Expired Message -->
+          <Message v-if="sessionExpiredMessage" severity="warn" :closable="true" @close="sessionExpiredMessage = ''">
+            {{ sessionExpiredMessage }}
+          </Message>
+
           <!-- Error Message -->
           <Message v-if="authStore.error" severity="error" :closable="false">
             {{ authStore.error }}
@@ -110,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../store/authStore'
 import Card from 'primevue/card'
@@ -130,6 +135,14 @@ const password = ref('')
 const rememberMe = ref(false)
 const emailError = ref('')
 const passwordError = ref('')
+const sessionExpiredMessage = ref('')
+
+// Check if redirected due to session expiration
+onMounted(() => {
+  if (route.query.reason === 'session_expired') {
+    sessionExpiredMessage.value = 'Your session has expired. Please sign in again.'
+  }
+})
 
 const validateForm = (): boolean => {
   emailError.value = ''
