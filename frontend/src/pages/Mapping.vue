@@ -229,6 +229,17 @@
           </ul>
         </div>
 
+        <!-- Transformation Warnings -->
+        <div v-if="transformationWarnings.length > 0" class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
+          <h3 class="font-semibold text-blue-800 mb-2">
+            <i class="pi pi-info-circle mr-2"></i>
+            Transformation Info
+          </h3>
+          <ul class="list-disc list-inside text-sm text-blue-700 space-y-1">
+            <li v-for="(warning, index) in transformationWarnings" :key="index">{{ warning }}</li>
+          </ul>
+        </div>
+
         <!-- Server Validation Errors -->
         <div v-if="serverValidationErrors.length > 0" class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
           <h3 class="font-semibold text-red-800 mb-2">
@@ -501,7 +512,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import StepperNav from '../components/StepperNav.vue'
 import { useMappingStore, Field } from '../store/mappingStore'
-import { transformations, applyTransformation, suggestTransformations, type TransformationType } from '../utils/transformations'
+import { transformations, applyTransformation, suggestTransformations, hasYearOnlyValues, type TransformationType } from '../utils/transformations'
 import { validateDataset, validateCell, getCellClass, getValidationIcon, type ValidationResult } from '../utils/dataValidation'
 import {
   loadTemplates,
@@ -1000,6 +1011,38 @@ const validationErrors = computed(() => {
   }
 
   return errors
+})
+
+/**
+ * Transformation warnings (informational, not blocking)
+ */
+const transformationWarnings = computed(() => {
+  const warnings: string[] = []
+
+  if (!store.selectedTable) return warnings
+
+  // Check for year-only values in date fields
+  for (const field of store.selectedTable.fields) {
+    const fieldTypeLower = field.type.toLowerCase()
+    const isDateField = fieldTypeLower.includes('date') || fieldTypeLower.includes('time')
+
+    if (isDateField) {
+      const excelCol = getMappedExcelColumn(field.name)
+      if (excelCol) {
+        const columnIndex = store.excelHeaders.indexOf(excelCol)
+        const columnData = store.excelData.map(row => row[columnIndex])
+
+        if (hasYearOnlyValues(columnData)) {
+          warnings.push(
+            `Field "${field.name}": Detected year-only values (e.g., "2023"). ` +
+            `Using "Excel Date (or Year)" transformation will convert them to YYYY-01-01.`
+          )
+        }
+      }
+    }
+  }
+
+  return warnings
 })
 
 /**

@@ -176,8 +176,8 @@ export const transformations: Record<TransformationType, Transformation> = {
 
   excelDate: {
     type: 'excelDate',
-    label: 'Excel Date',
-    description: 'Convert Excel serial date number to YYYY-MM-DD HH:MM:SS',
+    label: 'Excel Date (or Year)',
+    description: 'Convert Excel serial date to YYYY-MM-DD HH:MM:SS. If value is just a year (e.g., 2023), converts to YYYY-01-01',
     apply: (val) => {
       const date = parseExcelDate(val)
       return date ? formatDateTimeISO(date) : val
@@ -261,6 +261,11 @@ export function formatDateTimeISO(date: Date): string {
  * Excel stores dates as numbers where:
  * - Integer part = days since January 1, 1900
  * - Decimal part = fraction of day (time)
+ *
+ * Special handling:
+ * - If the number looks like a year (1900-2100), treat it as YYYY-01-01
+ * - Otherwise treat as Excel serial date
+ *
  * Note: Excel incorrectly treats 1900 as a leap year, so we need to account for that
  */
 export function parseExcelDate(value: unknown): Date | null {
@@ -269,22 +274,32 @@ export function parseExcelDate(value: unknown): Date | null {
   // Convert to number
   const num = typeof value === 'number' ? value : parseFloat(String(value))
 
+  if (isNaN(num)) return null
+
+  // SMART DETECTION: If it looks like a year (between 1900 and 2100), treat as year
+  // This handles cases where users have just "2023" in their date column
+  if (num >= 1900 && num <= 2100 && Number.isInteger(num)) {
+    // It's a year! Convert to January 1st of that year
+    return new Date(num, 0, 1, 0, 0, 0, 0)
+  }
+
   // Check if it's a valid Excel date number (between 1 and ~50000 for reasonable dates)
-  if (isNaN(num) || num < 1 || num > 100000) return null
+  if (num < 1 || num > 100000) return null
 
-  // Excel epoch is January 1, 1900 (but Excel thinks 1900 was a leap year)
-  // JavaScript Date uses milliseconds since January 1, 1970
-  // Excel serial 1 = January 1, 1900
-  // Excel serial 25569 = January 1, 1970 (Unix epoch)
+  // Excel epoch: January 1, 1900 (serial 1 = Jan 1, 1900)
+  // Excel incorrectly treats 1900 as a leap year (serial 60 = fake Feb 29, 1900)
+  // For dates after Feb 29, 1900 (serial > 60), we need to subtract an extra day
 
-  // Account for Excel's leap year bug (it thinks Feb 29, 1900 existed)
-  const excelEpoch = new Date(1900, 0, 1)
-  const daysOffset = num > 60 ? num - 1 : num // Adjust for Excel's 1900 leap year bug
+  const excelEpoch = new Date(1900, 0, 1) // January 1, 1900
 
-  // Calculate milliseconds
+  // Calculate days to add from epoch
+  // Serial 1 = Jan 1, 1900, so we subtract 1
+  // For dates after the fake Feb 29 (serial > 60), subtract an extra day
+  const daysToAdd = num > 60 ? num - 2 : num - 1
+
+  // Calculate the date
   const millisecondsPerDay = 24 * 60 * 60 * 1000
-  const excelEpochMs = excelEpoch.getTime()
-  const dateMs = excelEpochMs + (daysOffset - 1) * millisecondsPerDay
+  const dateMs = excelEpoch.getTime() + daysToAdd * millisecondsPerDay
 
   const date = new Date(dateMs)
 
@@ -292,6 +307,27 @@ export function parseExcelDate(value: unknown): Date | null {
   if (isNaN(date.getTime())) return null
 
   return date
+}
+
+/**
+ * Check if a value looks like a year (for warning purposes)
+ */
+export function isYearValue(value: unknown): boolean {
+  if (value === null || value === undefined) return false
+  const num = typeof value === 'number' ? value : parseFloat(String(value))
+  return !isNaN(num) && num >= 1900 && num <= 2100 && Number.isInteger(num)
+}
+
+/**
+ * Detect if a column contains year-only values
+ */
+export function hasYearOnlyValues(data: unknown[]): boolean {
+  const sample = data.slice(0, 10).filter(v => v !== null && v !== undefined)
+  if (sample.length === 0) return false
+
+  // Check if at least 50% of values look like years
+  const yearCount = sample.filter(isYearValue).length
+  return yearCount >= sample.length / 2
 }
 
 /**
