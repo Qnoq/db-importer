@@ -108,7 +108,11 @@
               v-for="(field, index) in store.selectedTable?.fields"
               :key="index"
               class="bg-white border-2 rounded-lg p-4 hover:border-blue-300 transition-all"
-              :class="getMappedExcelColumn(field.name) ? 'border-green-300 bg-green-50' : 'border-gray-200'"
+              :class="{
+                'border-green-300 bg-green-50': getMappedExcelColumn(field.name) && !hasYearWarning(field.name),
+                'border-orange-400 bg-orange-50': getMappedExcelColumn(field.name) && hasYearWarning(field.name),
+                'border-gray-200': !getMappedExcelColumn(field.name)
+              }"
             >
               <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                 <!-- DB Field (Target) -->
@@ -128,6 +132,10 @@
                         <span v-if="isAutoIncrementField(field)" class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full whitespace-nowrap">
                           AUTO
                         </span>
+                        <span v-if="hasYearWarning(field.name)" class="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-700 rounded-full whitespace-nowrap flex items-center gap-1">
+                          <i class="pi pi-exclamation-triangle text-xs"></i>
+                          YEAR
+                        </span>
                       </div>
                       <p class="text-xs text-gray-500">
                         {{ field.type }}
@@ -138,7 +146,11 @@
 
                 <!-- Arrow -->
                 <div class="md:col-span-1 flex justify-center">
-                  <i class="pi pi-arrow-left text-2xl" :class="getMappedExcelColumn(field.name) ? 'text-green-600' : 'text-gray-300'"></i>
+                  <i class="pi pi-arrow-left text-2xl" :class="{
+                    'text-green-600': getMappedExcelColumn(field.name) && !hasYearWarning(field.name),
+                    'text-orange-500': getMappedExcelColumn(field.name) && hasYearWarning(field.name),
+                    'text-gray-300': !getMappedExcelColumn(field.name)
+                  }"></i>
                 </div>
 
                 <!-- Excel Column (Source) -->
@@ -230,12 +242,12 @@
         </div>
 
         <!-- Transformation Warnings -->
-        <div v-if="transformationWarnings.length > 0" class="bg-blue-50 border border-blue-200 rounded-md p-4 mb-4">
-          <h3 class="font-semibold text-blue-800 mb-2">
-            <i class="pi pi-info-circle mr-2"></i>
-            Transformation Info
+        <div v-if="transformationWarnings.length > 0" class="bg-orange-50 border border-orange-300 rounded-md p-4 mb-4">
+          <h3 class="font-semibold text-orange-900 mb-2">
+            <i class="pi pi-exclamation-triangle mr-2"></i>
+            Date Transformation Warning
           </h3>
-          <ul class="list-disc list-inside text-sm text-blue-700 space-y-1">
+          <ul class="list-disc list-inside text-sm text-orange-800 space-y-1">
             <li v-for="(warning, index) in transformationWarnings" :key="index">{{ warning }}</li>
           </ul>
         </div>
@@ -1044,6 +1056,30 @@ const transformationWarnings = computed(() => {
 
   return warnings
 })
+
+/**
+ * Check if a field has year-only warning
+ */
+function hasYearWarning(fieldName: string): boolean {
+  if (!store.selectedTable) return false
+
+  const field = store.selectedTable.fields.find(f => f.name === fieldName)
+  if (!field) return false
+
+  const fieldTypeLower = field.type.toLowerCase()
+  const isDateField = fieldTypeLower.includes('date') || fieldTypeLower.includes('time')
+
+  if (isDateField) {
+    const excelCol = getMappedExcelColumn(fieldName)
+    if (excelCol) {
+      const columnIndex = store.excelHeaders.indexOf(excelCol)
+      const columnData = store.excelData.map(row => row[columnIndex])
+      return hasYearOnlyValues(columnData)
+    }
+  }
+
+  return false
+}
 
 /**
  * Can generate SQL
