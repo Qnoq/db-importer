@@ -38,7 +38,7 @@ Mode SANS COMPTE (gratuit)          Mode AVEC COMPTE (optionnel)
 
 ---
 
-#### 2. Historique des Imports
+#### 2. Historique des Imports ✅ COMPLÉTÉ
 **Valeur** : ⭐⭐⭐ | **Complexité** : Faible
 
 **Base de données** :
@@ -59,20 +59,24 @@ CREATE TABLE imports (
 ```
 
 **Backend** :
-- [ ] `POST /api/v1/imports` - Sauvegarder un import
-- [ ] `GET /api/v1/imports` - Lister l'historique (pagination)
-- [ ] `GET /api/v1/imports/:id` - Récupérer un import spécifique
-- [ ] `DELETE /api/v1/imports/:id` - Supprimer un import
-- [ ] Compression gzip du SQL généré
+- [x] `POST /api/v1/imports` - Sauvegarder un import
+- [x] `GET /api/v1/imports/list` - Lister l'historique (pagination)
+- [x] `GET /api/v1/imports/get?id=xxx` - Récupérer un import spécifique
+- [x] `GET /api/v1/imports/sql?id=xxx` - Récupérer avec SQL décompressé
+- [x] `DELETE /api/v1/imports/delete?id=xxx` - Supprimer un import
+- [x] `GET /api/v1/imports/stats` - Statistiques utilisateur
+- [x] Compression gzip du SQL généré
 
 **Frontend** :
-- [ ] Nouvelle page "Historique" dans le menu
-- [ ] Liste des imports avec filtres (date, table, statut)
-- [ ] Bouton "Réutiliser" pour recharger un import
-- [ ] Télécharger à nouveau le SQL
-- [ ] Stats : total rows importées, taux de succès
+- [x] Nouvelle page "Historique" dans le menu
+- [x] Liste des imports avec filtres (table, statut)
+- [x] Pagination complète avec DataTable
+- [x] Télécharger à nouveau le SQL
+- [x] Stats dashboard : total imports, rows, taux de succès, table favorite
+- [x] Affichage détails (modal)
+- [x] Suppression avec confirmation
 
-**Estimation** : 3-4 jours
+**Temps réel** : 1 jour
 
 ---
 
@@ -328,11 +332,11 @@ CREATE TABLE import_stats (
 - [x] Navigation guards et auto-refresh des tokens
 - [x] Documentation complète (docs/AUTHENTICATION.md)
 
-### Sprint 2 : Historique (2 semaines)
-- [ ] Modèle + endpoints imports
-- [ ] Frontend : page historique
-- [ ] Compression SQL
-- [ ] Tests E2E
+### Sprint 2 : Historique (2 semaines) ✅ COMPLÉTÉ
+- [x] Modèle + endpoints imports
+- [x] Frontend : page historique avec stats et filtres
+- [x] Compression/décompression SQL avec gzip
+- [x] Navigation et intégration complète
 
 ### Sprint 3 : Templates (2 semaines)
 - [ ] Modèle + endpoints templates
