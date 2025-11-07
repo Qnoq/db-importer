@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
           <div class="flex items-center space-x-6">
-            <router-link to="/" class="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer">
+            <a @click="handleNewImport" class="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer">
               <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
                 <i class="pi pi-database text-white text-xl"></i>
               </div>
@@ -15,17 +15,17 @@
                 </h1>
                 <p class="text-xs text-gray-500">Import data safely & efficiently</p>
               </div>
-            </router-link>
+            </a>
 
             <!-- Navigation Menu for Authenticated Users -->
             <nav v-if="authStore.isAuthenticated" class="hidden md:flex items-center space-x-4">
-              <router-link
-                to="/"
-                class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
-                active-class="text-blue-600"
+              <a
+                @click="handleNewImport"
+                class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors cursor-pointer"
+                :class="{ 'text-blue-600': router.currentRoute.value.path === '/' }"
               >
                 New Import
-              </router-link>
+              </a>
               <router-link
                 to="/history"
                 class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
@@ -107,6 +107,7 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from './store/authStore'
+import { useMappingStore } from './store/mappingStore'
 import { APP_VERSION } from './version'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
@@ -115,6 +116,7 @@ import Toast from 'primevue/toast'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const mappingStore = useMappingStore()
 const appVersion = APP_VERSION
 
 const userInitials = computed(() => {
@@ -130,6 +132,11 @@ const userInitials = computed(() => {
   }
   return 'U'
 })
+
+const handleNewImport = () => {
+  mappingStore.reset()
+  router.push('/')
+}
 
 const handleLogout = async () => {
   await authStore.logout()
