@@ -91,6 +91,10 @@
             <p class="text-green-700 text-sm mt-1">
               Found {{ store.tables.length }} table{{ store.tables.length !== 1 ? 's' : '' }} in your database dump
             </p>
+            <p v-if="store.tables.length === 1" class="text-green-600 text-sm mt-2 flex items-center gap-2">
+              <i class="pi pi-forward"></i>
+              Auto-selecting table and redirecting...
+            </p>
           </div>
         </div>
 
@@ -128,8 +132,8 @@
           </div>
         </div>
 
-        <!-- Continue Button -->
-        <div class="flex items-center justify-between pt-6 border-t border-gray-200">
+        <!-- Continue Button (only show for multiple tables) -->
+        <div v-if="store.tables.length > 1" class="flex items-center justify-between pt-6 border-t border-gray-200">
           <button
             @click="$refs.fileInput?.click()"
             class="text-blue-600 hover:text-blue-700 font-medium flex items-center transition"
@@ -191,6 +195,15 @@ async function processFile(file: File) {
     }
 
     store.setTables(data.tables)
+
+    // If only one table, auto-select it and skip to upload data
+    if (data.tables.length === 1) {
+      store.selectTable(data.tables[0].name)
+      // Give user a brief moment to see the success message, then redirect
+      setTimeout(() => {
+        router.push('/upload-data')
+      }, 1500)
+    }
   } catch (err) {
     if (err instanceof TypeError && err.message.includes('fetch')) {
       error.value = 'Cannot connect to backend server. Please ensure the backend is running on ' + API_URL
