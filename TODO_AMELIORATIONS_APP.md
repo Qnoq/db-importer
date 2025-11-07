@@ -23,15 +23,18 @@ Mode SANS COMPTE (gratuit)          Mode AVEC COMPTE (optionnel)
 
 ### 🥇 Priorité 1 : Fondations
 
-#### 1. Authentification JWT (Mode Hybride)
-- [ ] Schéma de base de données `users`
-- [ ] Endpoints `/api/v1/auth/register`, `/api/v1/auth/login`, `/api/v1/auth/refresh`
-- [ ] Middleware JWT pour routes protégées
-- [ ] Frontend : bouton "Se connecter" optionnel en header
-- [ ] Frontend : détection auto du mode (guest vs authenticated)
-- [ ] Rate limiting différencié (guest: 3/jour, auth: illimité)
+#### 1. Authentification JWT (Mode Hybride) ✅ COMPLÉTÉ
+- [x] Schéma de base de données `users`
+- [x] Endpoints `/api/v1/auth/register`, `/api/v1/auth/login`, `/api/v1/auth/refresh`
+- [x] Middleware JWT pour routes protégées
+- [x] Frontend : bouton "Se connecter" optionnel en header
+- [x] Frontend : détection auto du mode (guest vs authenticated)
+- [x] Rate limiting différencié (guest: 3/jour, auth: illimité)
+- [x] Fix : Persistance du JWT lors du refresh de page
+- [x] Fix : Validation et nettoyage des données localStorage corrompues
+- [x] Fix : Redirection propre vers login lors d'expiration de session
 
-**Estimation** : 2-3 jours
+**Temps réel** : 3 jours
 
 ---
 
