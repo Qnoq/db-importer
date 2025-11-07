@@ -56,71 +56,119 @@
         </div>
 
         <!-- Column Mapping -->
-        <div class="space-y-4 mb-6">
-          <div
-            v-for="(header, index) in store.excelHeaders"
-            :key="index"
-            class="border rounded-lg p-4"
-          >
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <!-- Column Mapping -->
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                  Excel Column: {{ header }}
-                </label>
-                <select
-                  v-model="localMapping[header]"
-                  @change="onMappingChange"
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">-- Skip this column --</option>
-                  <option
-                    v-for="field in store.selectedTable?.fields"
-                    :key="field.name"
-                    :value="field.name"
-                  >
-                    {{ field.name }} ({{ field.type }}){{ field.nullable ? '' : ' - NOT NULL' }}
-                  </option>
-                </select>
-              </div>
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Column Mapping</h3>
+            <div class="flex gap-2">
+              <button
+                @click="autoMap"
+                class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition flex items-center gap-2 shadow-sm"
+              >
+                <i class="pi pi-bolt"></i>
+                Auto-map Columns
+              </button>
+              <button
+                @click="clearAllMappings"
+                class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition flex items-center gap-2 shadow-sm"
+              >
+                <i class="pi pi-times"></i>
+                Clear All
+              </button>
+            </div>
+          </div>
 
-              <!-- Transformation -->
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                  Transformation
-                </label>
-                <select
-                  v-model="columnTransformations[header]"
-                  @change="onTransformationChange(header)"
-                  :disabled="!localMapping[header]"
-                  class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
-                >
-                  <option
-                    v-for="transType in getTransformationOptions(header)"
-                    :key="transType"
-                    :value="transType"
-                  >
-                    {{ transformations[transType].label }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- Status Indicator -->
-              <div class="flex items-center justify-between">
-                <div v-if="localMapping[header]" class="flex items-center gap-2">
-                  <i class="pi pi-check-circle text-green-600 text-2xl"></i>
-                  <span class="text-sm text-gray-600">
-                    Mapped to {{ localMapping[header] }}
-                  </span>
+          <div class="space-y-3">
+            <div
+              v-for="(header, index) in store.excelHeaders"
+              :key="index"
+              class="bg-white border-2 rounded-lg p-4 hover:border-blue-300 transition-all"
+              :class="localMapping[header] ? 'border-green-300 bg-green-50' : 'border-gray-200'"
+            >
+              <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                <!-- Excel Column (Source) -->
+                <div class="md:col-span-3">
+                  <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                    Excel Column
+                  </label>
+                  <div class="flex items-center gap-2">
+                    <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <i class="pi pi-file-excel text-blue-600"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="font-semibold text-gray-900 truncate" :title="header">{{ header }}</p>
+                      <p class="text-xs text-gray-500">
+                        Sample: {{ getSampleValue(header) }}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <button
-                  v-if="columnTransformations[header] && columnTransformations[header] !== 'none'"
-                  @click="showTransformPreview(header)"
-                  class="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                >
-                  <i class="pi pi-eye mr-1"></i>
-                  Preview
-                </button>
+
+                <!-- Arrow -->
+                <div class="md:col-span-1 flex justify-center">
+                  <i class="pi pi-arrow-right text-2xl" :class="localMapping[header] ? 'text-green-600' : 'text-gray-300'"></i>
+                </div>
+
+                <!-- DB Column (Target) -->
+                <div class="md:col-span-4">
+                  <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                    Database Field
+                  </label>
+                  <select
+                    v-model="localMapping[header]"
+                    @change="onMappingChange"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  >
+                    <option value="">-- Skip this column --</option>
+                    <option
+                      v-for="field in store.selectedTable?.fields"
+                      :key="field.name"
+                      :value="field.name"
+                    >
+                      {{ field.name }} ({{ field.type }}){{ field.nullable ? '' : ' *' }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Transformation -->
+                <div class="md:col-span-3">
+                  <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                    Transformation
+                  </label>
+                  <select
+                    v-model="columnTransformations[header]"
+                    @change="onTransformationChange(header)"
+                    :disabled="!localMapping[header]"
+                    class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
+                  >
+                    <option
+                      v-for="transType in getTransformationOptions(header)"
+                      :key="transType"
+                      :value="transType"
+                    >
+                      {{ transformations[transType].label }}
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Actions -->
+                <div class="md:col-span-1 flex gap-2 justify-end">
+                  <button
+                    v-if="columnTransformations[header] && columnTransformations[header] !== 'none'"
+                    @click="showTransformPreview(header)"
+                    class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                    title="Preview transformation"
+                  >
+                    <i class="pi pi-eye"></i>
+                  </button>
+                  <button
+                    v-if="localMapping[header]"
+                    @click="localMapping[header] = ''; onMappingChange()"
+                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition"
+                    title="Remove mapping"
+                  >
+                    <i class="pi pi-times"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -210,14 +258,6 @@
           >
             <i class="pi pi-download"></i>
             Generate & Download SQL
-          </button>
-
-          <button
-            @click="autoMap"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition flex items-center gap-2"
-          >
-            <i class="pi pi-bolt"></i>
-            Auto-map
           </button>
 
           <button
@@ -581,6 +621,31 @@ function autoMap() {
  */
 function updateMapping() {
   store.setMapping(localMapping.value)
+}
+
+/**
+ * Clear all mappings
+ */
+function clearAllMappings() {
+  if (confirm('Are you sure you want to clear all column mappings?')) {
+    localMapping.value = {}
+    columnTransformations.value = {}
+    updateMapping()
+  }
+}
+
+/**
+ * Get sample value from first row
+ */
+function getSampleValue(header: string): string {
+  const columnIndex = store.excelHeaders.indexOf(header)
+  if (columnIndex === -1 || !store.excelData.length) return 'N/A'
+
+  const sampleValue = store.excelData[0]?.[columnIndex]
+  if (sampleValue === null || sampleValue === undefined) return 'N/A'
+
+  const strValue = String(sampleValue)
+  return strValue.substring(0, 30) + (strValue.length > 30 ? '...' : '')
 }
 
 /**
