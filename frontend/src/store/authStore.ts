@@ -43,12 +43,9 @@ function loadFromStorage(): Partial<AuthState> | null {
       return null
     }
 
-    // Check if tokens are expired
-    if (parsed.state.tokens && parsed.state.tokens.expiresAt < Date.now()) {
-      console.warn('Stored tokens expired, clearing auth data')
-      localStorage.removeItem(STORAGE_KEY)
-      return null
-    }
+    // Don't check access token expiration here - we'll handle refresh in the router
+    // The refresh token is valid for 7 days, so we should still load the state
+    // and let the router handle refreshing the access token if needed
 
     return parsed.state
   } catch (error) {

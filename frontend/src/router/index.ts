@@ -53,12 +53,27 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
-  // Check if token needs refresh
-  if (authStore.isAuthenticated && authStore.shouldRefreshToken() && !authStore.isTokenExpired) {
-    try {
-      await authStore.refreshAccessToken()
-    } catch (error) {
-      console.error('Token refresh failed:', error)
+  // If user appears authenticated, check token status
+  if (authStore.isAuthenticated && authStore.tokens) {
+    // If token is expired, try to refresh it
+    if (authStore.isTokenExpired) {
+      console.log('Access token expired, attempting refresh...')
+      try {
+        await authStore.refreshAccessToken()
+        console.log('Token refreshed successfully')
+      } catch (error) {
+        console.error('Token refresh failed, logging out:', error)
+        authStore.logout()
+      }
+    }
+    // If token will expire soon, proactively refresh it
+    else if (authStore.shouldRefreshToken()) {
+      try {
+        await authStore.refreshAccessToken()
+        console.log('Token proactively refreshed')
+      } catch (error) {
+        console.error('Proactive token refresh failed:', error)
+      }
     }
   }
 
