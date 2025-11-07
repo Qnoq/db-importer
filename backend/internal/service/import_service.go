@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"fmt"
 	"io"
 
@@ -25,7 +26,7 @@ func NewImportService(importRepo *repository.ImportRepository) *ImportService {
 	}
 }
 
-// compressSQL compresses SQL using gzip
+// compressSQL compresses SQL using gzip and encodes to base64
 func compressSQL(sql string) (string, error) {
 	if sql == "" {
 		return "", nil
@@ -44,16 +45,24 @@ func compressSQL(sql string) (string, error) {
 		return "", fmt.Errorf("failed to close gzip writer: %w", err)
 	}
 
-	return buf.String(), nil
+	// Encode to base64 to make it safe for TEXT columns
+	encoded := base64.StdEncoding.EncodeToString(buf.Bytes())
+	return encoded, nil
 }
 
-// decompressSQL decompresses gzip-compressed SQL
+// decompressSQL decodes from base64 and decompresses gzip-compressed SQL
 func decompressSQL(compressedSQL string) (string, error) {
 	if compressedSQL == "" {
 		return "", nil
 	}
 
-	reader, err := gzip.NewReader(bytes.NewReader([]byte(compressedSQL)))
+	// Decode from base64
+	decoded, err := base64.StdEncoding.DecodeString(compressedSQL)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode base64: %w", err)
+	}
+
+	reader, err := gzip.NewReader(bytes.NewReader(decoded))
 	if err != nil {
 		return "", fmt.Errorf("failed to create gzip reader: %w", err)
 	}
