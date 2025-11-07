@@ -182,6 +182,12 @@ func formatBooleanValue(value string) string {
 func formatDateTimeValue(value string) string {
 	value = strings.TrimSpace(value)
 
+	// Check for invalid date values that should be NULL
+	// MySQL/MariaDB reject '0', '0000-00-00', empty strings, etc.
+	if value == "" || value == "0" || value == "0000-00-00" || value == "0000-00-00 00:00:00" {
+		return "NULL"
+	}
+
 	// Try to parse common date formats
 	dateFormats := []string{
 		"2006-01-02",
@@ -199,8 +205,9 @@ func formatDateTimeValue(value string) string {
 		}
 	}
 
-	// If not a valid date, return as-is quoted (database might handle it)
-	return formatStringValue(value)
+	// If not a valid date format, return NULL instead of invalid string
+	// This prevents MySQL errors like "Incorrect date value: '0'"
+	return "NULL"
 }
 
 // formatStringValue formats string values with proper escaping
@@ -240,6 +247,13 @@ func ValidateFieldTypes(rows [][]interface{}, fields []FieldInfo, mapping map[st
 			trimmedCell := strings.TrimSpace(cellStr)
 			isNullValue := cell == nil || trimmedCell == "" || strings.EqualFold(trimmedCell, "null")
 
+			// For date/time fields, also treat "0" and invalid date strings as NULL
+			if isDateTimeType(field.Type) {
+				if trimmedCell == "0" || trimmedCell == "0000-00-00" || trimmedCell == "0000-00-00 00:00:00" {
+					isNullValue = true
+				}
+			}
+
 			if !field.Nullable && isNullValue {
 				errors = append(errors, fmt.Sprintf("Row %d: Field '%s' cannot be NULL", rowIdx+1, field.Name))
 			}
@@ -265,6 +279,13 @@ func validateValueType(value interface{}, sqlType string) error {
 	// Skip validation for NULL strings
 	if strings.EqualFold(trimmedValue, "null") || trimmedValue == "" {
 		return nil
+	}
+
+	// For date/time fields, skip validation for invalid date values that will become NULL
+	if isDateTimeType(sqlType) {
+		if trimmedValue == "0" || trimmedValue == "0000-00-00" || trimmedValue == "0000-00-00 00:00:00" {
+			return nil
+		}
 	}
 
 	if isNumericType(sqlType) {
