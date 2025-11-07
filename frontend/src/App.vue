@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
@@ -22,22 +22,14 @@
       </div>
     </header>
 
-    <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
+    <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8 flex-1">
       <router-view />
     </main>
 
-    <footer class="mt-auto py-6 border-t border-gray-200 bg-white">
+    <footer class="py-6 border-t border-gray-200 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between text-sm text-gray-500">
-          <p>
-            Made with <span class="text-red-500">♥</span> for developers who need to import data safely
-          </p>
-          <div class="flex items-center space-x-4">
-            <span>v1.0.0</span>
-            <!-- Future: Add support link when ready -->
-            <!-- <span>•</span>
-            <a href="#" class="hover:text-gray-700 transition">Support</a> -->
-          </div>
+        <div class="flex items-center justify-center text-sm text-gray-500">
+          <span>v{{ appVersion }}</span>
         </div>
       </div>
     </footer>
@@ -45,4 +37,7 @@
 </template>
 
 <script setup lang="ts">
+import { APP_VERSION } from './version'
+
+const appVersion = APP_VERSION
 </script>
