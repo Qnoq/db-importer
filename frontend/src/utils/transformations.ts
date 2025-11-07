@@ -176,8 +176,8 @@ export const transformations: Record<TransformationType, Transformation> = {
 
   excelDate: {
     type: 'excelDate',
-    label: 'Excel Date',
-    description: 'Convert Excel serial date number to YYYY-MM-DD HH:MM:SS',
+    label: 'Excel Date (or Year)',
+    description: 'Convert Excel serial date to YYYY-MM-DD HH:MM:SS. If value is just a year (e.g., 2023), converts to YYYY-01-01',
     apply: (val) => {
       const date = parseExcelDate(val)
       return date ? formatDateTimeISO(date) : val
@@ -261,6 +261,11 @@ export function formatDateTimeISO(date: Date): string {
  * Excel stores dates as numbers where:
  * - Integer part = days since January 1, 1900
  * - Decimal part = fraction of day (time)
+ *
+ * Special handling:
+ * - If the number looks like a year (1900-2100), treat it as YYYY-01-01
+ * - Otherwise treat as Excel serial date
+ *
  * Note: Excel incorrectly treats 1900 as a leap year, so we need to account for that
  */
 export function parseExcelDate(value: unknown): Date | null {
@@ -269,8 +274,17 @@ export function parseExcelDate(value: unknown): Date | null {
   // Convert to number
   const num = typeof value === 'number' ? value : parseFloat(String(value))
 
+  if (isNaN(num)) return null
+
+  // SMART DETECTION: If it looks like a year (between 1900 and 2100), treat as year
+  // This handles cases where users have just "2023" in their date column
+  if (num >= 1900 && num <= 2100 && Number.isInteger(num)) {
+    // It's a year! Convert to January 1st of that year
+    return new Date(num, 0, 1, 0, 0, 0, 0)
+  }
+
   // Check if it's a valid Excel date number (between 1 and ~50000 for reasonable dates)
-  if (isNaN(num) || num < 1 || num > 100000) return null
+  if (num < 1 || num > 100000) return null
 
   // Excel epoch: January 1, 1900 (serial 1 = Jan 1, 1900)
   // Excel incorrectly treats 1900 as a leap year (serial 60 = fake Feb 29, 1900)
@@ -293,6 +307,27 @@ export function parseExcelDate(value: unknown): Date | null {
   if (isNaN(date.getTime())) return null
 
   return date
+}
+
+/**
+ * Check if a value looks like a year (for warning purposes)
+ */
+export function isYearValue(value: unknown): boolean {
+  if (value === null || value === undefined) return false
+  const num = typeof value === 'number' ? value : parseFloat(String(value))
+  return !isNaN(num) && num >= 1900 && num <= 2100 && Number.isInteger(num)
+}
+
+/**
+ * Detect if a column contains year-only values
+ */
+export function hasYearOnlyValues(data: unknown[]): boolean {
+  const sample = data.slice(0, 10).filter(v => v !== null && v !== undefined)
+  if (sample.length === 0) return false
+
+  // Check if at least 50% of values look like years
+  const yearCount = sample.filter(isYearValue).length
+  return yearCount >= sample.length / 2
 }
 
 /**
