@@ -199,6 +199,40 @@ const handleContinueAsGuest = () => {
 :deep(.p-inputtext),
 :deep(.p-password input) {
   border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 0.75rem;
+  transition: border-color 0.2s;
+}
+
+:deep(.p-inputtext:hover),
+:deep(.p-password input:hover) {
+  border-color: #9ca3af;
+}
+
+:deep(.p-inputtext:focus),
+:deep(.p-password input:focus) {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+:deep(.p-invalid .p-inputtext),
+:deep(.p-invalid input) {
+  border-color: #ef4444;
+}
+
+:deep(.p-checkbox) {
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+}
+
+:deep(.p-checkbox:hover) {
+  border-color: #9ca3af;
+}
+
+:deep(.p-checkbox.p-highlight) {
+  background: #3b82f6;
+  border-color: #3b82f6;
 }
 
 :deep(.p-button) {
