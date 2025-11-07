@@ -29,7 +29,7 @@ func (h *ImportHandler) CreateImport(w http.ResponseWriter, r *http.Request) {
 
 	// Parse request body
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.BadRequest(w, "Invalid request body")
+		utils.BadRequest(w, "Invalid request body: "+err.Error())
 		return
 	}
 
@@ -55,7 +55,8 @@ func (h *ImportHandler) CreateImport(w http.ResponseWriter, r *http.Request) {
 	// Create import
 	importResp, err := h.importService.CreateImport(r.Context(), uid, &req)
 	if err != nil {
-		utils.InternalServerError(w, "Failed to create import")
+		// Log the actual error for debugging
+		utils.InternalServerError(w, "Failed to create import: "+err.Error())
 		return
 	}
 
