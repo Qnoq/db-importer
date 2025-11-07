@@ -41,18 +41,18 @@
             </div>
             <div class="flex-1">
               <h3 class="font-semibold text-green-900 mb-1">
-                Auto-mapping réussi !
+                Auto-mapping successful!
               </h3>
               <p class="text-sm text-green-800">
-                Le système a automatiquement mappé <strong>{{ autoMappingStats.mapped }} colonnes sur {{ autoMappingStats.total }}</strong>
-                en comparant les noms de vos colonnes Excel avec les champs de la base de données.
+                The system automatically mapped <strong>{{ autoMappingStats.mapped }} of {{ autoMappingStats.total }} columns</strong>
+                by comparing your Excel column names with database field names.
               </p>
               <p class="text-sm text-green-700 mt-2">
                 <i class="pi pi-info-circle mr-1"></i>
-                Vérifiez les mappings ci-dessous et ajustez si nécessaire.
+                Review the mappings below and adjust if needed.
                 <template v-if="getAutoIncrementFieldNames().length > 0">
-                  Les champs ID (<strong>{{ getAutoIncrementFieldNames().join(', ') }}</strong>)
-                  ont été automatiquement ignorés car ils sont auto-incrémentés.
+                  ID fields (<strong>{{ getAutoIncrementFieldNames().join(', ') }}</strong>)
+                  were automatically skipped as they are auto-incremented.
                 </template>
               </p>
             </div>
