@@ -141,14 +141,14 @@ func extractFieldsWithRegex(sql string) []Field {
 
 		// Skip empty lines, comments, and constraint definitions
 		if line == "" ||
-		   strings.HasPrefix(line, "--") ||
-		   strings.HasPrefix(line, "/*") ||
-		   strings.HasPrefix(strings.ToUpper(line), "PRIMARY KEY") ||
-		   strings.HasPrefix(strings.ToUpper(line), "UNIQUE KEY") ||
-		   strings.HasPrefix(strings.ToUpper(line), "KEY") ||
-		   strings.HasPrefix(strings.ToUpper(line), "FOREIGN KEY") ||
-		   strings.HasPrefix(strings.ToUpper(line), "CONSTRAINT") ||
-		   strings.HasPrefix(strings.ToUpper(line), "INDEX") {
+			strings.HasPrefix(line, "--") ||
+			strings.HasPrefix(line, "/*") ||
+			strings.HasPrefix(strings.ToUpper(line), "PRIMARY KEY") ||
+			strings.HasPrefix(strings.ToUpper(line), "UNIQUE KEY") ||
+			strings.HasPrefix(strings.ToUpper(line), "KEY") ||
+			strings.HasPrefix(strings.ToUpper(line), "FOREIGN KEY") ||
+			strings.HasPrefix(strings.ToUpper(line), "CONSTRAINT") ||
+			strings.HasPrefix(strings.ToUpper(line), "INDEX") {
 			continue
 		}
 

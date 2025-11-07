@@ -94,7 +94,14 @@ func formatValueByType(value interface{}, sqlType string) string {
 
 	// Check if the value is an empty string
 	strValue := fmt.Sprintf("%v", value)
-	if strings.TrimSpace(strValue) == "" {
+	trimmedValue := strings.TrimSpace(strValue)
+
+	if trimmedValue == "" {
+		return "NULL"
+	}
+
+	// Check if the value is the string "NULL" (case-insensitive)
+	if strings.EqualFold(trimmedValue, "null") {
 		return "NULL"
 	}
 
@@ -231,12 +238,16 @@ func ValidateFieldTypes(rows [][]interface{}, fields []FieldInfo, mapping map[st
 			field := fields[colIdx]
 
 			// Check NOT NULL constraint
-			if !field.Nullable && (cell == nil || fmt.Sprintf("%v", cell) == "") {
+			cellStr := fmt.Sprintf("%v", cell)
+			trimmedCell := strings.TrimSpace(cellStr)
+			isNullValue := cell == nil || trimmedCell == "" || strings.EqualFold(trimmedCell, "null")
+
+			if !field.Nullable && isNullValue {
 				errors = append(errors, fmt.Sprintf("Row %d: Field '%s' cannot be NULL", rowIdx+1, field.Name))
 			}
 
-			// Validate type
-			if cell != nil && fmt.Sprintf("%v", cell) != "" {
+			// Validate type (skip if NULL)
+			if !isNullValue {
 				if err := validateValueType(cell, field.Type); err != nil {
 					errors = append(errors, fmt.Sprintf("Row %d, Field '%s': %s", rowIdx+1, field.Name, err.Error()))
 				}
@@ -250,7 +261,13 @@ func ValidateFieldTypes(rows [][]interface{}, fields []FieldInfo, mapping map[st
 // validateValueType validates a value against its expected SQL type
 func validateValueType(value interface{}, sqlType string) error {
 	strValue := fmt.Sprintf("%v", value)
+	trimmedValue := strings.TrimSpace(strValue)
 	sqlType = strings.ToLower(sqlType)
+
+	// Skip validation for NULL strings
+	if strings.EqualFold(trimmedValue, "null") || trimmedValue == "" {
+		return nil
+	}
 
 	if isNumericType(sqlType) {
 		if _, err := strconv.ParseFloat(strValue, 64); err != nil {
