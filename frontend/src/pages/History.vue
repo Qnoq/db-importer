@@ -1,5 +1,7 @@
 <template>
   <div class="p-6 max-w-7xl mx-auto">
+    <Toast />
+
     <!-- Page Header -->
     <div class="mb-6">
       <h1 class="text-3xl font-bold text-gray-900 mb-2">Import History</h1>
@@ -60,7 +62,7 @@
     <!-- Filters -->
     <Card class="mb-6">
       <template #content>
-        <div class="flex flex-wrap gap-4 items-end">
+        <div class="flex flex-wrap gap-4">
           <div class="flex-1 min-w-[200px]">
             <label class="block text-sm font-medium text-gray-700 mb-2">Table Name</label>
             <InputText
@@ -82,21 +84,6 @@
               showClear
             />
           </div>
-
-          <Button
-            label="Apply Filters"
-            icon="pi pi-filter"
-            @click="applyFilters"
-            :loading="importStore.loading"
-          />
-
-          <Button
-            label="Reset"
-            icon="pi pi-refresh"
-            severity="secondary"
-            outlined
-            @click="resetFilters"
-          />
         </div>
       </template>
     </Card>
@@ -206,11 +193,12 @@
     <Dialog
       v-model:visible="detailsVisible"
       :header="`Import Details - ${selectedImport?.tableName}`"
-      :style="{ width: '50rem' }"
+      :style="{ width: '60rem' }"
       :modal="true"
     >
-      <div v-if="selectedImport" class="space-y-4">
-        <div class="grid grid-cols-2 gap-4">
+      <div v-if="selectedImport" class="space-y-6">
+        <!-- Basic Info -->
+        <div class="grid grid-cols-3 gap-4">
           <div>
             <p class="text-sm text-gray-500">Table Name</p>
             <p class="font-medium">{{ selectedImport.tableName }}</p>
@@ -233,26 +221,76 @@
           </div>
           <div v-if="selectedImport.metadata.sourceFileName">
             <p class="text-sm text-gray-500">Source File</p>
-            <p class="font-medium">{{ selectedImport.metadata.sourceFileName }}</p>
+            <p class="font-medium truncate" :title="selectedImport.metadata.sourceFileName">{{ selectedImport.metadata.sourceFileName }}</p>
           </div>
         </div>
 
-        <div v-if="selectedImport.metadata.validationErrors?.length">
-          <p class="text-sm font-medium text-red-600 mb-2">Errors:</p>
-          <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
-            <li v-for="(error, idx) in selectedImport.metadata.validationErrors" :key="idx">
-              {{ error }}
-            </li>
-          </ul>
+        <!-- Column Mapping -->
+        <div v-if="selectedImport.metadata.mappingSummary && Object.keys(selectedImport.metadata.mappingSummary).length > 0">
+          <p class="text-sm font-semibold text-gray-700 mb-2">Column Mapping:</p>
+          <div class="bg-gray-50 rounded-lg p-3 max-h-40 overflow-y-auto">
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div v-for="(dbCol, excelCol) in selectedImport.metadata.mappingSummary" :key="excelCol" class="flex items-center gap-2">
+                <span class="text-gray-600">{{ excelCol }}</span>
+                <i class="pi pi-arrow-right text-xs text-gray-400"></i>
+                <span class="font-medium text-gray-800">{{ dbCol }}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
+        <!-- Transformations -->
+        <div v-if="selectedImport.metadata.transformations && selectedImport.metadata.transformations.length > 0">
+          <p class="text-sm font-semibold text-gray-700 mb-2">Transformations Applied:</p>
+          <div class="bg-blue-50 rounded-lg p-3">
+            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+              <li v-for="(transformation, idx) in selectedImport.metadata.transformations" :key="idx">
+                {{ transformation }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- SQL Preview -->
+        <div v-if="selectedImportSQL">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-sm font-semibold text-gray-700">SQL Preview:</p>
+            <Button
+              label="Download Full SQL"
+              icon="pi pi-download"
+              size="small"
+              severity="secondary"
+              outlined
+              @click="downloadFullSQL"
+            />
+          </div>
+          <div class="bg-gray-900 rounded-lg p-4 max-h-60 overflow-y-auto">
+            <pre class="text-sm text-green-400 whitespace-pre-wrap font-mono">{{ getSQLPreview(selectedImportSQL) }}</pre>
+          </div>
+        </div>
+
+        <!-- Errors -->
+        <div v-if="selectedImport.metadata.validationErrors?.length">
+          <p class="text-sm font-semibold text-red-600 mb-2">Errors:</p>
+          <div class="bg-red-50 rounded-lg p-3 max-h-32 overflow-y-auto">
+            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+              <li v-for="(error, idx) in selectedImport.metadata.validationErrors" :key="idx">
+                {{ error }}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Warnings -->
         <div v-if="selectedImport.metadata.validationWarnings?.length">
-          <p class="text-sm font-medium text-orange-600 mb-2">Warnings:</p>
-          <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
-            <li v-for="(warning, idx) in selectedImport.metadata.validationWarnings" :key="idx">
-              {{ warning }}
-            </li>
-          </ul>
+          <p class="text-sm font-semibold text-orange-600 mb-2">Warnings:</p>
+          <div class="bg-orange-50 rounded-lg p-3 max-h-32 overflow-y-auto">
+            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+              <li v-for="(warning, idx) in selectedImport.metadata.validationWarnings" :key="idx">
+                {{ warning }}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </Dialog>
@@ -278,7 +316,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useImportStore, type Import } from '../store/importStore'
 import { useToast } from 'primevue/usetoast'
@@ -290,6 +328,7 @@ import Tag from 'primevue/tag'
 import InputText from 'primevue/inputtext'
 import Dropdown from 'primevue/dropdown'
 import Dialog from 'primevue/dialog'
+import Toast from 'primevue/toast'
 
 const router = useRouter()
 const importStore = useImportStore()
@@ -307,29 +346,34 @@ const statusOptions = [
 ]
 
 const selectedImport = ref<Import | null>(null)
+const selectedImportSQL = ref<string | null>(null)
 const detailsVisible = ref(false)
 const deleteVisible = ref(false)
 const downloadingId = ref<string | null>(null)
+
+// Debounce timer for auto-filtering
+let filterDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
 onMounted(async () => {
   await importStore.getStats()
   await importStore.listImports({ page: 1, pageSize: 20 })
 })
 
-const applyFilters = async () => {
-  await importStore.listImports({
-    page: 1,
-    pageSize: importStore.pageSize,
-    tableName: filters.value.tableName || undefined,
-    status: filters.value.status || undefined
-  })
-}
+// Auto-filter with debounce when filters change
+watch(filters, () => {
+  if (filterDebounceTimer) {
+    clearTimeout(filterDebounceTimer)
+  }
 
-const resetFilters = async () => {
-  filters.value.tableName = ''
-  filters.value.status = null
-  await importStore.listImports({ page: 1, pageSize: 20 })
-}
+  filterDebounceTimer = setTimeout(async () => {
+    await importStore.listImports({
+      page: 1,
+      pageSize: importStore.pageSize,
+      tableName: filters.value.tableName || undefined,
+      status: filters.value.status || undefined
+    })
+  }, 500)
+}, { deep: true })
 
 const onPage = async (event: any) => {
   await importStore.listImports({
@@ -340,9 +384,35 @@ const onPage = async (event: any) => {
   })
 }
 
-const viewDetails = (imp: Import) => {
+const viewDetails = async (imp: Import) => {
   selectedImport.value = imp
+  selectedImportSQL.value = null
   detailsVisible.value = true
+
+  // Fetch SQL in the background
+  try {
+    const importWithSQL = await importStore.getImportWithSQL(imp.id)
+    selectedImportSQL.value = importWithSQL.generatedSql
+  } catch (error) {
+    console.error('Failed to load SQL:', error)
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Failed to load SQL preview', life: 3000 })
+  }
+}
+
+const getSQLPreview = (sql: string): string => {
+  const maxLength = 500
+  if (sql.length <= maxLength) {
+    return sql
+  }
+  return sql.substring(0, maxLength) + '\n...\n(SQL truncated for preview. Download to see full SQL)'
+}
+
+const downloadFullSQL = () => {
+  if (!selectedImport.value || !selectedImportSQL.value) return
+
+  const filename = `${selectedImport.value.tableName}_${selectedImport.value.createdAt.replace(/[:.]/g, '-')}.sql`
+  importStore.downloadSQL(selectedImportSQL.value, filename)
+  toast.add({ severity: 'success', summary: 'Success', detail: 'SQL downloaded successfully', life: 3000 })
 }
 
 const downloadSQL = async (imp: Import) => {
