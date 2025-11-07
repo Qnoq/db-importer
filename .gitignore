@@ -40,5 +40,8 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 
+# Deployment
+deploy/config.sh
+
 # Docker
 *.sql.generated

@@ -1,0 +1,8 @@
+# VPS Configuration
+# Copy this file to config.sh and fill in your details
+# DO NOT commit config.sh to git (it's in .gitignore)
+
+SSH_USER="root"
+SSH_HOST="your-vps-ip-or-domain.com"
+SSH_PORT="22"
+APP_DIR="/var/www/db-importer"
