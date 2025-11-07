@@ -6,6 +6,7 @@ import UploadData from '../pages/UploadData.vue'
 import Mapping from '../pages/Mapping.vue'
 import Login from '../pages/Login.vue'
 import Register from '../pages/Register.vue'
+import History from '../pages/History.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -45,6 +46,12 @@ const router = createRouter({
       name: 'Register',
       component: Register,
       meta: { requiresAuth: false, guestOnly: true }
+    },
+    {
+      path: '/history',
+      name: 'History',
+      component: History,
+      meta: { requiresAuth: true }
     }
   ]
 })

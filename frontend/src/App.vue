@@ -1,18 +1,39 @@
 <template>
+  <Toast />
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-          <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
-              <i class="pi pi-database text-white text-xl"></i>
+          <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
+                <i class="pi pi-database text-white text-xl"></i>
+              </div>
+              <div>
+                <h1 class="text-xl font-bold text-gray-900">
+                  SQL Data Importer
+                </h1>
+                <p class="text-xs text-gray-500">Import data safely & efficiently</p>
+              </div>
             </div>
-            <div>
-              <h1 class="text-xl font-bold text-gray-900">
-                SQL Data Importer
-              </h1>
-              <p class="text-xs text-gray-500">Import data safely & efficiently</p>
-            </div>
+
+            <!-- Navigation Menu for Authenticated Users -->
+            <nav v-if="authStore.isAuthenticated" class="hidden md:flex items-center space-x-4">
+              <router-link
+                to="/"
+                class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                active-class="text-blue-600"
+              >
+                New Import
+              </router-link>
+              <router-link
+                to="/history"
+                class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                active-class="text-blue-600"
+              >
+                History
+              </router-link>
+            </nav>
           </div>
 
           <!-- Authentication Actions -->
@@ -90,6 +111,7 @@ import { APP_VERSION } from './version'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
 import Tag from 'primevue/tag'
+import Toast from 'primevue/toast'
 
 const router = useRouter()
 const authStore = useAuthStore()
