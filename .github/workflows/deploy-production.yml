@@ -1,10 +1,13 @@
 name: Deploy to Production VPS
 
-# Automatic deployment when pushing to main branch
+# Deployment triggers:
+# 1. Automatic: when pushing to 'main' branch
+# 2. Manual: click "Run workflow" button in GitHub Actions tab
 on:
   push:
     branches:
       - main
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
 
 jobs:
   deploy:
