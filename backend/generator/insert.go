@@ -21,22 +21,20 @@ func GenerateInsertSQL(tableName string, mapping map[string]string, rows [][]int
 		return ""
 	}
 
-	// Extract database columns in order from mapping values
+	// Extract database columns in order from fields array (preserves Excel column order)
 	var dbColumns []string
 	var excelColumns []string
 	var columnFields []FieldInfo
 
-	for excelCol, dbCol := range mapping {
-		if dbCol != "" {
-			excelColumns = append(excelColumns, excelCol)
-			dbColumns = append(dbColumns, dbCol)
-
-			// Find field info
-			for _, field := range fields {
-				if field.Name == dbCol {
-					columnFields = append(columnFields, field)
-					break
-				}
+	// Use the fields array order to preserve Excel column order from frontend
+	for _, field := range fields {
+		// Find the Excel column that maps to this field
+		for excelCol, dbCol := range mapping {
+			if dbCol == field.Name && dbCol != "" {
+				excelColumns = append(excelColumns, excelCol)
+				dbColumns = append(dbColumns, field.Name)
+				columnFields = append(columnFields, field)
+				break
 			}
 		}
 	}
