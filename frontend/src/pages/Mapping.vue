@@ -1085,6 +1085,8 @@ async function generateSQL() {
     // Save to import history if user is authenticated
     if (authStore.isAuthenticated) {
       try {
+        console.log('User is authenticated, saving to import history...')
+
         // Determine status based on validation results
         let status: 'success' | 'warning' | 'failed' = 'success'
         const errorCount = serverValidationErrors.value.length
@@ -1104,7 +1106,7 @@ async function generateSQL() {
           }
         })
 
-        await importStore.createImport({
+        const importData = {
           tableName: store.selectedTable.name,
           rowCount: mappedRows.length,
           status,
@@ -1112,19 +1114,24 @@ async function generateSQL() {
           errorCount,
           warningCount,
           metadata: {
-            sourceFileName: store.excelFileName || 'unknown',
+            sourceFileName: filename,
             mappingSummary: localMapping.value,
             transformations: appliedTransformations.length > 0 ? appliedTransformations : undefined,
             databaseType: 'mysql', // Could be detected from schema
             validationErrors: serverValidationErrors.value.length > 0 ? serverValidationErrors.value : undefined,
             validationWarnings: validationStats.value?.warningCount ? ['Some data validation warnings occurred'] : undefined
           }
-        })
-        console.log('Import saved to history successfully')
+        }
+
+        console.log('Saving import with data:', importData)
+        await importStore.createImport(importData)
+        console.log('✅ Import saved to history successfully')
       } catch (historyError) {
         // Don't fail the whole operation if history save fails
-        console.error('Failed to save import to history:', historyError)
+        console.error('❌ Failed to save import to history:', historyError)
       }
+    } else {
+      console.log('User not authenticated, skipping history save')
     }
 
     loading.value = false
