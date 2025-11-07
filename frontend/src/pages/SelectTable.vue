@@ -25,16 +25,16 @@
         <div class="mb-6 space-y-4">
           <!-- Search Input -->
           <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
               <i class="pi pi-search text-gray-400"></i>
             </div>
-            <input
+            <InputText
               v-model="searchQuery"
               type="text"
               placeholder="Search tables by name..."
-              class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition"
+              class="w-full pl-10 pr-10"
             />
-            <div v-if="searchQuery" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+            <div v-if="searchQuery" class="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
               <button
                 @click="searchQuery = ''"
                 class="text-gray-400 hover:text-gray-600 transition"
@@ -205,6 +205,7 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMappingStore } from '../store/mappingStore'
 import StepperNav from '../components/StepperNav.vue'
+import InputText from 'primevue/inputtext'
 
 const router = useRouter()
 const store = useMappingStore()
