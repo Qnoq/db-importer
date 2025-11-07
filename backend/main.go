@@ -7,6 +7,7 @@ import (
 	"db-importer/logger"
 	"db-importer/middleware"
 	"db-importer/parser"
+	"db-importer/version"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -279,7 +280,7 @@ func validateHandler(w http.ResponseWriter, r *http.Request) {
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	response := map[string]interface{}{
 		"status":  "ok",
-		"version": "1.0.0",
+		"version": version.GetVersion(),
 		"config": map[string]interface{}{
 			"maxUploadSize":    appConfig.MaxUploadSize,
 			"rateLimitEnabled": appConfig.RateLimitEnabled,
