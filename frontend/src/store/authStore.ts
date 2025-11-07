@@ -43,13 +43,30 @@ function loadFromStorage(): Partial<AuthState> | null {
       return null
     }
 
+    // Validate that stored data is complete and not corrupted
+    const state = parsed.state
+    if (state && state.isAuthenticated && state.tokens) {
+      // If marked as authenticated, must have valid user and complete tokens
+      if (!state.user || !state.user.id || !state.user.email) {
+        console.warn('Auth storage corrupted: missing user data, clearing')
+        localStorage.removeItem(STORAGE_KEY)
+        return null
+      }
+      if (!state.tokens.accessToken || !state.tokens.refreshToken || !state.tokens.expiresAt) {
+        console.warn('Auth storage corrupted: incomplete token data, clearing')
+        localStorage.removeItem(STORAGE_KEY)
+        return null
+      }
+    }
+
     // Don't check access token expiration here - we'll handle refresh in the router
     // The refresh token is valid for 7 days, so we should still load the state
     // and let the router handle refreshing the access token if needed
 
-    return parsed.state
+    return state
   } catch (error) {
     console.error('Failed to load auth state from storage:', error)
+    localStorage.removeItem(STORAGE_KEY)
     return null
   }
 }
