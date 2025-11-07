@@ -31,6 +31,30 @@
           </div>
         </div>
 
+        <!-- Pro Tip: Column Naming -->
+        <div class="mb-6 bg-green-50 border-l-4 border-green-500 rounded-lg p-4">
+          <div class="flex items-start gap-3">
+            <div class="flex-shrink-0">
+              <i class="pi pi-lightbulb text-green-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-green-900 mb-1">💡 Pro Tip: Name Your Excel Columns</h3>
+              <p class="text-sm text-green-800 mb-2">
+                For <strong>automatic column mapping</strong>, name your Excel headers to match your database field names.
+              </p>
+              <div class="text-sm text-green-700 bg-green-100 rounded px-3 py-2">
+                <strong>Example:</strong> If your database has <code class="bg-white px-1.5 py-0.5 rounded text-xs">sit_name</code>,
+                <code class="bg-white px-1.5 py-0.5 rounded text-xs">sit_address</code>,
+                <code class="bg-white px-1.5 py-0.5 rounded text-xs">sit_zipCode</code>
+                → Use the same names in your Excel first row!
+              </div>
+              <p class="text-sm text-green-700 mt-2">
+                ✅ The system will auto-detect and map matching columns, saving you time!
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Upload Area -->
         <div class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-3">
