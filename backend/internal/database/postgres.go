@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/jackc/pgx/v5/stdlib" // Register pgx driver for database/sql
 	"github.com/jmoiron/sqlx"
 )
 
