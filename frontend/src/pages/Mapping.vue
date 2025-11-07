@@ -181,7 +181,7 @@
                   <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                     Excel Column
                   </label>
-                  <Select
+                  <Dropdown
                     :modelValue="getMappedExcelColumn(field.name)"
                     @update:modelValue="(value) => onFieldMappingChange(field.name, value)"
                     :options="getExcelColumnOptions()"
@@ -200,7 +200,7 @@
                   <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                     Transformation
                   </label>
-                  <Select
+                  <Dropdown
                     v-model="fieldTransformations[field.name]"
                     @update:modelValue="() => onTransformationChange(field.name)"
                     :options="getTransformationOptions(field)"
@@ -433,7 +433,7 @@ import { transformations, applyTransformation, suggestTransformations, hasYearOn
 import { validateDataset, validateCell, getCellClass, getValidationIcon, type ValidationResult } from '../utils/dataValidation'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
-import Select from 'primevue/select'
+import Dropdown from 'primevue/dropdown'
 import Checkbox from 'primevue/checkbox'
 
 const router = useRouter()
