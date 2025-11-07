@@ -12,7 +12,10 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application
+# Build argument for API URL (required at build time for Vite)
+ARG VITE_API_URL=http://localhost:8080
+
+# Build the application with API URL baked in
 RUN npm run build
 
 # Production stage - serve with nginx
