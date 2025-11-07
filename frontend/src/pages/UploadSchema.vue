@@ -81,8 +81,57 @@
         </div>
       </div>
 
+      <!-- Single Table Auto-Select Modal -->
+      <div v-if="showSingleTableDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="continueToProceed">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md mx-4 transform transition-all">
+          <div class="text-center">
+            <!-- Success Icon -->
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <i class="pi pi-check-circle text-green-600 text-5xl"></i>
+            </div>
+
+            <!-- Title -->
+            <h3 class="text-2xl font-bold text-gray-900 mb-3">
+              Single Table Detected
+            </h3>
+
+            <!-- Message -->
+            <p class="text-gray-600 mb-2">
+              We found only <strong class="text-blue-600">1 table</strong> in your schema:
+            </p>
+
+            <!-- Table Name -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+              <div class="flex items-center justify-center gap-3">
+                <i class="pi pi-table text-blue-600 text-2xl"></i>
+                <div class="text-left">
+                  <p class="font-bold text-blue-900 text-lg">{{ store.tables[0]?.name }}</p>
+                  <p class="text-sm text-blue-700">
+                    {{ store.tables[0]?.fields.length }} column{{ store.tables[0]?.fields.length !== 1 ? 's' : '' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Explanation -->
+            <p class="text-gray-500 text-sm mb-6">
+              Since there's only one table, we'll auto-select it and skip the table selection step.
+            </p>
+
+            <!-- Continue Button -->
+            <button
+              @click="continueToProceed"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+            >
+              Continue to Upload Data
+              <i class="pi pi-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Success State -->
-      <div v-if="store.hasSchema && !loading" class="space-y-6">
+      <div v-if="store.hasSchema && !loading && !showSingleTableDialog" class="space-y-6">
         <!-- Success Banner -->
         <div class="bg-green-50 border-l-4 border-green-500 rounded-lg p-4 flex items-start">
           <i class="pi pi-check-circle text-green-500 text-xl mr-3 mt-0.5"></i>
@@ -90,10 +139,6 @@
             <p class="font-medium text-green-800">Schema parsed successfully!</p>
             <p class="text-green-700 text-sm mt-1">
               Found {{ store.tables.length }} table{{ store.tables.length !== 1 ? 's' : '' }} in your database dump
-            </p>
-            <p v-if="store.tables.length === 1" class="text-green-600 text-sm mt-2 flex items-center gap-2">
-              <i class="pi pi-forward"></i>
-              Auto-selecting table and redirecting...
             </p>
           </div>
         </div>
@@ -165,6 +210,7 @@ const store = useMappingStore()
 const fileInput = ref<HTMLInputElement>()
 const loading = ref(false)
 const error = ref('')
+const showSingleTableDialog = ref(false)
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
 
@@ -196,13 +242,9 @@ async function processFile(file: File) {
 
     store.setTables(data.tables)
 
-    // If only one table, auto-select it and skip to upload data
+    // If only one table, show dialog
     if (data.tables.length === 1) {
-      store.selectTable(data.tables[0].name)
-      // Give user a brief moment to see the success message, then redirect
-      setTimeout(() => {
-        router.push('/upload-data')
-      }, 1500)
+      showSingleTableDialog.value = true
     }
   } catch (err) {
     if (err instanceof TypeError && err.message.includes('fetch')) {
@@ -229,6 +271,15 @@ function handleDrop(event: DragEvent) {
     processFile(file)
   } else {
     error.value = 'Please upload a valid .sql file'
+  }
+}
+
+function continueToProceed() {
+  // Auto-select the single table
+  if (store.tables.length === 1) {
+    store.selectTable(store.tables[0].name)
+    showSingleTableDialog.value = false
+    router.push('/upload-data')
   }
 }
 
