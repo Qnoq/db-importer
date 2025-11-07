@@ -125,7 +125,7 @@ func (rl *RateLimiter) getRemainingTime(identifier string) string {
 	// Format the remaining time nicely
 	if remaining > 24*time.Hour {
 		hours := int(remaining.Hours())
-		return time.Duration(hours) * time.Hour + "."
+		return (time.Duration(hours) * time.Hour).String()
 	}
 
 	return remaining.Round(time.Second).String()
