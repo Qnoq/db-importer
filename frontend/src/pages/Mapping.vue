@@ -95,9 +95,14 @@
                       <i class="pi pi-database text-purple-600"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                      <p class="font-semibold text-gray-900 truncate" :title="field.name">
-                        {{ field.name }}{{ field.nullable ? '' : ' *' }}
-                      </p>
+                      <div class="flex items-center gap-2">
+                        <p class="font-semibold text-gray-900 truncate" :title="field.name">
+                          {{ field.name }}{{ field.nullable ? '' : ' *' }}
+                        </p>
+                        <span v-if="isAutoIncrementField(field)" class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full whitespace-nowrap">
+                          AUTO
+                        </span>
+                      </div>
                       <p class="text-xs text-gray-500">
                         {{ field.type }}
                       </p>
@@ -573,6 +578,26 @@ function calculateSimilarity(str1: string, str2: string): number {
 }
 
 /**
+ * Check if a field is likely an auto-increment ID field
+ */
+function isAutoIncrementField(field: Field): boolean {
+  const nameLower = field.name.toLowerCase()
+  const typeLower = field.type.toLowerCase()
+
+  // Check if it's an integer type
+  const isIntType = typeLower.includes('int') || typeLower.includes('serial')
+
+  // Check if name suggests it's an ID
+  const isIdName = nameLower === 'id' ||
+                   nameLower.endsWith('_id') ||
+                   nameLower.endsWith('id') ||
+                   nameLower.startsWith('id_')
+
+  // Auto-increment fields are typically NOT NULL integer IDs
+  return isIntType && isIdName && !field.nullable
+}
+
+/**
  * Auto-map columns with Levenshtein
  */
 function autoMap() {
@@ -586,6 +611,11 @@ function autoMap() {
     let bestScore = 0
 
     for (const field of store.selectedTable?.fields || []) {
+      // Skip auto-increment ID fields - they shouldn't be mapped
+      if (isAutoIncrementField(field)) {
+        continue
+      }
+
       const normalizedField = field.name.toLowerCase().trim().replace(/[_\s-]/g, '')
 
       let score = 0
@@ -905,6 +935,11 @@ const validationErrors = computed(() => {
   if (!store.selectedTable) return errors
 
   for (const field of store.selectedTable.fields) {
+    // Skip auto-increment ID fields - they don't need to be mapped
+    if (isAutoIncrementField(field)) {
+      continue
+    }
+
     if (!field.nullable) {
       const isMapped = Object.values(localMapping.value).includes(field.name)
       if (!isMapped) {
