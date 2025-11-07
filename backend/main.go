@@ -19,9 +19,9 @@ type ParseSchemaResponse struct {
 }
 
 type GenerateSQLRequest struct {
-	Table   string              `json:"table"`
-	Mapping map[string]string   `json:"mapping"`
-	Rows    [][]interface{}     `json:"rows"`
+	Table   string                `json:"table"`
+	Mapping map[string]string     `json:"mapping"`
+	Rows    [][]interface{}       `json:"rows"`
 	Fields  []generator.FieldInfo `json:"fields"`
 }
 
@@ -296,10 +296,10 @@ func main() {
 	logger.Init(appConfig.EnableDebugLog)
 
 	logger.Info("Starting DB Importer API", map[string]interface{}{
-		"port":              appConfig.Port,
-		"allowedOrigins":    appConfig.AllowedOrigins,
-		"maxUploadSize":     appConfig.MaxUploadSize,
-		"rateLimitEnabled":  appConfig.RateLimitEnabled,
+		"port":             appConfig.Port,
+		"allowedOrigins":   appConfig.AllowedOrigins,
+		"maxUploadSize":    appConfig.MaxUploadSize,
+		"rateLimitEnabled": appConfig.RateLimitEnabled,
 	})
 
 	// Initialize rate limiter

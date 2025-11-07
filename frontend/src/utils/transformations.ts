@@ -17,6 +17,7 @@ export type TransformationType =
   | 'toBoolean'
   | 'toNumber'
   | 'formatDate'
+  | 'excelDate'
 
 export interface Transformation {
   type: TransformationType
@@ -171,6 +172,21 @@ export const transformations: Record<TransformationType, Transformation> = {
       const result = date ? formatDateISO(date) : val
       return `"${val}" → "${result}"`
     }
+  },
+
+  excelDate: {
+    type: 'excelDate',
+    label: 'Excel Date',
+    description: 'Convert Excel serial date number to YYYY-MM-DD HH:MM:SS',
+    apply: (val) => {
+      const date = parseExcelDate(val)
+      return date ? formatDateTimeISO(date) : val
+    },
+    preview: (val) => {
+      const date = parseExcelDate(val)
+      const result = date ? formatDateTimeISO(date) : val
+      return `${val} → "${result}"`
+    }
   }
 }
 
@@ -225,6 +241,57 @@ export function formatDateISO(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
+}
+
+/**
+ * Format date and time as ISO (YYYY-MM-DD HH:MM:SS)
+ */
+export function formatDateTimeISO(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
+/**
+ * Parse Excel serial date number to JavaScript Date
+ * Excel stores dates as numbers where:
+ * - Integer part = days since January 1, 1900
+ * - Decimal part = fraction of day (time)
+ * Note: Excel incorrectly treats 1900 as a leap year, so we need to account for that
+ */
+export function parseExcelDate(value: unknown): Date | null {
+  if (value === null || value === undefined) return null
+
+  // Convert to number
+  const num = typeof value === 'number' ? value : parseFloat(String(value))
+
+  // Check if it's a valid Excel date number (between 1 and ~50000 for reasonable dates)
+  if (isNaN(num) || num < 1 || num > 100000) return null
+
+  // Excel epoch is January 1, 1900 (but Excel thinks 1900 was a leap year)
+  // JavaScript Date uses milliseconds since January 1, 1970
+  // Excel serial 1 = January 1, 1900
+  // Excel serial 25569 = January 1, 1970 (Unix epoch)
+
+  // Account for Excel's leap year bug (it thinks Feb 29, 1900 existed)
+  const excelEpoch = new Date(1900, 0, 1)
+  const daysOffset = num > 60 ? num - 1 : num // Adjust for Excel's 1900 leap year bug
+
+  // Calculate milliseconds
+  const millisecondsPerDay = 24 * 60 * 60 * 1000
+  const excelEpochMs = excelEpoch.getTime()
+  const dateMs = excelEpochMs + (daysOffset - 1) * millisecondsPerDay
+
+  const date = new Date(dateMs)
+
+  // Validate the result
+  if (isNaN(date.getTime())) return null
+
+  return date
 }
 
 /**
@@ -290,6 +357,16 @@ export function suggestTransformations(
   }
 
   if (fieldTypeLower.includes('date') || fieldTypeLower.includes('time')) {
+    // Check if data looks like Excel serial dates (numbers between 1 and 100000)
+    const hasExcelDates = sample.some(v => {
+      const num = typeof v === 'number' ? v : parseFloat(String(v))
+      return !isNaN(num) && num >= 1 && num < 100000
+    })
+
+    if (hasExcelDates) {
+      suggestions.push('excelDate')
+    }
+
     suggestions.push('formatDate')
   }
 

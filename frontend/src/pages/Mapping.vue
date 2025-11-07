@@ -79,25 +79,27 @@
 
           <div class="space-y-3">
             <div
-              v-for="(header, index) in store.excelHeaders"
+              v-for="(field, index) in store.selectedTable?.fields"
               :key="index"
               class="bg-white border-2 rounded-lg p-4 hover:border-blue-300 transition-all"
-              :class="localMapping[header] ? 'border-green-300 bg-green-50' : 'border-gray-200'"
+              :class="getMappedExcelColumn(field.name) ? 'border-green-300 bg-green-50' : 'border-gray-200'"
             >
               <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                <!-- Excel Column (Source) -->
+                <!-- DB Field (Target) -->
                 <div class="md:col-span-3">
                   <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-                    Excel Column
+                    Database Field
                   </label>
                   <div class="flex items-center gap-2">
-                    <div class="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <i class="pi pi-file-excel text-blue-600"></i>
+                    <div class="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <i class="pi pi-database text-purple-600"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                      <p class="font-semibold text-gray-900 truncate" :title="header">{{ header }}</p>
+                      <p class="font-semibold text-gray-900 truncate" :title="field.name">
+                        {{ field.name }}{{ field.nullable ? '' : ' *' }}
+                      </p>
                       <p class="text-xs text-gray-500">
-                        Sample: {{ getSampleValue(header) }}
+                        {{ field.type }}
                       </p>
                     </div>
                   </div>
@@ -105,28 +107,31 @@
 
                 <!-- Arrow -->
                 <div class="md:col-span-1 flex justify-center">
-                  <i class="pi pi-arrow-right text-2xl" :class="localMapping[header] ? 'text-green-600' : 'text-gray-300'"></i>
+                  <i class="pi pi-arrow-left text-2xl" :class="getMappedExcelColumn(field.name) ? 'text-green-600' : 'text-gray-300'"></i>
                 </div>
 
-                <!-- DB Column (Target) -->
+                <!-- Excel Column (Source) -->
                 <div class="md:col-span-4">
                   <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-                    Database Field
+                    Excel Column
                   </label>
                   <select
-                    v-model="localMapping[header]"
-                    @change="onMappingChange"
+                    :value="getMappedExcelColumn(field.name)"
+                    @change="onFieldMappingChange(field.name, ($event.target as HTMLSelectElement).value)"
                     class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
                   >
-                    <option value="">-- Skip this column --</option>
+                    <option value="">-- Skip this field --</option>
                     <option
-                      v-for="field in store.selectedTable?.fields"
-                      :key="field.name"
-                      :value="field.name"
+                      v-for="excelHeader in store.excelHeaders"
+                      :key="excelHeader"
+                      :value="excelHeader"
                     >
-                      {{ field.name }} ({{ field.type }}){{ field.nullable ? '' : ' *' }}
+                      {{ excelHeader }}
                     </option>
                   </select>
+                  <p v-if="getMappedExcelColumn(field.name)" class="text-xs text-gray-500 mt-1">
+                    Sample: {{ getSampleValue(getMappedExcelColumn(field.name)!) }}
+                  </p>
                 </div>
 
                 <!-- Transformation -->
@@ -135,13 +140,13 @@
                     Transformation
                   </label>
                   <select
-                    v-model="columnTransformations[header]"
-                    @change="onTransformationChange(header)"
-                    :disabled="!localMapping[header]"
+                    v-model="fieldTransformations[field.name]"
+                    @change="onTransformationChange(field.name)"
+                    :disabled="!getMappedExcelColumn(field.name)"
                     class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
                   >
                     <option
-                      v-for="transType in getTransformationOptions(header)"
+                      v-for="transType in getTransformationOptionsForField(field)"
                       :key="transType"
                       :value="transType"
                     >
@@ -153,8 +158,8 @@
                 <!-- Actions -->
                 <div class="md:col-span-1 flex gap-2 justify-end items-center">
                   <button
-                    v-if="columnTransformations[header] && columnTransformations[header] !== 'none' && localMapping[header]"
-                    @click="showTransformPreview(header)"
+                    v-if="fieldTransformations[field.name] && fieldTransformations[field.name] !== 'none' && getMappedExcelColumn(field.name)"
+                    @click="showTransformPreviewForField(field.name)"
                     class="flex items-center justify-center w-8 h-8 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                     title="Preview transformation"
                   >
@@ -170,8 +175,8 @@
                   <label class="flex items-center gap-1.5 cursor-pointer group px-2 py-1.5 hover:bg-gray-100 rounded-lg transition h-8">
                     <input
                       type="checkbox"
-                      :checked="!localMapping[header] || localMapping[header] === ''"
-                      @change="toggleSkip(header)"
+                      :checked="!getMappedExcelColumn(field.name)"
+                      @change="toggleSkipField(field.name)"
                       class="w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-orange-500 cursor-pointer"
                     />
                     <span class="text-xs text-gray-600 group-hover:text-gray-900 font-medium whitespace-nowrap">Skip</span>
@@ -432,10 +437,10 @@
 
         <div class="mb-4">
           <p class="text-sm text-gray-600">
-            Transformation: <strong>{{ transformations[columnTransformations[transformPreviewColumn]]?.label }}</strong>
+            Transformation: <strong>{{ transformations[fieldTransformations[transformPreviewColumn]]?.label }}</strong>
           </p>
           <p class="text-sm text-gray-600">
-            {{ transformations[columnTransformations[transformPreviewColumn]]?.description }}
+            {{ transformations[fieldTransformations[transformPreviewColumn]]?.description }}
           </p>
         </div>
 
@@ -480,10 +485,11 @@ import {
 const router = useRouter()
 const store = useMappingStore()
 
-// Mapping state
+// Mapping state (Excel column → DB field)
 const localMapping = ref<Record<string, string>>({})
-const columnTransformations = ref<Record<string, TransformationType>>({})
-const previousTransformations = ref<Record<string, TransformationType>>({}) // Store previous transformations when skipping
+// Field transformations (DB field → transformation type)
+const fieldTransformations = ref<Record<string, TransformationType>>({})
+const previousFieldTransformations = ref<Record<string, TransformationType>>({}) // Store previous transformations when skipping
 
 // UI state
 const loading = ref(false)
@@ -608,20 +614,18 @@ function autoMap() {
       const columnIndex = store.excelHeaders.indexOf(header)
       const columnData = store.excelData.map(row => row[columnIndex])
 
-      // Suggest transformations
+      // Suggest transformations (store by field name, not Excel column)
       const suggestions = suggestTransformations(columnData, bestMatch.type)
       if (suggestions.length > 1) {
-        transformsToApply[header] = suggestions[1] // First non-'none' suggestion
+        transformsToApply[bestMatch.name] = suggestions[1] // First non-'none' suggestion
       } else {
-        transformsToApply[header] = 'none'
+        transformsToApply[bestMatch.name] = 'none'
       }
-    } else {
-      transformsToApply[header] = 'none'
     }
   }
 
   localMapping.value = mapping
-  columnTransformations.value = transformsToApply
+  fieldTransformations.value = transformsToApply
   updateMapping()
 }
 
@@ -644,6 +648,121 @@ function clearAllMappings() {
 }
 
 /**
+ * Get which Excel column is mapped to a database field
+ */
+function getMappedExcelColumn(fieldName: string): string | null {
+  for (const [excelCol, dbField] of Object.entries(localMapping.value)) {
+    if (dbField === fieldName) {
+      return excelCol
+    }
+  }
+  return null
+}
+
+/**
+ * Handle field mapping change
+ */
+function onFieldMappingChange(fieldName: string, excelColumn: string) {
+  // Remove any existing mapping to this field
+  for (const [excelCol, dbField] of Object.entries(localMapping.value)) {
+    if (dbField === fieldName) {
+      delete localMapping.value[excelCol]
+    }
+  }
+
+  // Add new mapping if Excel column selected
+  if (excelColumn) {
+    // Remove any existing mapping for this Excel column (prevent duplicate mappings)
+    delete localMapping.value[excelColumn]
+    localMapping.value[excelColumn] = fieldName
+
+    // Suggest transformation
+    const field = store.selectedTable?.fields.find(f => f.name === fieldName)
+    if (field) {
+      const columnIndex = store.excelHeaders.indexOf(excelColumn)
+      const columnData = store.excelData.map(row => row[columnIndex])
+      const suggestions = suggestTransformations(columnData, field.type)
+      fieldTransformations.value[fieldName] = suggestions[1] || 'none'
+    }
+  } else {
+    fieldTransformations.value[fieldName] = 'none'
+  }
+
+  onMappingChange()
+}
+
+/**
+ * Toggle skip for a field
+ */
+function toggleSkipField(fieldName: string) {
+  const mappedExcelCol = getMappedExcelColumn(fieldName)
+
+  if (mappedExcelCol) {
+    // Currently mapped, skip it - save transformation before clearing
+    previousFieldTransformations.value[fieldName] = fieldTransformations.value[fieldName] || 'none'
+    delete localMapping.value[mappedExcelCol]
+    fieldTransformations.value[fieldName] = 'none'
+  } else {
+    // Currently skipped, try to auto-map it
+    const field = store.selectedTable?.fields.find(f => f.name === fieldName)
+    if (!field) return
+
+    const normalizedField = fieldName.toLowerCase().trim().replace(/[_\s-]/g, '')
+    let bestMatch: string | null = null
+    let bestScore = 0
+
+    for (const excelHeader of store.excelHeaders) {
+      // Skip if this Excel column is already mapped
+      if (localMapping.value[excelHeader]) continue
+
+      const normalizedHeader = excelHeader.toLowerCase().trim().replace(/[_\s-]/g, '')
+      const similarity = calculateSimilarity(normalizedHeader, normalizedField)
+
+      if (similarity > bestScore) {
+        bestScore = similarity
+        bestMatch = excelHeader
+      }
+    }
+
+    if (bestMatch && bestScore > 0.6) {
+      localMapping.value[bestMatch] = fieldName
+
+      // Restore previous transformation if it exists, otherwise suggest one
+      if (previousFieldTransformations.value[fieldName] && previousFieldTransformations.value[fieldName] !== 'none') {
+        fieldTransformations.value[fieldName] = previousFieldTransformations.value[fieldName]
+      } else {
+        const columnIndex = store.excelHeaders.indexOf(bestMatch)
+        const columnData = store.excelData.map(row => row[columnIndex])
+        const suggestions = suggestTransformations(columnData, field.type)
+        fieldTransformations.value[fieldName] = suggestions[1] || 'none'
+      }
+    }
+  }
+
+  onMappingChange()
+}
+
+/**
+ * Get transformation options for a field
+ */
+function getTransformationOptionsForField(field: Field): TransformationType[] {
+  const excelCol = getMappedExcelColumn(field.name)
+  if (!excelCol) return ['none']
+
+  const columnIndex = store.excelHeaders.indexOf(excelCol)
+  const columnData = store.excelData.map(row => row[columnIndex])
+
+  return suggestTransformations(columnData, field.type)
+}
+
+/**
+ * Show transformation preview for a field
+ */
+function showTransformPreviewForField(fieldName: string) {
+  transformPreviewColumn.value = fieldName
+}
+
+/**
  * Get sample value from first row
  */
 function getSampleValue(header: string): string {
@@ -658,51 +777,6 @@ function getSampleValue(header: string): string {
 }
 
 /**
- * Toggle skip for a column
- */
-function toggleSkip(header: string) {
-  if (localMapping.value[header]) {
-    // Currently mapped, skip it - save transformation before clearing
-    previousTransformations.value[header] = columnTransformations.value[header] || 'none'
-    localMapping.value[header] = ''
-    columnTransformations.value[header] = 'none'
-  } else {
-    // Currently skipped, restore it
-    // Try to auto-map it
-    const normalizedHeader = header.toLowerCase().trim().replace(/[_\s-]/g, '')
-    let bestMatch: Field | null = null
-    let bestScore = 0
-
-    for (const field of store.selectedTable?.fields || []) {
-      const normalizedField = field.name.toLowerCase().trim().replace(/[_\s-]/g, '')
-      const similarity = calculateSimilarity(normalizedHeader, normalizedField)
-
-      if (similarity > bestScore) {
-        bestScore = similarity
-        bestMatch = field
-      }
-    }
-
-    if (bestMatch && bestScore > 0.6) {
-      localMapping.value[header] = bestMatch.name
-
-      // Restore previous transformation if it exists, otherwise suggest one
-      if (previousTransformations.value[header] && previousTransformations.value[header] !== 'none') {
-        columnTransformations.value[header] = previousTransformations.value[header]
-      } else {
-        // Suggest transformation based on field type
-        const columnIndex = store.excelHeaders.indexOf(header)
-        const columnData = store.excelData.map(row => row[columnIndex])
-        const suggestions = suggestTransformations(columnData, bestMatch.type)
-        columnTransformations.value[header] = suggestions[1] || 'none'
-      }
-    }
-  }
-
-  onMappingChange()
-}
-
-/**
  * Handle mapping change
  */
 function onMappingChange() {
@@ -713,24 +787,8 @@ function onMappingChange() {
 /**
  * Handle transformation change
  */
-function onTransformationChange(header: string) {
+function onTransformationChange(fieldName: string) {
   validateData()
-}
-
-/**
- * Get transformation options for a column
- */
-function getTransformationOptions(header: string): TransformationType[] {
-  const dbColumn = localMapping.value[header]
-  if (!dbColumn) return ['none']
-
-  const field = store.selectedTable?.fields.find(f => f.name === dbColumn)
-  if (!field) return ['none']
-
-  const columnIndex = store.excelHeaders.indexOf(header)
-  const columnData = store.excelData.map(row => row[columnIndex])
-
-  return suggestTransformations(columnData, field.type)
 }
 
 /**
@@ -757,9 +815,12 @@ function validateData() {
   const transformedData = store.excelData.map(row => {
     const newRow = [...row]
     store.excelHeaders.forEach((header, idx) => {
-      const transform = columnTransformations.value[header]
-      if (transform && transform !== 'none') {
-        newRow[idx] = applyTransformation(row[idx], transform)
+      const dbField = localMapping.value[header]
+      if (dbField) {
+        const transform = fieldTransformations.value[dbField]
+        if (transform && transform !== 'none') {
+          newRow[idx] = applyTransformation(row[idx], transform)
+        }
       }
     })
     return newRow
@@ -815,9 +876,12 @@ const previewData = computed(() => {
   return store.excelData.slice(0, 20).map(row => {
     const newRow = [...row]
     store.excelHeaders.forEach((header, idx) => {
-      const transform = columnTransformations.value[header]
-      if (transform && transform !== 'none') {
-        newRow[idx] = applyTransformation(row[idx], transform)
+      const dbField = localMapping.value[header]
+      if (dbField) {
+        const transform = fieldTransformations.value[dbField]
+        if (transform && transform !== 'none') {
+          newRow[idx] = applyTransformation(row[idx], transform)
+        }
       }
     })
     return newRow
@@ -869,7 +933,7 @@ function saveTemplate() {
     newTemplateName.value.trim(),
     store.selectedTable.name,
     localMapping.value,
-    columnTransformations.value,
+    fieldTransformations.value,
     newTemplateDescription.value.trim() || undefined
   )
 
@@ -885,7 +949,7 @@ function saveTemplate() {
 function applyTemplate(template: MappingTemplate) {
   localMapping.value = { ...template.mapping }
   if (template.transformations) {
-    columnTransformations.value = { ...template.transformations }
+    fieldTransformations.value = { ...template.transformations }
   }
   updateMapping()
   validateData()
@@ -943,18 +1007,14 @@ function importTemplatesFile(event: Event) {
 }
 
 /**
- * Show transformation preview
- */
-function showTransformPreview(header: string) {
-  transformPreviewColumn.value = header
-}
-
-/**
  * Get transformation preview data
  */
-function getTransformPreview(header: string) {
-  const columnIndex = store.excelHeaders.indexOf(header)
-  const transform = columnTransformations.value[header]
+function getTransformPreview(fieldName: string) {
+  const excelCol = getMappedExcelColumn(fieldName)
+  if (!excelCol) return []
+
+  const columnIndex = store.excelHeaders.indexOf(excelCol)
+  const transform = fieldTransformations.value[fieldName]
 
   return store.excelData.slice(0, 10).map(row => ({
     original: formatCellValue(row[columnIndex]),
@@ -991,9 +1051,12 @@ async function generateSQL() {
     const transformedData = store.excelData.map(row => {
       const newRow = [...row]
       store.excelHeaders.forEach((header, idx) => {
-        const transform = columnTransformations.value[header]
-        if (transform && transform !== 'none') {
-          newRow[idx] = applyTransformation(row[idx], transform)
+        const dbField = localMapping.value[header]
+        if (dbField) {
+          const transform = fieldTransformations.value[dbField]
+          if (transform && transform !== 'none') {
+            newRow[idx] = applyTransformation(row[idx], transform)
+          }
         }
       })
       return newRow
