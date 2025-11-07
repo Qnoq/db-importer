@@ -316,12 +316,14 @@ CREATE TABLE import_stats (
 
 ## Plan de Migration (4 Sprints)
 
-### Sprint 1 : Fondations (2 semaines)
-- [ ] Setup PostgreSQL (docker-compose)
-- [ ] Migrations initiales
-- [ ] Authentification JWT complète
-- [ ] Adaptation frontend mode hybride
-- [ ] Tests auth
+### Sprint 1 : Fondations (2 semaines) ✅ COMPLÉTÉ
+- [x] Setup PostgreSQL (docker-compose)
+- [x] Migrations initiales (users + refresh_tokens)
+- [x] Authentification JWT complète (backend)
+- [x] Adaptation frontend mode hybride (Login/Register pages + authStore)
+- [x] Rate limiting différencié (guest: 3/jour, auth: illimité)
+- [x] Navigation guards et auto-refresh des tokens
+- [x] Documentation complète (docs/AUTHENTICATION.md)
 
 ### Sprint 2 : Historique (2 semaines)
 - [ ] Modèle + endpoints imports
