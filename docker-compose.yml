@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   backend:
     build:
@@ -30,11 +28,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8080}
     container_name: db-importer-frontend
     ports:
       - "8081:8080"
-    environment:
-      - VITE_API_URL=${VITE_API_URL:-http://localhost:8080}
     networks:
       - db-importer-network
     depends_on:
