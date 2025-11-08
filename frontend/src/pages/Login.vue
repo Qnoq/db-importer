@@ -62,10 +62,10 @@
 
           <!-- Remember Me -->
           <div class="flex items-center justify-between">
-            <div class="flex items-center">
+            <div class="flex items-center gap-2">
               <Checkbox v-model="rememberMe" inputId="remember" :binary="true" />
-              <label for="remember" class="ml-2 text-sm text-gray-600">
-                Remember me
+              <label for="remember" class="text-sm text-gray-600 cursor-pointer select-none">
+                Remember me (7 days)
               </label>
             </div>
           </div>
@@ -177,7 +177,7 @@ const handleLogin = async () => {
   }
 
   try {
-    await authStore.login(email.value, password.value)
+    await authStore.login(email.value, password.value, rememberMe.value)
 
     // Redirect to the page they were trying to access, or home
     const redirect = route.query.redirect as string || '/'
