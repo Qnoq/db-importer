@@ -35,6 +35,9 @@ WORKDIR /app
 # Copy the binary from builder
 COPY --from=builder /app/db-importer /app/db-importer
 
+# Copy migrations directory
+COPY --from=builder /app/migrations /app/migrations
+
 # Create non-root user for security
 RUN addgroup -g 1000 appuser && \
     adduser -D -u 1000 -G appuser appuser && \
