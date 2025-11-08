@@ -80,3 +80,4 @@ services:
 networks:
   db-importer-network:
     driver: bridge
+    enable_ipv6: false
