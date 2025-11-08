@@ -9,6 +9,8 @@ backend/*.test
 backend/*.out
 backend/go.work
 backend/vendor/
+backend/tmp/
+backend/.air.toml
 
 # Frontend Node
 frontend/node_modules/
