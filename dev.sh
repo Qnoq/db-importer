@@ -57,14 +57,14 @@ fi
 # Vérifier que Air est installé
 if ! command -v air &> /dev/null; then
     echo -e "${YELLOW}⚠️  Air n'est pas installé. Installation...${NC}"
-    go install github.com/cosmtrek/air@latest
+    go install github.com/air-verse/air@latest
 
     # Ajouter GOPATH/bin au PATH si nécessaire
     export PATH=$PATH:$(go env GOPATH)/bin
 
     if ! command -v air &> /dev/null; then
         echo -e "${RED}❌ Impossible d'installer Air${NC}"
-        echo "Exécute manuellement : go install github.com/cosmtrek/air@latest"
+        echo "Exécute manuellement : go install github.com/air-verse/air@latest"
         echo "Puis ajoute $(go env GOPATH)/bin à ton PATH"
         exit 1
     fi
