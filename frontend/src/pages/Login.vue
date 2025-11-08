@@ -64,7 +64,7 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <Checkbox v-model="rememberMe" inputId="remember" :binary="true" />
-              <label for="remember" class="text-sm text-gray-600 cursor-pointer select-none">
+              <label for="remember" class="text-sm text-gray-600 select-none">
                 Remember me (7 days)
               </label>
             </div>
@@ -234,19 +234,6 @@ const handleContinueAsGuest = () => {
   border-color: #ef4444;
 }
 
-:deep(.p-checkbox) {
-  border: 2px solid #d1d5db;
-  border-radius: 4px;
-}
-
-:deep(.p-checkbox:hover) {
-  border-color: #9ca3af;
-}
-
-:deep(.p-checkbox.p-highlight) {
-  background: #3b82f6;
-  border-color: #3b82f6;
-}
 
 :deep(.p-button) {
   border-radius: 8px;
