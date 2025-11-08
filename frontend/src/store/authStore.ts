@@ -21,6 +21,7 @@ export interface AuthState {
   tokens: AuthTokens | null
   isAuthenticated: boolean
   isGuest: boolean
+  rememberMe: boolean
   loading: boolean
   error: string | null
 }
@@ -28,10 +29,33 @@ export interface AuthState {
 const STORAGE_KEY = 'db-importer-auth'
 const STORAGE_VERSION = '1.0'
 
-// Load auth state from localStorage
+// Determine which storage to use
+function getStorage(): Storage {
+  // Try to load from both storages and return the one that has data
+  const localData = localStorage.getItem(STORAGE_KEY)
+  const sessionData = sessionStorage.getItem(STORAGE_KEY)
+
+  // If both have data, prefer sessionStorage (more restrictive)
+  if (sessionData) return sessionStorage
+  if (localData) return localStorage
+
+  // Default to sessionStorage if no data exists yet
+  return sessionStorage
+}
+
+// Load auth state from storage (checks both localStorage and sessionStorage)
 function loadFromStorage(): Partial<AuthState> | null {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
+    // Check sessionStorage first (takes precedence)
+    let stored = sessionStorage.getItem(STORAGE_KEY)
+    let storage: Storage = sessionStorage
+
+    // If not in session, check localStorage
+    if (!stored) {
+      stored = localStorage.getItem(STORAGE_KEY)
+      storage = localStorage
+    }
+
     if (!stored) return null
 
     const parsed = JSON.parse(stored)
@@ -40,6 +64,7 @@ function loadFromStorage(): Partial<AuthState> | null {
     if (parsed.version !== STORAGE_VERSION) {
       console.warn('Auth storage version mismatch, clearing old data')
       localStorage.removeItem(STORAGE_KEY)
+      sessionStorage.removeItem(STORAGE_KEY)
       return null
     }
 
@@ -50,11 +75,13 @@ function loadFromStorage(): Partial<AuthState> | null {
       if (!state.user || !state.user.id || !state.user.email) {
         console.warn('Auth storage corrupted: missing user data, clearing')
         localStorage.removeItem(STORAGE_KEY)
+        sessionStorage.removeItem(STORAGE_KEY)
         return null
       }
       if (!state.tokens.accessToken || !state.tokens.refreshToken || !state.tokens.expiresAt) {
         console.warn('Auth storage corrupted: incomplete token data, clearing')
         localStorage.removeItem(STORAGE_KEY)
+        sessionStorage.removeItem(STORAGE_KEY)
         return null
       }
     }
@@ -67,12 +94,13 @@ function loadFromStorage(): Partial<AuthState> | null {
   } catch (error) {
     console.error('Failed to load auth state from storage:', error)
     localStorage.removeItem(STORAGE_KEY)
+    sessionStorage.removeItem(STORAGE_KEY)
     return null
   }
 }
 
-// Save auth state to localStorage
-function saveToStorage(state: AuthState): void {
+// Save auth state to storage
+function saveToStorage(state: AuthState, rememberMe: boolean = false): void {
   try {
     const toStore = {
       version: STORAGE_VERSION,
@@ -81,10 +109,25 @@ function saveToStorage(state: AuthState): void {
         user: state.user,
         tokens: state.tokens,
         isAuthenticated: state.isAuthenticated,
-        isGuest: state.isGuest
+        isGuest: state.isGuest,
+        rememberMe: rememberMe
       }
     }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore))
+
+    const serialized = JSON.stringify(toStore)
+
+    // Clear both storages first
+    localStorage.removeItem(STORAGE_KEY)
+    sessionStorage.removeItem(STORAGE_KEY)
+
+    // Save to the appropriate storage
+    if (rememberMe) {
+      localStorage.setItem(STORAGE_KEY, serialized)
+      console.log('Auth saved to localStorage (remember me enabled)')
+    } else {
+      sessionStorage.setItem(STORAGE_KEY, serialized)
+      console.log('Auth saved to sessionStorage (remember me disabled)')
+    }
   } catch (error) {
     console.error('Failed to save auth state to storage:', error)
   }
@@ -102,6 +145,7 @@ export const useAuthStore = defineStore('auth', {
         tokens: stored.tokens,
         isAuthenticated: true,
         isGuest: false,
+        rememberMe: stored.rememberMe || false,
         loading: false,
         error: null
       }
@@ -113,6 +157,7 @@ export const useAuthStore = defineStore('auth', {
       tokens: null,
       isAuthenticated: false,
       isGuest: true,
+      rememberMe: false,
       loading: false,
       error: null
     }
@@ -144,8 +189,8 @@ export const useAuthStore = defineStore('auth', {
 
         const data = await response.json()
 
-        // After successful registration, log in automatically
-        await this.login(email, password)
+        // After successful registration, log in automatically (with remember me enabled by default)
+        await this.login(email, password, true)
 
         return data
       } catch (error: any) {
@@ -156,7 +201,7 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async login(email: string, password: string) {
+    async login(email: string, password: string, rememberMe: boolean = false) {
       this.loading = true
       this.error = null
 
@@ -187,6 +232,7 @@ export const useAuthStore = defineStore('auth', {
         }
         this.isAuthenticated = true
         this.isGuest = false
+        this.rememberMe = rememberMe
 
         this.persist()
 
@@ -287,12 +333,13 @@ export const useAuthStore = defineStore('auth', {
     },
 
     persist() {
-      saveToStorage(this.$state)
+      saveToStorage(this.$state, this.rememberMe)
     },
 
     clearStorage() {
       try {
         localStorage.removeItem(STORAGE_KEY)
+        sessionStorage.removeItem(STORAGE_KEY)
       } catch (error) {
         console.error('Failed to clear auth storage:', error)
       }
