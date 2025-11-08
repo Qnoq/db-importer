@@ -74,18 +74,22 @@ fi
 # Créer les liens symboliques .env si nécessaire
 echo -e "${BLUE}📝 Configuration des variables d'environnement...${NC}"
 
-if [ ! -f backend/.env ]; then
+if [ ! -e backend/.env ]; then
     echo -e "${YELLOW}   Création du lien backend/.env → .env.local${NC}"
     cd backend
-    ln -s ../.env.local .env
+    ln -sf ../.env.local .env
     cd ..
+else
+    echo -e "${GREEN}   backend/.env déjà configuré${NC}"
 fi
 
-if [ ! -f frontend/.env ]; then
+if [ ! -e frontend/.env ]; then
     echo -e "${YELLOW}   Création du lien frontend/.env → .env.local${NC}"
     cd frontend
-    ln -s ../.env.local .env
+    ln -sf ../.env.local .env
     cd ..
+else
+    echo -e "${GREEN}   frontend/.env déjà configuré${NC}"
 fi
 
 echo -e "${GREEN}✅ Variables d'environnement configurées${NC}"
