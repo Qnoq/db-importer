@@ -315,7 +315,7 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 // runMigrations runs database migrations
 func runMigrations(databaseURL string) error {
 	m, err := migrate.New(
-		"file://migrations",
+		"file:///app/migrations",
 		databaseURL,
 	)
 	if err != nil {
