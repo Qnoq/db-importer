@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -39,6 +40,17 @@ func NewDB(cfg Config) (*DB, error) {
 	poolConfig.MinConns = int32(cfg.MaxIdleConns)
 	poolConfig.MaxConnLifetime = cfg.ConnMaxLifetime
 	poolConfig.MaxConnIdleTime = cfg.ConnMaxIdleTime
+
+	// Force IPv4 only by using a custom dialer
+	// This prevents connection failures on systems without IPv6 connectivity
+	poolConfig.ConnConfig.DialFunc = func(ctx context.Context, network, addr string) (net.Conn, error) {
+		// Force TCP IPv4 only
+		d := &net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}
+		return d.DialContext(ctx, "tcp4", addr)
+	}
 
 	// Create pgxpool connection
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
