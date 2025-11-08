@@ -22,6 +22,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/joho/godotenv"
 )
 
 // Response structures
@@ -331,6 +332,10 @@ func runMigrations(databaseURL string) error {
 }
 
 func main() {
+	// Load .env file (symlink to ../.env.local created by dev.sh)
+	// Ignore errors if .env doesn't exist (production might use env vars directly)
+	_ = godotenv.Load()
+
 	// Load configuration
 	appConfig = config.LoadConfig()
 
