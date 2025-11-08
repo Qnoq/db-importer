@@ -172,8 +172,12 @@ echo -e "${GREEN}🎯 Lancement des serveurs...${NC}"
 echo -e "${GREEN}================================${NC}"
 echo ""
 
+# Lire le port depuis .env.local
+BACKEND_PORT=$(grep -E "^PORT=" .env.local | cut -d '=' -f2)
+BACKEND_PORT=${BACKEND_PORT:-3000}
+
 # Lancer le backend avec Air
-echo -e "${BLUE}🔧 Backend (Go + Air)${NC} → http://localhost:8080"
+echo -e "${BLUE}🔧 Backend (Go + Air)${NC} → http://localhost:${BACKEND_PORT}"
 cd backend
 air > ../backend.log 2>&1 &
 BACKEND_PID=$!
@@ -196,7 +200,7 @@ echo -e "${GREEN}================================${NC}"
 echo ""
 echo -e "${BLUE}📍 URLs :${NC}"
 echo -e "   Frontend : ${GREEN}http://localhost:5173${NC}"
-echo -e "   Backend  : ${GREEN}http://localhost:8080${NC}"
+echo -e "   Backend  : ${GREEN}http://localhost:${BACKEND_PORT}${NC}"
 echo ""
 echo -e "${BLUE}📋 Logs :${NC}"
 echo -e "   Backend  : ${YELLOW}tail -f backend.log${NC}"
