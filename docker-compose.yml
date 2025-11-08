@@ -1,38 +1,16 @@
+# ===================================================================
+# Docker Compose - PRODUCTION ONLY
+# ===================================================================
+# This configuration is designed for production deployment on VPS
+# Database is hosted on Supabase (not in Docker)
+#
+# For local development, run backend and frontend natively:
+# - Backend: cd backend && go run main.go
+# - Frontend: cd frontend && npm run dev
+# See DEV.md for complete development setup instructions
+# ===================================================================
+
 services:
-  adminer:
-    image: adminer:latest
-    container_name: db-importer-adminer
-    ports:
-      - "8082:8080"
-    networks:
-      - db-importer-network
-    depends_on:
-      - postgres
-    restart: unless-stopped
-    environment:
-      - ADMINER_DEFAULT_SERVER=postgres
-
-  postgres:
-    image: postgres:15-alpine
-    container_name: db-importer-postgres
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=${DB_USER:-dbimporter}
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-dbimporter_password}
-      - POSTGRES_DB=${DB_NAME:-dbimporter}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - db-importer-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U dbimporter -d dbimporter"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
-
   backend:
     build:
       context: ./backend
@@ -41,27 +19,35 @@ services:
     ports:
       - "${PORT:-8080}:8080"
     environment:
+      # Server Configuration
       - PORT=${PORT:-8080}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
       - MAX_UPLOAD_SIZE=${MAX_UPLOAD_SIZE:-52428800}
       - DEBUG_LOG=${DEBUG_LOG:-false}
+
+      # Rate Limiting
       - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED:-true}
       - RATE_LIMIT_REQUESTS=${RATE_LIMIT_REQUESTS:-100}
       - RATE_LIMIT_WINDOW=${RATE_LIMIT_WINDOW:-60}
-      - DATABASE_URL=postgres://${DB_USER:-dbimporter}:${DB_PASSWORD:-dbimporter_password}@postgres:5432/${DB_NAME:-dbimporter}?sslmode=disable
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET:-change-this-secret-in-production-min-32-chars}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-change-this-refresh-secret-in-production-min-32-chars}
-      - JWT_ACCESS_EXPIRY=${JWT_ACCESS_EXPIRY:-15m}
-      - JWT_REFRESH_EXPIRY=${JWT_REFRESH_EXPIRY:-168h}
+
+      # Database - Supabase (loaded from .env.production)
+      - DATABASE_URL=${DATABASE_URL}
       - DB_MAX_OPEN_CONNS=${DB_MAX_OPEN_CONNS:-25}
       - DB_MAX_IDLE_CONNS=${DB_MAX_IDLE_CONNS:-5}
       - DB_CONN_MAX_LIFETIME=${DB_CONN_MAX_LIFETIME:-5m}
       - DB_CONN_MAX_IDLE_TIME=${DB_CONN_MAX_IDLE_TIME:-10m}
+
+      # JWT Configuration
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_ACCESS_EXPIRY=${JWT_ACCESS_EXPIRY:-15m}
+      - JWT_REFRESH_EXPIRY=${JWT_REFRESH_EXPIRY:-168h}
+
+      # Supabase (optional, if using Supabase client SDK)
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
     networks:
       - db-importer-network
-    depends_on:
-      postgres:
-        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
@@ -82,8 +68,7 @@ services:
     networks:
       - db-importer-network
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
@@ -95,6 +80,3 @@ services:
 networks:
   db-importer-network:
     driver: bridge
-
-volumes:
-  postgres-data:

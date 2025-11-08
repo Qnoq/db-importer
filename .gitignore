@@ -35,10 +35,23 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-# Environment
+# Environment variables (NEVER commit these!)
 .env
 .env.local
+.env.production
 .env.*.local
+backend/.env
+backend/.env.local
+backend/.env.production
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# Keep example files
+!.env.example
+!.env.production.example
+!backend/.env.example
+!frontend/.env.example
 
 # Deployment
 deploy/config.sh
