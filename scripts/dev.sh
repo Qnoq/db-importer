@@ -9,11 +9,15 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
+# Get the script directory and project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 # Configuration
-BACKEND_DIR="backend"
-FRONTEND_DIR="frontend"
-BACKEND_LOG="backend.log"
-FRONTEND_LOG="frontend.log"
+BACKEND_DIR="$PROJECT_ROOT/backend"
+FRONTEND_DIR="$PROJECT_ROOT/frontend"
+BACKEND_LOG="$PROJECT_ROOT/backend.log"
+FRONTEND_LOG="$PROJECT_ROOT/frontend.log"
 
 # PID tracking
 BACKEND_PID=""
@@ -82,12 +86,12 @@ setup_env() {
     echo -e "${YELLOW}🔧 Setting up environment...${NC}"
 
     # Check for .env file
-    if [ ! -f ".env.local" ] && [ ! -f "$BACKEND_DIR/.env" ]; then
+    if [ ! -f "$PROJECT_ROOT/.env.local" ] && [ ! -f "$BACKEND_DIR/.env" ]; then
         echo -e "${YELLOW}⚠️  No .env file found${NC}"
 
         if [ -f "$BACKEND_DIR/.env.example" ]; then
             echo -e "${CYAN}Creating .env.local from .env.example...${NC}"
-            cp "$BACKEND_DIR/.env.example" ".env.local"
+            cp "$BACKEND_DIR/.env.example" "$PROJECT_ROOT/.env.local"
 
             # Create backend symlink
             if [ ! -f "$BACKEND_DIR/.env" ]; then
@@ -103,7 +107,7 @@ setup_env() {
         echo -e "${GREEN}✓ Environment file exists${NC}"
 
         # Create symlink if needed
-        if [ ! -f "$BACKEND_DIR/.env" ] && [ -f ".env.local" ]; then
+        if [ ! -f "$BACKEND_DIR/.env" ] && [ -f "$PROJECT_ROOT/.env.local" ]; then
             ln -sf ../.env.local "$BACKEND_DIR/.env"
             echo -e "${GREEN}✓ Created backend .env symlink${NC}"
         fi
@@ -130,14 +134,14 @@ start_backend() {
 
     cd "$BACKEND_DIR"
 
-    if [ "$USE_AIR" = true ] && [ -f ".air.toml" ]; then
+    if [ "$USE_AIR" = true ] && [ -f "$BACKEND_DIR/.air.toml" ]; then
         # Use Air for hot reload
-        air > "../$BACKEND_LOG" 2>&1 &
+        air > "$BACKEND_LOG" 2>&1 &
         BACKEND_PID=$!
         echo -e "${GREEN}✓ Backend started with Air (hot reload enabled) [PID: $BACKEND_PID]${NC}"
     elif [ "$USE_AIR" = true ]; then
         # Air is installed but no config, create one
-        cat > .air.toml << 'EOF'
+        cat > "$BACKEND_DIR/.air.toml" << 'EOF'
 root = "."
 tmp_dir = "tmp"
 
@@ -162,17 +166,17 @@ tmp_dir = "tmp"
   build = "yellow"
   runner = "green"
 EOF
-        air > "../$BACKEND_LOG" 2>&1 &
+        air > "$BACKEND_LOG" 2>&1 &
         BACKEND_PID=$!
         echo -e "${GREEN}✓ Backend started with Air (hot reload enabled) [PID: $BACKEND_PID]${NC}"
     else
         # Use go run (no hot reload)
-        go run ./cmd/server > "../$BACKEND_LOG" 2>&1 &
+        go run ./cmd/server > "$BACKEND_LOG" 2>&1 &
         BACKEND_PID=$!
         echo -e "${GREEN}✓ Backend started with 'go run' [PID: $BACKEND_PID]${NC}"
     fi
 
-    cd ..
+    cd "$PROJECT_ROOT"
 }
 
 # Start frontend
@@ -180,9 +184,9 @@ start_frontend() {
     echo -e "${YELLOW}🚀 Starting frontend...${NC}"
 
     cd "$FRONTEND_DIR"
-    npm run dev > "../$FRONTEND_LOG" 2>&1 &
+    npm run dev > "$FRONTEND_LOG" 2>&1 &
     FRONTEND_PID=$!
-    cd ..
+    cd "$PROJECT_ROOT"
 
     echo -e "${GREEN}✓ Frontend started (Vite dev server) [PID: $FRONTEND_PID]${NC}"
 }

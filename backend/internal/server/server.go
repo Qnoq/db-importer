@@ -101,8 +101,11 @@ func (s *Server) initDatabase() {
 	var err error
 	s.db, err = database.NewDB(dbConfig)
 	if err != nil {
-		logger.Error("Failed to connect to database", err)
-		log.Fatal(err)
+		logger.Warn("Failed to connect to database, running in stateless mode", map[string]interface{}{
+			"error": err.Error(),
+		})
+		s.db = nil
+		return
 	}
 
 	logger.Info("Database connection established", nil)
@@ -112,8 +115,14 @@ func (s *Server) initDatabase() {
 func (s *Server) runMigrations() error {
 	logger.Info("Running database migrations", nil)
 
+	// Determine migrations path based on environment
+	migrationsPath := "file://migrations"
+	if s.config.IsProduction() {
+		migrationsPath = "file:///app/migrations"
+	}
+
 	m, err := migrate.New(
-		"file:///app/migrations",
+		migrationsPath,
 		s.config.DatabaseURL,
 	)
 	if err != nil {
