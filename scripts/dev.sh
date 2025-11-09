@@ -199,7 +199,7 @@ wait_for_backend() {
     local attempt=0
 
     while [ $attempt -lt $max_attempts ]; do
-        if curl -s http://localhost:8080/health > /dev/null 2>&1; then
+        if curl -s http://localhost:3000/health > /dev/null 2>&1; then
             echo -e "${GREEN}✓ Backend is ready!${NC}"
             return 0
         fi
@@ -219,8 +219,8 @@ monitor_logs() {
     echo -e "${GREEN}✨ Development environment ready!${NC}"
     echo -e "${GREEN}════════════════════════════════════════${NC}"
     echo -e "📱 Frontend: ${CYAN}http://localhost:5173${NC}"
-    echo -e "🔧 Backend:  ${CYAN}http://localhost:8080${NC}"
-    echo -e "📊 Health:   ${CYAN}http://localhost:8080/health${NC}"
+    echo -e "🔧 Backend:  ${CYAN}http://localhost:3000${NC}"
+    echo -e "📊 Health:   ${CYAN}http://localhost:3000/health${NC}"
     echo -e "\n${YELLOW}📝 View logs:${NC}"
     echo -e "  Backend:  ${CYAN}tail -f $BACKEND_LOG${NC}"
     echo -e "  Frontend: ${CYAN}tail -f $FRONTEND_LOG${NC}"
