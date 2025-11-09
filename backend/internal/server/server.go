@@ -10,7 +10,6 @@ import (
 	"db-importer/internal/service"
 	"db-importer/logger"
 	"db-importer/middleware"
-	"log"
 	"net/http"
 	"time"
 
