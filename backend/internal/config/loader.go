@@ -60,15 +60,32 @@ func Load() (*Config, error) {
 		env = "development"
 	}
 
-	// Try to load environment-specific .env file first
-	envFile := ".env." + env
-	if _, err := os.Stat(envFile); err == nil {
-		if err := godotenv.Load(envFile); err != nil {
-			log.Printf("Warning: Failed to load %s: %v", envFile, err)
+	// Try to load environment files in order of priority:
+	// 1. .env.{environment} (e.g., .env.development, .env.production)
+	// 2. .env.local (local overrides, gitignored)
+	// 3. .env (default, committed to git)
+
+	envFiles := []string{
+		".env." + env,      // Environment-specific
+		".env.local",       // Local overrides (gitignored)
+		".env",             // Default
+	}
+
+	loaded := false
+	for _, file := range envFiles {
+		if _, err := os.Stat(file); err == nil {
+			if err := godotenv.Load(file); err != nil {
+				log.Printf("Warning: Failed to load %s: %v", file, err)
+			} else {
+				log.Printf("✓ Loaded configuration from %s", file)
+				loaded = true
+				break
+			}
 		}
-	} else {
-		// Fallback to .env
-		_ = godotenv.Load()
+	}
+
+	if !loaded {
+		log.Printf("Warning: No .env file found, using environment variables only")
 	}
 
 	cfg := &Config{
