@@ -41,15 +41,14 @@ func NewDB(cfg Config) (*DB, error) {
 	poolConfig.MaxConnLifetime = cfg.ConnMaxLifetime
 	poolConfig.MaxConnIdleTime = cfg.ConnMaxIdleTime
 
-	// Force IPv4 only by using a custom dialer
-	// This prevents connection failures on systems without IPv6 connectivity
+	// Use custom dialer with proper timeout settings
+	// Support both IPv4 and IPv6 connections
 	poolConfig.ConnConfig.DialFunc = func(ctx context.Context, network, addr string) (net.Conn, error) {
-		// Force TCP IPv4 only
 		d := &net.Dialer{
 			Timeout:   30 * time.Second,
 			KeepAlive: 30 * time.Second,
 		}
-		return d.DialContext(ctx, "tcp4", addr)
+		return d.DialContext(ctx, "tcp", addr)
 	}
 
 	// Create pgxpool connection
