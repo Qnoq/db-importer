@@ -522,7 +522,7 @@ echo "✅ Setup complete!"
 
 ---
 
-## 3. Documentation API avec Swagger
+## 3. Documentation API avec Swagger ✅ TERMINÉ
 
 ### Installation et configuration
 
@@ -2238,7 +2238,7 @@ db-importer/
 
 **Objectif** : Améliorer la qualité et la maintenabilité
 
-- [ ] Ajouter la documentation Swagger
+- [x] Ajouter la documentation Swagger ✅
 - [ ] Implémenter les composables Vue
 - [ ] Créer l'Error Boundary
 - [ ] Améliorer la validation SQL

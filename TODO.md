@@ -1,14 +1,14 @@
 # 📋 TODO - DB Importer Improvements
 
 > Suivi de l'implémentation des améliorations proposées dans IMPROVEMENTS.md
-> Dernière mise à jour: 2025-11-09
+> Dernière mise à jour: 2025-11-11
 
 ## 📊 Progression Globale
 
-- **Priorité 1**: ✅ Terminée
-- **Priorité 2**: ⏸️ À faire
-- **Priorité 3**: ⏸️ À faire
-- **Priorité 4**: ⏸️ À faire
+- **Priorité 1**: ✅ Terminée (100%)
+- **Priorité 2**: ⏸️ À faire (0%)
+- **Priorité 3**: 🔄 En cours (33% - Swagger ✅)
+- **Priorité 4**: ⏸️ À faire (0%)
 
 ---
 
@@ -109,16 +109,17 @@
 
 ## 📚 Priorité 3 - Moyen terme
 
-### 3.1 Documentation Swagger
+### 3.1 Documentation Swagger ✅
 **Impact**: ⭐⭐⭐ | **Effort**: 🔨🔨🔨
 
-- [ ] Installer `swag` CLI
-- [ ] Ajouter les annotations Swagger aux handlers
-- [ ] Configurer Swagger dans le serveur
-- [ ] Générer la documentation
-- [ ] Ajouter l'endpoint `/swagger/` (dev only)
-- [ ] Documenter tous les endpoints
-- [ ] Ajouter des exemples de requêtes/réponses
+- [x] Installer `swag` CLI
+- [x] Ajouter les annotations Swagger aux handlers
+- [x] Configurer Swagger dans le serveur
+- [x] Générer la documentation
+- [x] Ajouter l'endpoint `/swagger/`
+- [x] Documenter tous les endpoints (15 endpoints)
+- [x] Ajouter des exemples de requêtes/réponses
+- [x] Mettre à jour le README.md avec la section API Documentation
 
 ### 3.2 CI/CD GitHub Actions
 **Impact**: ⭐⭐⭐⭐ | **Effort**: 🔨🔨🔨🔨
