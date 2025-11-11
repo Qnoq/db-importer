@@ -32,10 +32,13 @@ help:
 	@echo "  make clean            Nettoie les fichiers temporaires"
 	@echo ""
 	@echo "🧪 Tests:"
-	@echo "  make test             Lance tous les tests"
-	@echo "  make test-backend     Tests backend uniquement"
-	@echo "  make test-coverage    Tests backend avec rapport de couverture"
-	@echo "  make test-watch       Tests en mode watch (relance auto)"
+	@echo "  make test                    Lance tous les tests (backend + frontend)"
+	@echo "  make test-backend            Tests backend uniquement (Go)"
+	@echo "  make test-frontend           Tests frontend uniquement (Vitest)"
+	@echo "  make test-coverage           Tests backend avec rapport de couverture"
+	@echo "  make test-coverage-frontend  Tests frontend avec rapport de couverture"
+	@echo "  make test-watch              Tests backend en mode watch (relance auto)"
+	@echo "  make test-watch-frontend     Tests frontend en mode watch (relance auto)"
 	@echo ""
 	@echo "🎨 Code Quality:"
 	@echo "  make fmt              Formate le code (gofmt)"
@@ -144,17 +147,29 @@ clean:
 # 🧪 Tests
 #=============================================================================
 
-# Lancer tous les tests backend
+# Lancer tous les tests (backend + frontend)
 test:
-	@echo "🧪 Lancement des tests backend..."
+	@echo "🧪 Lancement de tous les tests..."
+	@echo ""
+	@echo "📦 Tests Backend (Go)..."
 	@cd $(BACKEND_DIR) && go test $(GO_PACKAGES) -v
+	@echo ""
+	@echo "📦 Tests Frontend (Vitest)..."
+	@cd $(FRONTEND_DIR) && npm run test:run
+	@echo ""
+	@echo "✅ Tous les tests terminés !"
 
 # Tests backend uniquement
 test-backend:
 	@echo "🧪 Tests backend..."
 	@cd $(BACKEND_DIR) && go test $(GO_PACKAGES) -v
 
-# Tests avec couverture de code
+# Tests frontend uniquement
+test-frontend:
+	@echo "🧪 Tests frontend..."
+	@cd $(FRONTEND_DIR) && npm run test:run
+
+# Tests avec couverture de code (backend)
 test-coverage:
 	@echo "🧪 Tests backend avec couverture..."
 	@cd $(BACKEND_DIR) && go test $(GO_PACKAGES) -coverprofile=coverage.out
@@ -164,11 +179,21 @@ test-coverage:
 	@echo ""
 	@echo "💡 Pour voir le rapport HTML: cd backend && go tool cover -html=coverage.out"
 
+# Tests frontend avec couverture de code
+test-coverage-frontend:
+	@echo "🧪 Tests frontend avec couverture..."
+	@cd $(FRONTEND_DIR) && npm run test:coverage
+
 # Tests en mode watch (relance automatiquement)
 test-watch:
 	@echo "🧪 Tests en mode watch (Ctrl+C pour arrêter)..."
 	@echo "💡 Installe 'gow' si pas disponible: go install github.com/mitranim/gow@latest"
 	@cd $(BACKEND_DIR) && gow test $(GO_PACKAGES) -v
+
+# Tests frontend en mode watch
+test-watch-frontend:
+	@echo "🧪 Tests frontend en mode watch (Ctrl+C pour arrêter)..."
+	@cd $(FRONTEND_DIR) && npm test
 
 #=============================================================================
 # 🎨 Code Quality
