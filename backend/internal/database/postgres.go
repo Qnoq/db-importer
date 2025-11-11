@@ -42,13 +42,13 @@ func NewDB(cfg Config) (*DB, error) {
 	poolConfig.MaxConnIdleTime = cfg.ConnMaxIdleTime
 
 	// Use custom dialer with proper timeout settings
-	// Support both IPv4 and IPv6 connections
+	// Force IPv4 to avoid IPv6 connectivity issues in Docker environments
 	poolConfig.ConnConfig.DialFunc = func(ctx context.Context, network, addr string) (net.Conn, error) {
 		d := &net.Dialer{
 			Timeout:   30 * time.Second,
 			KeepAlive: 30 * time.Second,
 		}
-		return d.DialContext(ctx, "tcp", addr)
+		return d.DialContext(ctx, "tcp4", addr)
 	}
 
 	// Create pgxpool connection

@@ -22,6 +22,9 @@ services:
       - net.ipv6.conf.all.disable_ipv6=1
       - net.ipv6.conf.default.disable_ipv6=1
     environment:
+      # Go Network Configuration - Force IPv4
+      - GODEBUG=netdns=go
+
       # Server Configuration
       - PORT=${PORT:-8080}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
