@@ -4,9 +4,6 @@ name: Deploy to Production VPS
 # This gives you full control over when to deploy to production
 on:
   workflow_dispatch:  # Manual trigger only from GitHub UI
-  push:
-    branches:
-      - main  # Auto-deploy when pushing to main
 
 jobs:
   deploy:
