@@ -106,6 +106,32 @@ A secure, production-ready web application for importing data from Excel/CSV fil
    - Frontend: http://localhost:8081
    - Backend API: http://localhost:8080
 
+## 📚 API Documentation
+
+Interactive API documentation is available via **Swagger/OpenAPI**:
+
+- **Swagger UI**: http://localhost:3000/swagger/
+- **OpenAPI Spec (JSON)**: http://localhost:3000/swagger/doc.json
+- **OpenAPI Spec (YAML)**: http://localhost:3000/swagger/doc.yaml
+
+The Swagger UI provides:
+- ✅ Complete API reference for all endpoints
+- ✅ Interactive "Try it out" feature to test endpoints
+- ✅ Request/response schemas with examples
+- ✅ Authentication flows (Bearer token for protected endpoints)
+- ✅ Organized by tags (Health, Schema, SQL, Auth, Imports)
+
+### Regenerating Documentation
+
+If you modify API annotations, regenerate the Swagger docs:
+
+```bash
+cd backend
+swag init -g cmd/server/docs.go -o docs --parseDependency --parseInternal
+```
+
+The generated documentation files (`docs/`) are committed to the repository, so the Swagger UI works out of the box.
+
 ## Usage Guide
 
 ### Step 1: Upload SQL Schema

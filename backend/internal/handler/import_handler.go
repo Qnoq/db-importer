@@ -23,7 +23,19 @@ func NewImportHandler(importService *service.ImportService) *ImportHandler {
 }
 
 // CreateImport handles creating a new import record
-// POST /api/v1/imports
+// @Summary      Create import record
+// @Description  Save a new import record with generated SQL and metadata
+// @Description  Stores table name, row count, SQL (gzipped), mappings, transformations, and validation results
+// @Tags         Imports
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request  body      models.CreateImportRequest  true  "Import details (table, rows, SQL, metadata)"
+// @Success      201      {object}  map[string]interface{}      "Import created successfully with import data"
+// @Failure      400      {object}  map[string]interface{}      "Invalid request or validation failed"
+// @Failure      401      {object}  map[string]interface{}      "Unauthorized - missing or invalid token"
+// @Failure      500      {object}  map[string]interface{}      "Internal server error"
+// @Router       /api/v1/imports [post]
 func (h *ImportHandler) CreateImport(w http.ResponseWriter, r *http.Request) {
 	var req models.CreateImportRequest
 
@@ -64,7 +76,18 @@ func (h *ImportHandler) CreateImport(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetImport handles retrieving an import by ID
-// GET /api/v1/imports/get?id=xxx
+// @Summary      Get import details
+// @Description  Retrieve import metadata by ID (without SQL content)
+// @Description  Returns table name, row count, status, timestamps, and statistics
+// @Tags         Imports
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   query     string  true  "Import UUID"
+// @Success      200  {object}  map[string]interface{}  "Import details"
+// @Failure      400  {object}  map[string]interface{}  "Invalid or missing import ID"
+// @Failure      401  {object}  map[string]interface{}  "Unauthorized"
+// @Failure      404  {object}  map[string]interface{}  "Import not found"
+// @Router       /api/v1/imports/get [get]
 func (h *ImportHandler) GetImport(w http.ResponseWriter, r *http.Request) {
 	importID := r.URL.Query().Get("id")
 	if importID == "" {
@@ -103,7 +126,17 @@ func (h *ImportHandler) GetImport(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetImportSQL handles retrieving an import with its SQL
-// GET /api/v1/imports/sql?id=xxx
+// @Summary      Get import with SQL
+// @Description  Retrieve import details including the generated SQL content (decompressed)
+// @Tags         Imports
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   query     string  true  "Import UUID"
+// @Success      200  {object}  map[string]interface{}  "Import details with SQL content"
+// @Failure      400  {object}  map[string]interface{}  "Invalid or missing import ID"
+// @Failure      401  {object}  map[string]interface{}  "Unauthorized"
+// @Failure      404  {object}  map[string]interface{}  "Import not found"
+// @Router       /api/v1/imports/sql [get]
 func (h *ImportHandler) GetImportSQL(w http.ResponseWriter, r *http.Request) {
 	importID := r.URL.Query().Get("id")
 	if importID == "" {
@@ -142,7 +175,22 @@ func (h *ImportHandler) GetImportSQL(w http.ResponseWriter, r *http.Request) {
 }
 
 // ListImports handles listing imports with pagination and filters
-// GET /api/v1/imports
+// @Summary      List user imports
+// @Description  List imports with pagination, filtering by table/status, and sorting
+// @Tags         Imports
+// @Produce      json
+// @Security     BearerAuth
+// @Param        page       query     int     false  "Page number (default: 1)"
+// @Param        pageSize   query     int     false  "Page size, max 100 (default: 20)"
+// @Param        tableName  query     string  false  "Filter by table name"
+// @Param        status     query     string  false  "Filter by status (success/warning/failed)"
+// @Param        sortBy     query     string  false  "Sort field (createdAt/tableName/rowCount)"
+// @Param        sortOrder  query     string  false  "Sort order (asc/desc)"
+// @Success      200        {object}  map[string]interface{}  "Paginated list of imports"
+// @Failure      400        {object}  map[string]interface{}  "Invalid query parameters"
+// @Failure      401        {object}  map[string]interface{}  "Unauthorized"
+// @Failure      500        {object}  map[string]interface{}  "Internal server error"
+// @Router       /api/v1/imports/list [get]
 func (h *ImportHandler) ListImports(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context
 	userID, ok := r.Context().Value("userID").(string)
@@ -199,7 +247,17 @@ func (h *ImportHandler) ListImports(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteImport handles deleting an import by ID
-// DELETE /api/v1/imports/delete?id=xxx
+// @Summary      Delete import
+// @Description  Delete a specific import record by ID
+// @Tags         Imports
+// @Produce      json
+// @Security     BearerAuth
+// @Param        id   query     string  true  "Import UUID to delete"
+// @Success      200  {object}  map[string]interface{}  "Import deleted successfully"
+// @Failure      400  {object}  map[string]interface{}  "Invalid or missing import ID"
+// @Failure      401  {object}  map[string]interface{}  "Unauthorized"
+// @Failure      404  {object}  map[string]interface{}  "Import not found"
+// @Router       /api/v1/imports/delete [delete]
 func (h *ImportHandler) DeleteImport(w http.ResponseWriter, r *http.Request) {
 	importID := r.URL.Query().Get("id")
 	if importID == "" {
@@ -238,7 +296,15 @@ func (h *ImportHandler) DeleteImport(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetStats handles retrieving import statistics
-// GET /api/v1/imports/stats
+// @Summary      Get import statistics
+// @Description  Retrieve user's import statistics (total count, success/warning/failed counts, total rows)
+// @Tags         Imports
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  map[string]interface{}  "Import statistics"
+// @Failure      401  {object}  map[string]interface{}  "Unauthorized"
+// @Failure      500  {object}  map[string]interface{}  "Internal server error"
+// @Router       /api/v1/imports/stats [get]
 func (h *ImportHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context
 	userID, ok := r.Context().Value("userID").(string)
@@ -264,7 +330,16 @@ func (h *ImportHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteOldImports handles deleting old imports
-// DELETE /api/v1/imports/old
+// @Summary      Delete old imports
+// @Description  Delete imports older than specified number of days (default: 30)
+// @Tags         Imports
+// @Produce      json
+// @Security     BearerAuth
+// @Param        days  query     int  false  "Delete imports older than this many days (default: 30)"
+// @Success      200   {object}  map[string]interface{}  "Number of imports deleted"
+// @Failure      401   {object}  map[string]interface{}  "Unauthorized"
+// @Failure      500   {object}  map[string]interface{}  "Internal server error"
+// @Router       /api/v1/imports/old [delete]
 func (h *ImportHandler) DeleteOldImports(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context
 	userID, ok := r.Context().Value("userID").(string)

@@ -23,7 +23,18 @@ func NewAuthHandler(authService *service.AuthService) *AuthHandler {
 }
 
 // Register handles user registration
-// POST /auth/register
+// @Summary      Register new user
+// @Description  Create a new user account with email and password
+// @Description  Password must be at least 8 characters. Email must be unique.
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      models.CreateUserRequest  true  "User registration details"
+// @Success      201      {object}  map[string]interface{}    "User created successfully with user data"
+// @Failure      400      {object}  map[string]interface{}    "Invalid request body or validation failed"
+// @Failure      409      {object}  map[string]interface{}    "Email already exists"
+// @Failure      500      {object}  map[string]interface{}    "Internal server error"
+// @Router       /auth/register [post]
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var req models.CreateUserRequest
 
@@ -54,7 +65,18 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 // Login handles user login
-// POST /auth/login
+// @Summary      User login
+// @Description  Authenticate user with email and password, returns JWT access and refresh tokens
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      models.LoginRequest     true  "Login credentials"
+// @Success      200      {object}  map[string]interface{}  "Login successful with tokens and user data"
+// @Failure      400      {object}  map[string]interface{}  "Invalid request body or validation failed"
+// @Failure      401      {object}  map[string]interface{}  "Invalid credentials"
+// @Failure      403      {object}  map[string]interface{}  "User account not active"
+// @Failure      500      {object}  map[string]interface{}  "Internal server error"
+// @Router       /auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req models.LoginRequest
 
@@ -89,7 +111,16 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 // RefreshToken handles token refresh
-// POST /auth/refresh
+// @Summary      Refresh access token
+// @Description  Generate new access and refresh tokens using a valid refresh token
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      models.RefreshTokenRequest  true  "Refresh token"
+// @Success      200      {object}  map[string]interface{}      "Tokens refreshed successfully with new tokens"
+// @Failure      400      {object}  map[string]interface{}      "Invalid request body or validation failed"
+// @Failure      401      {object}  map[string]interface{}      "Invalid or expired refresh token"
+// @Router       /auth/refresh [post]
 func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	var req models.RefreshTokenRequest
 
@@ -116,7 +147,16 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 }
 
 // Logout handles user logout
-// POST /auth/logout
+// @Summary      User logout
+// @Description  Invalidate the refresh token to log out the user
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        request  body      models.RefreshTokenRequest  true  "Refresh token to invalidate"
+// @Success      200      {object}  map[string]interface{}      "Logout successful"
+// @Failure      400      {object}  map[string]interface{}      "Invalid request body or validation failed"
+// @Failure      500      {object}  map[string]interface{}      "Internal server error"
+// @Router       /auth/logout [post]
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	var req models.RefreshTokenRequest
 
