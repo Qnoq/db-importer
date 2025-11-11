@@ -10,7 +10,10 @@ import (
 	"db-importer/internal/service"
 	"db-importer/logger"
 	"db-importer/middleware"
+	"fmt"
+	"net"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -120,9 +123,19 @@ func (s *Server) runMigrations() error {
 		migrationsPath = "file:///app/migrations"
 	}
 
+	// Resolve DATABASE_URL to IPv4 for golang-migrate compatibility
+	// golang-migrate creates its own connection and doesn't use our custom resolver
+	databaseURL, err := resolveIPv4InURL(s.config.DatabaseURL)
+	if err != nil {
+		logger.Warn("Failed to resolve IPv4 address, using original URL", map[string]interface{}{
+			"error": err.Error(),
+		})
+		databaseURL = s.config.DatabaseURL
+	}
+
 	m, err := migrate.New(
 		migrationsPath,
-		s.config.DatabaseURL,
+		databaseURL,
 	)
 	if err != nil {
 		return err
@@ -219,4 +232,70 @@ func (s *Server) Shutdown(ctx context.Context) error {
 
 	logger.Info("Server shut down successfully", nil)
 	return nil
+}
+
+// resolveIPv4InURL resolves the hostname in a PostgreSQL connection URL to IPv4
+// This is necessary for golang-migrate which doesn't use our custom resolver
+func resolveIPv4InURL(dbURL string) (string, error) {
+	// Parse the URL
+	parsedURL, err := url.Parse(dbURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse database URL: %w", err)
+	}
+
+	// Extract hostname (without port)
+	hostname := parsedURL.Hostname()
+	port := parsedURL.Port()
+
+	// Check if it's already an IP address
+	if ip := net.ParseIP(hostname); ip != nil {
+		// Already an IP, return as-is
+		return dbURL, nil
+	}
+
+	// Resolve to IPv4 only
+	resolver := &net.Resolver{
+		PreferGo: true,
+		Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+			d := net.Dialer{Timeout: 10 * time.Second}
+			return d.DialContext(ctx, "udp4", address)
+		},
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	addrs, err := resolver.LookupHost(ctx, hostname)
+	if err != nil {
+		return "", fmt.Errorf("failed to resolve hostname %s: %w", hostname, err)
+	}
+
+	// Find first IPv4 address
+	var ipv4Addr string
+	for _, addr := range addrs {
+		if ip := net.ParseIP(addr); ip != nil && ip.To4() != nil {
+			ipv4Addr = addr
+			break
+		}
+	}
+
+	if ipv4Addr == "" {
+		return "", fmt.Errorf("no IPv4 address found for hostname %s", hostname)
+	}
+
+	// Replace hostname with IPv4 in the URL
+	newHost := ipv4Addr
+	if port != "" {
+		newHost = net.JoinHostPort(ipv4Addr, port)
+	}
+
+	parsedURL.Host = newHost
+	resolvedURL := parsedURL.String()
+
+	logger.Info("Resolved database hostname to IPv4", map[string]interface{}{
+		"hostname": hostname,
+		"ipv4":     ipv4Addr,
+	})
+
+	return resolvedURL, nil
 }
