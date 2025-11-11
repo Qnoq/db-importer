@@ -195,10 +195,10 @@ lint-backend:
 # Lint frontend
 lint-frontend:
 	@echo "🔍 Lint frontend..."
-	@cd $(FRONTEND_DIR) && npm run lint || echo "⚠️  Pas de script lint configuré"
+	@cd $(FRONTEND_DIR) && npm run lint 2>/dev/null || echo "⚠️  Pas de script lint configuré"
 	@echo "   → TypeScript check..."
-	@cd $(FRONTEND_DIR) && npx vue-tsc --noEmit || echo "✅ Type check completed"
-	@echo "✅ Frontend lint completed"
+	@cd $(FRONTEND_DIR) && npx vue-tsc --noEmit
+	@echo "✅ Frontend lint passed"
 
 #=============================================================================
 # 🏗️  Build
