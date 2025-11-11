@@ -22,19 +22,26 @@ type Table struct {
 func ParseMySQL(sqlContent string) []Table {
 	var tables []Table
 
-	// Regex to match CREATE TABLE statements with (?s) flag for multiline
-	createTableRegex := regexp.MustCompile(`(?is)CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?` + "`?" + `([a-zA-Z0-9_]+)` + "`?" + `\s*\((.*?)\)`)
+	// Extract CREATE TABLE statements with proper parenthesis balancing
+	statements := extractMySQLCreateTableStatements(sqlContent)
 
-	matches := createTableRegex.FindAllStringSubmatch(sqlContent, -1)
+	for _, stmt := range statements {
+		// Extract table name
+		tableNameRegex := regexp.MustCompile(`(?i)CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?` + "`?" + `([a-zA-Z0-9_]+)` + "`?")
+		nameMatch := tableNameRegex.FindStringSubmatch(stmt)
+		if len(nameMatch) < 2 {
+			continue
+		}
+		tableName := nameMatch[1]
 
-	for _, match := range matches {
-		if len(match) < 3 {
+		// Extract content between first '(' and last ')'
+		firstParen := strings.Index(stmt, "(")
+		lastParen := strings.LastIndex(stmt, ")")
+		if firstParen == -1 || lastParen == -1 || firstParen >= lastParen {
 			continue
 		}
 
-		tableName := match[1]
-		tableContent := match[2]
-
+		tableContent := stmt[firstParen+1 : lastParen]
 		fields := parseFields(tableContent, "mysql")
 
 		if len(fields) > 0 {
@@ -46,6 +53,56 @@ func ParseMySQL(sqlContent string) []Table {
 	}
 
 	return tables
+}
+
+// extractMySQLCreateTableStatements extracts CREATE TABLE statements with proper parenthesis balancing
+func extractMySQLCreateTableStatements(sqlContent string) []string {
+	var statements []string
+	var currentStmt strings.Builder
+	inCreateTable := false
+	parenDepth := 0
+
+	lines := strings.Split(sqlContent, "\n")
+
+	for _, line := range lines {
+		upperLine := strings.ToUpper(strings.TrimSpace(line))
+
+		// Check if starting a CREATE TABLE
+		if strings.Contains(upperLine, "CREATE TABLE") {
+			// Save previous statement if any
+			if currentStmt.Len() > 0 {
+				statements = append(statements, currentStmt.String())
+			}
+			currentStmt.Reset()
+			inCreateTable = true
+		}
+
+		if inCreateTable {
+			// Track parenthesis depth
+			parenDepth += strings.Count(line, "(")
+			parenDepth -= strings.Count(line, ")")
+
+			// Add line to current statement
+			if currentStmt.Len() > 0 {
+				currentStmt.WriteString("\n")
+			}
+			currentStmt.WriteString(line)
+
+			// Check if statement is complete (parenDepth back to 0 and ends with semicolon or parenDepth is 0)
+			if parenDepth == 0 && strings.Contains(line, ")") {
+				statements = append(statements, currentStmt.String())
+				currentStmt.Reset()
+				inCreateTable = false
+			}
+		}
+	}
+
+	// Add last statement if any
+	if currentStmt.Len() > 0 {
+		statements = append(statements, currentStmt.String())
+	}
+
+	return statements
 }
 
 // parseFields extracts field definitions from table content
@@ -76,8 +133,10 @@ func parseFields(content string, dbType string) []Field {
 				strings.HasPrefix(upperPart, "KEY ") ||
 				strings.HasPrefix(upperPart, "INDEX") ||
 				strings.HasPrefix(upperPart, "UNIQUE KEY") ||
+				strings.HasPrefix(upperPart, "UNIQUE (") || // PostgreSQL UNIQUE constraint
 				strings.HasPrefix(upperPart, "CONSTRAINT") ||
-				strings.HasPrefix(upperPart, "FOREIGN KEY") {
+				strings.HasPrefix(upperPart, "FOREIGN KEY") ||
+				strings.HasPrefix(upperPart, "CHECK ") { // CHECK constraint
 				continue
 			}
 

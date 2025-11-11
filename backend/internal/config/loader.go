@@ -42,10 +42,10 @@ type Config struct {
 	DBConnMaxIdleTime time.Duration
 
 	// Features
-	RateLimitEnabled  bool
-	RateLimitGuest    int // requests per window for guest users
-	RateLimitAuth     int // requests per window for authenticated users (0 = unlimited)
-	RateLimitWindow   int // window in seconds
+	RateLimitEnabled bool
+	RateLimitGuest   int // requests per window for guest users
+	RateLimitAuth    int // requests per window for authenticated users (0 = unlimited)
+	RateLimitWindow  int // window in seconds
 
 	// Observability
 	EnableDebugLog bool
@@ -66,9 +66,9 @@ func Load() (*Config, error) {
 	// 3. .env (default, committed to git)
 
 	envFiles := []string{
-		".env." + env,      // Environment-specific
-		".env.local",       // Local overrides (gitignored)
-		".env",             // Default
+		".env." + env, // Environment-specific
+		".env.local",  // Local overrides (gitignored)
+		".env",        // Default
 	}
 
 	loaded := false
@@ -115,7 +115,7 @@ func Load() (*Config, error) {
 		// Rate limiting
 		RateLimitEnabled: getBool("RATE_LIMIT_ENABLED", true),
 		RateLimitGuest:   getInt("RATE_LIMIT_GUEST", 3),
-		RateLimitAuth:    getInt("RATE_LIMIT_AUTH", 0), // 0 = unlimited
+		RateLimitAuth:    getInt("RATE_LIMIT_AUTH", 0),       // 0 = unlimited
 		RateLimitWindow:  getInt("RATE_LIMIT_WINDOW", 86400), // 24h default for guest
 
 		// Observability

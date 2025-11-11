@@ -18,9 +18,9 @@ type Config struct {
 	RateLimitWindow   int // seconds
 
 	// Database configuration
-	DatabaseURL      string
-	DBMaxOpenConns   int
-	DBMaxIdleConns   int
+	DatabaseURL       string
+	DBMaxOpenConns    int
+	DBMaxIdleConns    int
 	DBConnMaxLifetime time.Duration
 	DBConnMaxIdleTime time.Duration
 
