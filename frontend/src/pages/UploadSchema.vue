@@ -82,8 +82,17 @@
       </div>
 
       <!-- Single Table Auto-Select Modal -->
-      <div v-if="showSingleTableDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md mx-4 transform transition-all">
+      <div v-if="showSingleTableDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="cancelSingleTableDialog">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md mx-4 transform transition-all relative" @click.stop>
+          <!-- Close button -->
+          <button
+            @click="cancelSingleTableDialog"
+            class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+            aria-label="Close"
+          >
+            <i class="pi pi-times text-xl"></i>
+          </button>
+
           <div class="text-center">
             <!-- Success Icon -->
             <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -118,14 +127,23 @@
               Since there's only one table, we'll auto-select it and skip the table selection step.
             </p>
 
-            <!-- Continue Button -->
-            <button
-              @click="continueToProceed"
-              class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-            >
-              Continue to Upload Data
-              <i class="pi pi-arrow-right"></i>
-            </button>
+            <!-- Action Buttons -->
+            <div class="flex flex-col gap-3">
+              <button
+                @click="continueToProceed"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+              >
+                Continue to Upload Data
+                <i class="pi pi-arrow-right"></i>
+              </button>
+              <button
+                @click="cancelSingleTableDialog"
+                class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2"
+              >
+                <i class="pi pi-upload"></i>
+                Upload a Different File
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -280,6 +298,17 @@ function continueToProceed() {
     store.selectTable(store.tables[0].name)
     showSingleTableDialog.value = false
     router.push('/upload-data')
+  }
+}
+
+function cancelSingleTableDialog() {
+  // Close the modal
+  showSingleTableDialog.value = false
+  // Reset the store to clear the uploaded schema
+  store.reset()
+  // Reset the file input to allow selecting a new file
+  if (fileInput.value) {
+    fileInput.value.value = ''
   }
 }
 
