@@ -317,7 +317,6 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { useImportStore, type Import } from '../store/importStore'
 import { useToast } from 'primevue/usetoast'
 import Card from 'primevue/card'
@@ -330,7 +329,6 @@ import Dropdown from 'primevue/dropdown'
 import Dialog from 'primevue/dialog'
 import Toast from 'primevue/toast'
 
-const router = useRouter()
 const importStore = useImportStore()
 const toast = useToast()
 
@@ -461,7 +459,7 @@ const getStatusSeverity = (status: string): 'success' | 'warning' | 'danger' => 
     case 'success': return 'success'
     case 'warning': return 'warning'
     case 'failed': return 'danger'
-    default: return 'info'
+    default: return 'warning'
   }
 }
 </script>

@@ -426,11 +426,11 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import StepperNav from '../components/StepperNav.vue'
-import { useMappingStore, Field } from '../store/mappingStore'
+import { useMappingStore, Field, type CellValue } from '../store/mappingStore'
 import { useAuthStore } from '../store/authStore'
 import { useImportStore } from '../store/importStore'
 import { transformations, applyTransformation, suggestTransformations, hasYearOnlyValues, type TransformationType } from '../utils/transformations'
-import { validateDataset, validateCell, getCellClass, getValidationIcon, type ValidationResult } from '../utils/dataValidation'
+import { validateDataset, getCellClass, getValidationIcon, type ValidationResult } from '../utils/dataValidation'
 import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import Dropdown from 'primevue/dropdown'
@@ -760,19 +760,6 @@ function getTransformationOptions(field: Field) {
 }
 
 /**
- * Get transformation options for a field (legacy - returns array of types)
- */
-function getTransformationOptionsForField(field: Field): TransformationType[] {
-  const excelCol = getMappedExcelColumn(field.name)
-  if (!excelCol) return ['none']
-
-  const columnIndex = store.excelHeaders.indexOf(excelCol)
-  const columnData = store.excelData.map(row => row[columnIndex])
-
-  return suggestTransformations(columnData, field.type)
-}
-
-/**
  * Show transformation preview for a field
  */
 function showTransformPreviewForField(fieldName: string) {
@@ -804,7 +791,7 @@ function onMappingChange() {
 /**
  * Handle transformation change
  */
-function onTransformationChange(fieldName: string) {
+function onTransformationChange(_fieldName: string) {
   validateData()
 }
 
@@ -836,7 +823,7 @@ function validateData() {
       if (dbField) {
         const transform = fieldTransformations.value[dbField]
         if (transform && transform !== 'none') {
-          newRow[idx] = applyTransformation(row[idx], transform)
+          newRow[idx] = applyTransformation(row[idx], transform) as CellValue
         }
       }
     })
@@ -897,7 +884,7 @@ const previewData = computed(() => {
       if (dbField) {
         const transform = fieldTransformations.value[dbField]
         if (transform && transform !== 'none') {
-          newRow[idx] = applyTransformation(row[idx], transform)
+          newRow[idx] = applyTransformation(row[idx], transform) as CellValue
         }
       }
     })
@@ -1042,7 +1029,7 @@ async function generateSQL() {
         if (dbField) {
           const transform = fieldTransformations.value[dbField]
           if (transform && transform !== 'none') {
-            newRow[idx] = applyTransformation(row[idx], transform)
+            newRow[idx] = applyTransformation(row[idx], transform) as CellValue
           }
         }
       })
