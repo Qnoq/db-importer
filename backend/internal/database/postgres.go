@@ -41,45 +41,13 @@ func NewDB(cfg Config) (*DB, error) {
 	poolConfig.MaxConnLifetime = cfg.ConnMaxLifetime
 	poolConfig.MaxConnIdleTime = cfg.ConnMaxIdleTime
 
-	// Custom resolver that only returns IPv4 addresses
-	// This prevents IPv6 connection issues in Docker environments
-	poolConfig.ConnConfig.LookupFunc = func(ctx context.Context, host string) ([]string, error) {
-		resolver := &net.Resolver{
-			PreferGo: true,
-			Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
-				d := net.Dialer{Timeout: 10 * time.Second}
-				return d.DialContext(ctx, "udp4", address)
-			},
-		}
-
-		addrs, err := resolver.LookupHost(ctx, host)
-		if err != nil {
-			return nil, err
-		}
-
-		// Filter to only IPv4 addresses
-		var ipv4Addrs []string
-		for _, addr := range addrs {
-			if ip := net.ParseIP(addr); ip != nil && ip.To4() != nil {
-				ipv4Addrs = append(ipv4Addrs, addr)
-			}
-		}
-
-		if len(ipv4Addrs) == 0 {
-			return nil, fmt.Errorf("no IPv4 addresses found for host %s", host)
-		}
-
-		return ipv4Addrs, nil
-	}
-
 	// Use custom dialer with proper timeout settings
-	// Force IPv4 to avoid IPv6 connectivity issues in Docker environments
 	poolConfig.ConnConfig.DialFunc = func(ctx context.Context, network, addr string) (net.Conn, error) {
 		d := &net.Dialer{
 			Timeout:   30 * time.Second,
 			KeepAlive: 30 * time.Second,
 		}
-		return d.DialContext(ctx, "tcp4", addr)
+		return d.DialContext(ctx, network, addr)
 	}
 
 	// Create pgxpool connection
