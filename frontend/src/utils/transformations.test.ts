@@ -172,24 +172,24 @@ describe('transformations.excelDate', () => {
 })
 
 describe('parseSmartDate', () => {
-  it('should parse ISO format (YYYY-MM-DD)', () => {
+  it('should parse ISO format (YYYY-MM-DD) as UTC', () => {
     const date = parseSmartDate('2023-12-25')
     expect(date).toBeInstanceOf(Date)
-    expect(date?.getFullYear()).toBe(2023)
-    expect(date?.getMonth()).toBe(11) // December = 11
-    expect(date?.getDate()).toBe(25)
+    expect(date?.getUTCFullYear()).toBe(2023)
+    expect(date?.getUTCMonth()).toBe(11) // December = 11
+    expect(date?.getUTCDate()).toBe(25)
   })
 
-  it('should parse DD/MM/YYYY format', () => {
+  it('should parse DD/MM/YYYY format as UTC', () => {
     const date = parseSmartDate('25/12/2023')
     expect(date).toBeInstanceOf(Date)
-    expect(date?.getFullYear()).toBe(2023)
+    expect(date?.getUTCFullYear()).toBe(2023)
   })
 
-  it('should parse DD-MM-YYYY format', () => {
+  it('should parse DD-MM-YYYY format as UTC', () => {
     const date = parseSmartDate('25-12-2023')
     expect(date).toBeInstanceOf(Date)
-    expect(date?.getFullYear()).toBe(2023)
+    expect(date?.getUTCFullYear()).toBe(2023)
   })
 
   it('should handle natural date parsing', () => {
@@ -210,24 +210,24 @@ describe('parseSmartDate', () => {
 
 describe('formatDateISO', () => {
   it('should format date as YYYY-MM-DD', () => {
-    const date = new Date(2023, 11, 25) // December 25, 2023
+    const date = new Date(Date.UTC(2023, 11, 25)) // December 25, 2023 UTC
     expect(formatDateISO(date)).toBe('2023-12-25')
   })
 
   it('should pad single-digit months and days', () => {
-    const date = new Date(2023, 0, 5) // January 5, 2023
+    const date = new Date(Date.UTC(2023, 0, 5)) // January 5, 2023 UTC
     expect(formatDateISO(date)).toBe('2023-01-05')
   })
 })
 
 describe('formatDateTimeISO', () => {
   it('should format datetime as YYYY-MM-DD HH:MM:SS', () => {
-    const date = new Date(2023, 11, 25, 15, 30, 45)
+    const date = new Date(Date.UTC(2023, 11, 25, 15, 30, 45)) // UTC time
     expect(formatDateTimeISO(date)).toBe('2023-12-25 15:30:45')
   })
 
   it('should pad single-digit values', () => {
-    const date = new Date(2023, 0, 5, 9, 5, 3)
+    const date = new Date(Date.UTC(2023, 0, 5, 9, 5, 3)) // UTC time
     expect(formatDateTimeISO(date)).toBe('2023-01-05 09:05:03')
   })
 })
@@ -236,17 +236,17 @@ describe('parseExcelDate', () => {
   it('should convert Excel serial date 1 to January 1, 1900', () => {
     const date = parseExcelDate(1)
     expect(date).toBeInstanceOf(Date)
-    expect(date?.getFullYear()).toBe(1900)
-    expect(date?.getMonth()).toBe(0)
-    expect(date?.getDate()).toBe(1)
+    expect(date?.getUTCFullYear()).toBe(1900)
+    expect(date?.getUTCMonth()).toBe(0)
+    expect(date?.getUTCDate()).toBe(1)
   })
 
   it('should convert Excel serial date 44927 to January 1, 2023', () => {
     const date = parseExcelDate(44927)
     expect(date).toBeInstanceOf(Date)
-    expect(date?.getFullYear()).toBe(2023)
-    expect(date?.getMonth()).toBe(0)
-    expect(date?.getDate()).toBe(1)
+    expect(date?.getUTCFullYear()).toBe(2023)
+    expect(date?.getUTCMonth()).toBe(0)
+    expect(date?.getUTCDate()).toBe(1)
   })
 
   it('should handle dates after fake Feb 29, 1900', () => {
@@ -259,9 +259,9 @@ describe('parseExcelDate', () => {
   it('should convert year values to YYYY-01-01', () => {
     const date = parseExcelDate(2023)
     expect(date).toBeInstanceOf(Date)
-    expect(date?.getFullYear()).toBe(2023)
-    expect(date?.getMonth()).toBe(0)
-    expect(date?.getDate()).toBe(1)
+    expect(date?.getUTCFullYear()).toBe(2023)
+    expect(date?.getUTCMonth()).toBe(0)
+    expect(date?.getUTCDate()).toBe(1)
   })
 
   it('should handle year range 1900-2100', () => {
@@ -271,9 +271,9 @@ describe('parseExcelDate', () => {
   })
 
   it('should handle decimal values (dates with time)', () => {
-    const date = parseExcelDate(44927.5) // 2023-01-01 12:00:00
+    const date = parseExcelDate(44927.5) // 2023-01-01 12:00:00 UTC
     expect(date).toBeInstanceOf(Date)
-    expect(date?.getHours()).toBe(12)
+    expect(date?.getUTCHours()).toBe(12)
   })
 
   it('should return null for invalid values', () => {
@@ -291,7 +291,7 @@ describe('parseExcelDate', () => {
   it('should handle string numbers', () => {
     const date = parseExcelDate('44927')
     expect(date).toBeInstanceOf(Date)
-    expect(date?.getFullYear()).toBe(2023)
+    expect(date?.getUTCFullYear()).toBe(2023)
   })
 })
 

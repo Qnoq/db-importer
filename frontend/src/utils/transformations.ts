@@ -192,6 +192,7 @@ export const transformations: Record<TransformationType, Transformation> = {
 
 /**
  * Smart date parsing - tries multiple formats
+ * Returns dates in UTC to avoid timezone ambiguities
  */
 export function parseSmartDate(value: string): Date | null {
   if (!value || typeof value !== 'string') return null
@@ -201,33 +202,54 @@ export function parseSmartDate(value: string): Date | null {
   // Try ISO format first (YYYY-MM-DD)
   const isoMatch = cleaned.match(/^(\d{4})-(\d{2})-(\d{2})/)
   if (isoMatch) {
-    return new Date(cleaned)
+    const [, year, month, day] = isoMatch
+    // Parse as UTC to avoid timezone shifts
+    return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)))
   }
 
   // Try DD/MM/YYYY or MM/DD/YYYY
   const slashMatch = cleaned.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/)
   if (slashMatch) {
     const [, first, second, year] = slashMatch
-    // Try both interpretations
-    const euDate = new Date(`${year}-${second}-${first}`)
-    const usDate = new Date(`${year}-${first}-${second}`)
+    const firstNum = parseInt(first)
+    const secondNum = parseInt(second)
+    const yearNum = parseInt(year)
 
-    // Return the valid one
-    if (!isNaN(euDate.getTime())) return euDate
-    if (!isNaN(usDate.getTime())) return usDate
+    // Validate ranges
+    if (firstNum < 1 || firstNum > 31 || secondNum < 1 || secondNum > 12) {
+      return null
+    }
+
+    // Try EU format (DD/MM/YYYY) first
+    const euDate = new Date(Date.UTC(yearNum, secondNum - 1, firstNum))
+    if (!isNaN(euDate.getTime()) && euDate.getUTCDate() === firstNum && euDate.getUTCMonth() === secondNum - 1) {
+      return euDate
+    }
+
+    // Try US format (MM/DD/YYYY) if first/second could be swapped
+    if (firstNum <= 12 && secondNum <= 31) {
+      const usDate = new Date(Date.UTC(yearNum, firstNum - 1, secondNum))
+      if (!isNaN(usDate.getTime()) && usDate.getUTCDate() === secondNum && usDate.getUTCMonth() === firstNum - 1) {
+        return usDate
+      }
+    }
+
+    return null
   }
 
   // Try DD-MM-YYYY
   const dashMatch = cleaned.match(/^(\d{1,2})-(\d{1,2})-(\d{4})/)
   if (dashMatch) {
     const [, day, month, year] = dashMatch
-    return new Date(`${year}-${month}-${day}`)
+    return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)))
   }
 
   // Try natural Date.parse
   const parsed = Date.parse(cleaned)
   if (!isNaN(parsed)) {
-    return new Date(parsed)
+    // Convert to UTC date at midnight
+    const date = new Date(parsed)
+    return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
   }
 
   return null
