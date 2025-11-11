@@ -57,7 +57,7 @@ const router = createRouter({
 })
 
 // Navigation guard for protected routes
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore()
 
   // If user appears authenticated, check token status

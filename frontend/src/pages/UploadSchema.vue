@@ -37,7 +37,7 @@
         </label>
         <div
           class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 transition cursor-pointer bg-gray-50"
-          @click="$refs.fileInput?.click()"
+          @click="fileInput?.click()"
           @dragover.prevent
           @drop.prevent="handleDrop"
         >
@@ -180,7 +180,7 @@
         <!-- Continue Button (only show for multiple tables) -->
         <div v-if="store.tables.length > 1" class="flex items-center justify-between pt-6 border-t border-gray-200">
           <button
-            @click="$refs.fileInput?.click()"
+            @click="fileInput?.click()"
             class="text-blue-600 hover:text-blue-700 font-medium flex items-center transition"
           >
             <i class="pi pi-refresh mr-2"></i>

@@ -29,31 +29,15 @@ export interface AuthState {
 const STORAGE_KEY = 'db-importer-auth'
 const STORAGE_VERSION = '1.0'
 
-// Determine which storage to use
-function getStorage(): Storage {
-  // Try to load from both storages and return the one that has data
-  const localData = localStorage.getItem(STORAGE_KEY)
-  const sessionData = sessionStorage.getItem(STORAGE_KEY)
-
-  // If both have data, prefer sessionStorage (more restrictive)
-  if (sessionData) return sessionStorage
-  if (localData) return localStorage
-
-  // Default to sessionStorage if no data exists yet
-  return sessionStorage
-}
-
 // Load auth state from storage (checks both localStorage and sessionStorage)
 function loadFromStorage(): Partial<AuthState> | null {
   try {
     // Check sessionStorage first (takes precedence)
     let stored = sessionStorage.getItem(STORAGE_KEY)
-    let storage: Storage = sessionStorage
 
     // If not in session, check localStorage
     if (!stored) {
       stored = localStorage.getItem(STORAGE_KEY)
-      storage = localStorage
     }
 
     if (!stored) return null
