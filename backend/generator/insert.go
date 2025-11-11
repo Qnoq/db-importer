@@ -121,6 +121,7 @@ func formatValueByType(value interface{}, sqlType string) string {
 
 // isNumericType checks if the SQL type is numeric
 func isNumericType(sqlType string) bool {
+	sqlType = strings.ToLower(sqlType)
 	numericTypes := []string{
 		"int", "integer", "tinyint", "smallint", "mediumint", "bigint",
 		"decimal", "numeric", "float", "double", "real",
@@ -137,11 +138,13 @@ func isNumericType(sqlType string) bool {
 
 // isBooleanType checks if the SQL type is boolean
 func isBooleanType(sqlType string) bool {
+	sqlType = strings.ToLower(sqlType)
 	return strings.Contains(sqlType, "bool") || strings.Contains(sqlType, "bit")
 }
 
 // isDateTimeType checks if the SQL type is date/time
 func isDateTimeType(sqlType string) bool {
+	sqlType = strings.ToLower(sqlType)
 	dateTypes := []string{"date", "time", "timestamp", "datetime", "year"}
 	for _, dateType := range dateTypes {
 		if strings.Contains(sqlType, dateType) {
