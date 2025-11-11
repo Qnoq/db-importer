@@ -303,20 +303,6 @@ const handleContinueAsGuest = () => {
   border-color: #ef4444;
 }
 
-:deep(.p-checkbox) {
-  border: 2px solid #d1d5db;
-  border-radius: 4px;
-}
-
-:deep(.p-checkbox:hover) {
-  border-color: #9ca3af;
-}
-
-:deep(.p-checkbox.p-highlight) {
-  background: #3b82f6;
-  border-color: #3b82f6;
-}
-
 :deep(.p-button) {
   border-radius: 8px;
   padding: 0.75rem 1rem;
