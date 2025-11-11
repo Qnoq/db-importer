@@ -4,6 +4,9 @@ name: Deploy to Production VPS
 # This gives you full control over when to deploy to production
 on:
   workflow_dispatch:  # Manual trigger only from GitHub UI
+  push:
+    branches:
+      - main  # Auto-deploy when pushing to main
 
 jobs:
   deploy:
@@ -14,33 +17,54 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
+      - name: 🔑 Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
       - name: 🚀 Deploy to Hostinger VPS
-        uses: hostinger/deploy-on-vps@v2
-        with:
-          api-key: ${{ secrets.HOSTINGER_API_KEY }}
-          virtual-machine: ${{ vars.HOSTINGER_VM_ID }}
-          docker-compose-path: docker-compose.yml
-          environment-variables: |
-            PORT=${{ vars.PORT || '8080' }}
-            ALLOWED_ORIGINS=${{ vars.ALLOWED_ORIGINS }}
-            VITE_API_URL=${{ vars.VITE_API_URL }}
-            MAX_UPLOAD_SIZE=${{ vars.MAX_UPLOAD_SIZE || '52428800' }}
-            DEBUG_LOG=${{ vars.DEBUG_LOG || 'false' }}
-            RATE_LIMIT_ENABLED=${{ vars.RATE_LIMIT_ENABLED || 'true' }}
-            RATE_LIMIT_REQUESTS=${{ vars.RATE_LIMIT_REQUESTS || '50' }}
-            RATE_LIMIT_WINDOW=${{ vars.RATE_LIMIT_WINDOW || '60' }}
-            DATABASE_URL=${{ secrets.DATABASE_URL }}
-            DB_MAX_OPEN_CONNS=${{ vars.DB_MAX_OPEN_CONNS || '25' }}
-            DB_MAX_IDLE_CONNS=${{ vars.DB_MAX_IDLE_CONNS || '5' }}
-            DB_CONN_MAX_LIFETIME=${{ vars.DB_CONN_MAX_LIFETIME || '5m' }}
-            DB_CONN_MAX_IDLE_TIME=${{ vars.DB_CONN_MAX_IDLE_TIME || '10m' }}
-            JWT_ACCESS_SECRET=${{ secrets.JWT_ACCESS_SECRET }}
-            JWT_REFRESH_SECRET=${{ secrets.JWT_REFRESH_SECRET }}
-            JWT_ACCESS_EXPIRY=${{ vars.JWT_ACCESS_EXPIRY || '15m' }}
-            JWT_REFRESH_EXPIRY=${{ vars.JWT_REFRESH_EXPIRY || '168h' }}
-            SUPABASE_URL=${{ vars.SUPABASE_URL }}
-            SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-            SUPABASE_PROJECT_REF=${{ vars.SUPABASE_PROJECT_REF }}
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/docker/db-importer' }}
+        run: |
+          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST << 'ENDSSH'
+            set -e
+
+            echo "📍 Navigating to deployment directory..."
+            cd ${{ vars.DEPLOY_PATH || '/docker/db-importer' }}
+
+            echo "📦 Pulling latest code from GitHub..."
+            git fetch --all
+            git reset --hard origin/main
+            git pull origin main
+
+            echo "🛑 Stopping existing containers..."
+            docker compose down
+
+            echo "🏗️  Building new images..."
+            docker compose build --no-cache
+
+            echo "🚀 Starting containers..."
+            docker compose up -d
+
+            echo "⏳ Waiting for services to be healthy..."
+            sleep 10
+
+            echo "📊 Checking container status..."
+            docker compose ps
+
+            echo "📝 Showing recent logs..."
+            docker compose logs --tail=50
+
+            echo "✅ Deployment completed successfully!"
+          ENDSSH
+
+      - name: 🧹 Cleanup
+        if: always()
+        run: rm -f ~/.ssh/id_rsa
 
       - name: ✅ Deployment Complete
         if: success()
