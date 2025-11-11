@@ -1,0 +1,728 @@
+basePath: /
+definitions:
+  db-importer_internal_models.CreateImportRequest:
+    properties:
+      errorCount:
+        minimum: 0
+        type: integer
+      generatedSql:
+        description: Will be compressed before storage
+        type: string
+      metadata:
+        $ref: '#/definitions/db-importer_internal_models.ImportMetadata'
+      rowCount:
+        minimum: 0
+        type: integer
+      status:
+        allOf:
+        - $ref: '#/definitions/db-importer_internal_models.ImportStatus'
+        enum:
+        - success
+        - warning
+        - failed
+      tableName:
+        maxLength: 255
+        minLength: 1
+        type: string
+      warningCount:
+        minimum: 0
+        type: integer
+    required:
+    - generatedSql
+    - rowCount
+    - status
+    - tableName
+    type: object
+  db-importer_internal_models.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      firstName:
+        maxLength: 100
+        minLength: 1
+        type: string
+      lastName:
+        maxLength: 100
+        minLength: 1
+        type: string
+      password:
+        description: bcrypt max 72 bytes
+        maxLength: 72
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  db-importer_internal_models.ImportMetadata:
+    properties:
+      databaseType:
+        description: mysql, postgresql, etc.
+        type: string
+      extra:
+        additionalProperties: true
+        description: any additional data
+        type: object
+      mappingSummary:
+        additionalProperties:
+          type: string
+        description: column -> source column
+        type: object
+      sourceFileName:
+        type: string
+      transformations:
+        description: list of transformations applied
+        items:
+          type: string
+        type: array
+      validationErrors:
+        description: error messages if any
+        items:
+          type: string
+        type: array
+      validationWarnings:
+        description: warning messages if any
+        items:
+          type: string
+        type: array
+    type: object
+  db-importer_internal_models.ImportStatus:
+    enum:
+    - success
+    - warning
+    - failed
+    type: string
+    x-enum-varnames:
+    - ImportStatusSuccess
+    - ImportStatusWarning
+    - ImportStatusFailed
+  db-importer_internal_models.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  db-importer_internal_models.RefreshTokenRequest:
+    properties:
+      refreshToken:
+        type: string
+    required:
+    - refreshToken
+    type: object
+  generator.FieldInfo:
+    properties:
+      name:
+        type: string
+      nullable:
+        type: boolean
+      type:
+        type: string
+    type: object
+  internal_handlers.ErrorResponse:
+    properties:
+      detail:
+        type: string
+      error:
+        type: string
+      errors:
+        items:
+          type: string
+        type: array
+    type: object
+  internal_handlers.GenerateSQLRequest:
+    properties:
+      fields:
+        items:
+          $ref: '#/definitions/generator.FieldInfo'
+        type: array
+      mapping:
+        additionalProperties:
+          type: string
+        type: object
+      rows:
+        items:
+          items: {}
+          type: array
+        type: array
+      table:
+        type: string
+    type: object
+  internal_handlers.ParseSchemaResponse:
+    properties:
+      tables:
+        items:
+          $ref: '#/definitions/parser.Table'
+        type: array
+    type: object
+  parser.Field:
+    properties:
+      name:
+        type: string
+      nullable:
+        type: boolean
+      type:
+        type: string
+    type: object
+  parser.Table:
+    properties:
+      fields:
+        items:
+          $ref: '#/definitions/parser.Field'
+        type: array
+      name:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact:
+    name: API Support
+    url: https://github.com/Qnoq/db-importer
+  description: |-
+    A secure web application that generates type-safe SQL INSERT statements from Excel/CSV files without requiring direct database connections.
+    Upload your SQL schema, map your data, and generate validated SQL statements.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: DB Importer API
+  version: "1.0"
+paths:
+  /api/v1/imports:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Save a new import record with generated SQL and metadata
+        Stores table name, row count, SQL (gzipped), mappings, transformations, and validation results
+      parameters:
+      - description: Import details (table, rows, SQL, metadata)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/db-importer_internal_models.CreateImportRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Import created successfully with import data
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request or validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized - missing or invalid token
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create import record
+      tags:
+      - Imports
+  /api/v1/imports/delete:
+    delete:
+      description: Delete a specific import record by ID
+      parameters:
+      - description: Import UUID to delete
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Import deleted successfully
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid or missing import ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Import not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete import
+      tags:
+      - Imports
+  /api/v1/imports/get:
+    get:
+      description: |-
+        Retrieve import metadata by ID (without SQL content)
+        Returns table name, row count, status, timestamps, and statistics
+      parameters:
+      - description: Import UUID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Import details
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid or missing import ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Import not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get import details
+      tags:
+      - Imports
+  /api/v1/imports/list:
+    get:
+      description: List imports with pagination, filtering by table/status, and sorting
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Page size, max 100 (default: 20)'
+        in: query
+        name: pageSize
+        type: integer
+      - description: Filter by table name
+        in: query
+        name: tableName
+        type: string
+      - description: Filter by status (success/warning/failed)
+        in: query
+        name: status
+        type: string
+      - description: Sort field (createdAt/tableName/rowCount)
+        in: query
+        name: sortBy
+        type: string
+      - description: Sort order (asc/desc)
+        in: query
+        name: sortOrder
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Paginated list of imports
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid query parameters
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List user imports
+      tags:
+      - Imports
+  /api/v1/imports/old:
+    delete:
+      description: 'Delete imports older than specified number of days (default: 30)'
+      parameters:
+      - description: 'Delete imports older than this many days (default: 30)'
+        in: query
+        name: days
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Number of imports deleted
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete old imports
+      tags:
+      - Imports
+  /api/v1/imports/sql:
+    get:
+      description: Retrieve import details including the generated SQL content (decompressed)
+      parameters:
+      - description: Import UUID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Import details with SQL content
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid or missing import ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Import not found
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get import with SQL
+      tags:
+      - Imports
+  /api/v1/imports/stats:
+    get:
+      description: Retrieve user's import statistics (total count, success/warning/failed
+        counts, total rows)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Import statistics
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get import statistics
+      tags:
+      - Imports
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user with email and password, returns JWT access and
+        refresh tokens
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/db-importer_internal_models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login successful with tokens and user data
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Invalid credentials
+          schema:
+            additionalProperties: true
+            type: object
+        "403":
+          description: User account not active
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User login
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Invalidate the refresh token to log out the user
+      parameters:
+      - description: Refresh token to invalidate
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/db-importer_internal_models.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout successful
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: User logout
+      tags:
+      - Auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Generate new access and refresh tokens using a valid refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/db-importer_internal_models.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tokens refreshed successfully with new tokens
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Invalid or expired refresh token
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Refresh access token
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Create a new user account with email and password
+        Password must be at least 8 characters. Email must be unique.
+      parameters:
+      - description: User registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/db-importer_internal_models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: User created successfully with user data
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body or validation failed
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: Email already exists
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register new user
+      tags:
+      - Auth
+  /generate-sql:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Generate type-safe SQL INSERT statements from mapped data rows
+        Validates data types, constraints (NOT NULL, length, ranges), and produces production-ready SQL
+      parameters:
+      - description: Table name, column mappings, data rows, and field definitions
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.GenerateSQLRequest'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Generated SQL INSERT statements (plain text)
+          schema:
+            type: string
+        "400":
+          description: Invalid request (missing fields, empty data)
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "422":
+          description: Data validation failed (type mismatches, constraint violations)
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      summary: Generate SQL INSERT statements
+      tags:
+      - SQL
+  /health:
+    get:
+      description: Check API server health, version, and database connection status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Health status, version, database status, and configuration
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check
+      tags:
+      - Health
+  /parse-schema:
+    post:
+      consumes:
+      - multipart/form-data
+      description: |-
+        Upload a SQL dump file (.sql) to extract table definitions and column information
+        Supports MySQL and PostgreSQL schemas using TiDB parser with regex fallbacks
+      parameters:
+      - description: SQL schema file (.sql)
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully parsed schema with table definitions
+          schema:
+            $ref: '#/definitions/internal_handlers.ParseSchemaResponse'
+        "400":
+          description: Invalid request (bad file, empty file, or no tables found)
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      summary: Parse SQL schema from file
+      tags:
+      - Schema
+  /validate:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        Validate data rows against field type definitions without generating SQL
+        Checks data types, NOT NULL constraints, length limits, and numeric ranges
+      parameters:
+      - description: Data rows, field definitions, and column mappings
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handlers.GenerateSQLRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Validation results with valid flag and error list
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/internal_handlers.ErrorResponse'
+      summary: Validate data against schema
+      tags:
+      - SQL
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

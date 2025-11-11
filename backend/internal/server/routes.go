@@ -4,6 +4,9 @@ import (
 	"db-importer/logger"
 	"db-importer/middleware"
 	"net/http"
+
+	_ "db-importer/docs" // Import swagger docs
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 // setupRoutes configures all HTTP routes
@@ -22,6 +25,9 @@ func (s *Server) setupRoutes(mux *http.ServeMux) {
 func (s *Server) setupPublicRoutes(mux *http.ServeMux) {
 	// Health check - no middlewares needed
 	mux.HandleFunc("/health", s.publicHandler.Health)
+
+	// Swagger documentation
+	mux.HandleFunc("/swagger/", httpSwagger.WrapHandler)
 
 	// Main endpoints with CORS, logging, and rate limiting
 	corsAndLog := s.withCORS(s.withLogging)

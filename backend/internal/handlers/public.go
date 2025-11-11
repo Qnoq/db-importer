@@ -51,6 +51,17 @@ type ErrorResponse struct {
 }
 
 // ParseSchema handles the /parse-schema endpoint
+// @Summary      Parse SQL schema from file
+// @Description  Upload a SQL dump file (.sql) to extract table definitions and column information
+// @Description  Supports MySQL and PostgreSQL schemas using TiDB parser with regex fallbacks
+// @Tags         Schema
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        file  formData  file  true  "SQL schema file (.sql)"
+// @Success      200   {object}  ParseSchemaResponse  "Successfully parsed schema with table definitions"
+// @Failure      400   {object}  ErrorResponse        "Invalid request (bad file, empty file, or no tables found)"
+// @Failure      500   {object}  ErrorResponse        "Internal server error"
+// @Router       /parse-schema [post]
 func (h *PublicHandler) ParseSchema(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		errors.RespondWithError(w, errors.NewBadRequestError("Method not allowed", "Only POST method is supported"))
@@ -138,6 +149,18 @@ func (h *PublicHandler) ParseSchema(w http.ResponseWriter, r *http.Request) {
 }
 
 // GenerateSQL handles the /generate-sql endpoint
+// @Summary      Generate SQL INSERT statements
+// @Description  Generate type-safe SQL INSERT statements from mapped data rows
+// @Description  Validates data types, constraints (NOT NULL, length, ranges), and produces production-ready SQL
+// @Tags         SQL
+// @Accept       json
+// @Produce      plain
+// @Param        request  body      GenerateSQLRequest  true  "Table name, column mappings, data rows, and field definitions"
+// @Success      200      {string}  string              "Generated SQL INSERT statements (plain text)"
+// @Failure      400      {object}  ErrorResponse       "Invalid request (missing fields, empty data)"
+// @Failure      422      {object}  ErrorResponse       "Data validation failed (type mismatches, constraint violations)"
+// @Failure      500      {object}  ErrorResponse       "Internal server error"
+// @Router       /generate-sql [post]
 func (h *PublicHandler) GenerateSQL(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		errors.RespondWithError(w, errors.NewBadRequestError("Method not allowed", "Only POST method is supported"))
@@ -215,6 +238,16 @@ func (h *PublicHandler) GenerateSQL(w http.ResponseWriter, r *http.Request) {
 }
 
 // Validate handles the /validate endpoint
+// @Summary      Validate data against schema
+// @Description  Validate data rows against field type definitions without generating SQL
+// @Description  Checks data types, NOT NULL constraints, length limits, and numeric ranges
+// @Tags         SQL
+// @Accept       json
+// @Produce      json
+// @Param        request  body      GenerateSQLRequest  true  "Data rows, field definitions, and column mappings"
+// @Success      200      {object}  map[string]interface{}  "Validation results with valid flag and error list"
+// @Failure      400      {object}  ErrorResponse           "Invalid request body"
+// @Router       /validate [post]
 func (h *PublicHandler) Validate(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		errors.RespondWithError(w, errors.NewBadRequestError("Method not allowed", "Only POST method is supported"))
@@ -240,6 +273,12 @@ func (h *PublicHandler) Validate(w http.ResponseWriter, r *http.Request) {
 }
 
 // Health handles the /health endpoint
+// @Summary      Health check
+// @Description  Check API server health, version, and database connection status
+// @Tags         Health
+// @Produce      json
+// @Success      200  {object}  map[string]interface{}  "Health status, version, database status, and configuration"
+// @Router       /health [get]
 func (h *PublicHandler) Health(w http.ResponseWriter, r *http.Request) {
 	// Check database health if available
 	dbStatus := "not_configured"
