@@ -19,6 +19,7 @@ frontend/dist/
 frontend/dist-ssr/
 frontend/.vite/
 frontend/*.local
+frontend/coverage/
 
 # Logs
 *.log
