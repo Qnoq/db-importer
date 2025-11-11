@@ -29,7 +29,7 @@ build:
 ## run: Run the application
 run:
 	@echo "Running $(BINARY_NAME)..."
-	go run .
+	go run ./cmd/server
 
 ## dev: Run in development mode
 dev:
@@ -39,7 +39,7 @@ dev:
 	else \
 		echo "Air not found. Install it with: go install github.com/cosmtrek/air@latest"; \
 		echo "Running with go run instead..."; \
-		go run .; \
+		go run ./cmd/server; \
 	fi
 
 ## test: Run tests
