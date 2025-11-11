@@ -235,24 +235,26 @@ export function parseSmartDate(value: string): Date | null {
 
 /**
  * Format date as ISO (YYYY-MM-DD)
+ * Uses UTC to avoid timezone issues
  */
 export function formatDateISO(date: Date): string {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
+  const year = date.getUTCFullYear()
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(date.getUTCDate()).padStart(2, '0')
   return `${year}-${month}-${day}`
 }
 
 /**
  * Format date and time as ISO (YYYY-MM-DD HH:MM:SS)
+ * Uses UTC to avoid timezone issues
  */
 export function formatDateTimeISO(date: Date): string {
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-  const seconds = String(date.getSeconds()).padStart(2, '0')
+  const year = date.getUTCFullYear()
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(date.getUTCDate()).padStart(2, '0')
+  const hours = String(date.getUTCHours()).padStart(2, '0')
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0')
+  const seconds = String(date.getUTCSeconds()).padStart(2, '0')
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
@@ -279,8 +281,8 @@ export function parseExcelDate(value: unknown): Date | null {
   // SMART DETECTION: If it looks like a year (between 1900 and 2100), treat as year
   // This handles cases where users have just "2023" in their date column
   if (num >= 1900 && num <= 2100 && Number.isInteger(num)) {
-    // It's a year! Convert to January 1st of that year
-    return new Date(num, 0, 1, 0, 0, 0, 0)
+    // It's a year! Convert to January 1st of that year (UTC to avoid timezone issues)
+    return new Date(Date.UTC(num, 0, 1, 0, 0, 0, 0))
   }
 
   // Check if it's a valid Excel date number (between 1 and ~50000 for reasonable dates)
@@ -290,7 +292,8 @@ export function parseExcelDate(value: unknown): Date | null {
   // Excel incorrectly treats 1900 as a leap year (serial 60 = fake Feb 29, 1900)
   // For dates after Feb 29, 1900 (serial > 60), we need to subtract an extra day
 
-  const excelEpoch = new Date(1900, 0, 1) // January 1, 1900
+  // Use UTC to avoid historical timezone issues (timezones weren't standardized in 1900)
+  const excelEpochMs = Date.UTC(1900, 0, 1) // January 1, 1900 00:00:00 UTC
 
   // Calculate days to add from epoch
   // Serial 1 = Jan 1, 1900, so we subtract 1
@@ -299,7 +302,7 @@ export function parseExcelDate(value: unknown): Date | null {
 
   // Calculate the date
   const millisecondsPerDay = 24 * 60 * 60 * 1000
-  const dateMs = excelEpoch.getTime() + daysToAdd * millisecondsPerDay
+  const dateMs = excelEpochMs + daysToAdd * millisecondsPerDay
 
   const date = new Date(dateMs)
 
