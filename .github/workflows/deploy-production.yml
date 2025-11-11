@@ -4,9 +4,6 @@ name: Deploy to Production VPS
 # This gives you full control over when to deploy to production
 on:
   workflow_dispatch:  # Manual trigger only from GitHub UI
-  push:
-    branches:
-      - main  # Auto-deploy when pushing to main
 
 jobs:
   deploy:
@@ -17,20 +14,35 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
+      - name: ❓ Validate Deployment Secrets
+        run: |
+          echo "Checking required secrets..."
+          if [[ -z "${{ secrets.DEPLOY_KEY }}" ]]; then
+            echo "❌ DEPLOY_KEY secret is not set!"
+            exit 1
+          fi
+          if [[ -z "${{ vars.HOSTINGER_VM_ID }}" ]]; then
+            echo "❌ HOSTINGER_VM_ID variable is not set!"
+            exit 1
+          fi
+          echo "✅ All deployment secrets are configured"
+          echo "Deploying to VM ID: ${{ vars.HOSTINGER_VM_ID }}"
+
       - name: 🔑 Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          # Hostinger VM hostname format
+          SSH_HOST="srv${{ vars.HOSTINGER_VM_ID }}.hstgr.cloud"
+          echo "SSH_HOST=$SSH_HOST" >> $GITHUB_ENV
+          ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
 
       - name: 🚀 Deploy to Hostinger VPS
         env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
           DEPLOY_PATH: ${{ vars.DEPLOY_PATH || '/docker/db-importer' }}
         run: |
-          ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST << 'ENDSSH'
+          ssh -o StrictHostKeyChecking=no root@$SSH_HOST << 'ENDSSH'
             set -e
 
             echo "📍 Navigating to deployment directory..."
