@@ -4,54 +4,67 @@
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-16">
-          <div class="flex items-center space-x-6">
-            <a @click="handleNewImport" class="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer">
-              <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-md">
-                <i class="pi pi-database text-white text-xl"></i>
+          <!-- Left: Logo + Navigation -->
+          <div class="flex items-center space-x-8">
+            <!-- Compact Logo -->
+            <a @click="handleNewImport" class="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer group">
+              <div class="w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
+                <i class="pi pi-database text-white text-lg"></i>
               </div>
-              <div>
-                <h1 class="text-xl font-bold text-gray-900">
-                  SQL Data Importer
-                </h1>
-                <p class="text-xs text-gray-500">Import data safely & efficiently</p>
-              </div>
+              <h1 class="text-lg font-bold text-gray-900">
+                SQL Importer
+              </h1>
             </a>
 
             <!-- Navigation Menu for Authenticated Users -->
-            <nav v-if="authStore.isAuthenticated" class="hidden md:flex items-center space-x-4">
+            <nav v-if="authStore.isAuthenticated" class="hidden md:flex items-center space-x-1">
               <a
                 @click="handleNewImport"
-                class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors cursor-pointer"
-                :class="{ 'text-blue-600': router.currentRoute.value.path === '/' }"
+                class="px-4 py-2 text-sm font-medium rounded-lg transition-all cursor-pointer"
+                :class="router.currentRoute.value.path === '/'
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
               >
+                <i class="pi pi-plus-circle mr-2"></i>
                 New Import
               </a>
               <router-link
                 to="/history"
-                class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
-                active-class="text-blue-600"
+                class="px-4 py-2 text-sm font-medium rounded-lg transition-all"
+                :class="router.currentRoute.value.path === '/history'
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
               >
+                <i class="pi pi-history mr-2"></i>
                 History
               </router-link>
             </nav>
           </div>
 
-          <!-- Authentication Actions -->
-          <div class="flex items-center space-x-4">
+          <!-- Right: Authentication Actions -->
+          <div class="flex items-center space-x-3">
             <!-- Authenticated User Menu -->
-            <div v-if="authStore.isAuthenticated" class="flex items-center space-x-2">
+            <div v-if="authStore.isAuthenticated" class="flex items-center space-x-3">
+              <div class="hidden md:flex items-center space-x-3 px-3 py-1.5 rounded-lg bg-gray-50">
+                <Avatar
+                  :label="userInitials"
+                  class="bg-blue-600 text-white"
+                  shape="circle"
+                  size="normal"
+                />
+                <div>
+                  <p class="text-sm font-medium text-gray-900">
+                    {{ authStore.userDisplayName }}
+                  </p>
+                  <p class="text-xs text-gray-500">{{ authStore.user?.email }}</p>
+                </div>
+              </div>
               <Avatar
                 :label="userInitials"
-                class="bg-blue-600 text-white"
+                class="md:hidden bg-blue-600 text-white"
                 shape="circle"
                 size="normal"
               />
-              <div class="hidden md:block">
-                <p class="text-sm font-medium text-gray-900">
-                  {{ authStore.userDisplayName }}
-                </p>
-                <p class="text-xs text-gray-500">{{ authStore.user?.email }}</p>
-              </div>
               <Button
                 icon="pi pi-sign-out"
                 text
@@ -59,30 +72,26 @@
                 severity="secondary"
                 @click="handleLogout"
                 v-tooltip.bottom="'Sign Out'"
+                class="hover:bg-gray-100"
               />
             </div>
 
-            <!-- Guest Mode: Badge + Login/Register Buttons -->
-            <div v-else class="flex items-center space-x-3">
-              <!-- Guest Mode Badge -->
-              <Tag severity="secondary" value="Guest Mode" icon="pi pi-user" class="hidden sm:flex" />
-
-              <!-- Login/Register Buttons -->
-              <div class="flex items-center space-x-2">
-                <Button
-                  label="Sign In"
-                  icon="pi pi-sign-in"
-                  text
-                  @click="router.push('/login')"
-                  class="hidden sm:inline-flex"
-                />
-                <Button
-                  label="Sign Up"
-                  icon="pi pi-user-plus"
-                  @click="router.push('/register')"
-                  size="small"
-                />
-              </div>
+            <!-- Guest: Login/Register Buttons -->
+            <div v-else class="flex items-center space-x-2">
+              <Button
+                label="Sign In"
+                icon="pi pi-sign-in"
+                text
+                @click="router.push('/login')"
+                class="hidden sm:inline-flex text-gray-700 hover:text-gray-900"
+              />
+              <Button
+                label="Sign Up"
+                icon="pi pi-user-plus"
+                @click="router.push('/register')"
+                severity="info"
+                size="small"
+              />
             </div>
           </div>
         </div>
