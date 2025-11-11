@@ -216,11 +216,11 @@ func (r *ImportRepository) GetStats(ctx context.Context, userID uuid.UUID) (*mod
 	`
 
 	var stats struct {
-		TotalImports   int        `db:"total_imports"`
-		TotalRows      int64      `db:"total_rows"`
-		SuccessCount   int        `db:"success_count"`
-		WarningCount   int        `db:"warning_count"`
-		FailedCount    int        `db:"failed_count"`
+		TotalImports   int           `db:"total_imports"`
+		TotalRows      int64         `db:"total_rows"`
+		SuccessCount   int           `db:"success_count"`
+		WarningCount   int           `db:"warning_count"`
+		FailedCount    int           `db:"failed_count"`
 		LastImportDate *sql.NullTime `db:"last_import_date"`
 	}
 

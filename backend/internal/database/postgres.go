@@ -14,8 +14,8 @@ import (
 
 // DB wraps the database connection
 type DB struct {
-	Pool  *pgxpool.Pool
-	Sqlx  *sqlx.DB
+	Pool *pgxpool.Pool
+	Sqlx *sqlx.DB
 }
 
 // Config holds database configuration

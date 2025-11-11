@@ -371,7 +371,7 @@ func (h *ImportHandler) DeleteOldImports(w http.ResponseWriter, r *http.Request)
 	}
 
 	result := map[string]interface{}{
-		"deletedCount": deletedCount,
+		"deletedCount":  deletedCount,
 		"olderThanDays": olderThanDays,
 	}
 

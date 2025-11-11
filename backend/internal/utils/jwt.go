@@ -28,10 +28,10 @@ type JWTConfig struct {
 }
 
 var (
-	ErrInvalidToken   = errors.New("invalid token")
-	ErrExpiredToken   = errors.New("token has expired")
-	ErrInvalidType    = errors.New("invalid token type")
-	ErrInvalidClaims  = errors.New("invalid token claims")
+	ErrInvalidToken  = errors.New("invalid token")
+	ErrExpiredToken  = errors.New("token has expired")
+	ErrInvalidType   = errors.New("invalid token type")
+	ErrInvalidClaims = errors.New("invalid token claims")
 )
 
 // GenerateAccessToken creates a new access token for a user

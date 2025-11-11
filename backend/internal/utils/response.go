@@ -24,9 +24,9 @@ const (
 
 // ErrorResponse represents a standardized error response
 type ErrorResponse struct {
-	Error   string    `json:"error"`
-	Message string    `json:"message"`
-	Code    ErrorCode `json:"code,omitempty"`
+	Error   string      `json:"error"`
+	Message string      `json:"message"`
+	Code    ErrorCode   `json:"code,omitempty"`
 	Details interface{} `json:"details,omitempty"`
 }
 
