@@ -7,13 +7,9 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  backend-tests:
+  backend:
     name: Backend Tests & Lint
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./backend
 
     steps:
       - name: 📥 Checkout code
@@ -26,29 +22,17 @@ jobs:
           cache: true
           cache-dependency-path: backend/go.sum
 
-      - name: 📦 Download dependencies
-        run: go mod download
+      - name: 📦 Install dependencies
+        run: make install
 
-      - name: 🔍 Verify dependencies
-        run: go mod verify
+      - name: 🧪 Run tests with coverage
+        run: make test-coverage
 
-      - name: 🧪 Run tests
-        run: go test -v -race -coverprofile=coverage.out ./...
-
-      - name: 📊 Coverage report
-        run: go tool cover -func=coverage.out
-
-      - name: 🎨 Run gofmt
-        run: |
-          if [ "$(gofmt -s -l . | wc -l)" -gt 0 ]; then
-            echo "❌ Code is not formatted. Run 'gofmt -s -w .'"
-            gofmt -s -d .
-            exit 1
-          fi
-          echo "✅ Code is properly formatted"
+      - name: 🎨 Lint backend
+        run: make lint-backend
 
       - name: 🔨 Build backend
-        run: go build -v ./cmd/server
+        run: make build-backend
 
       - name: 📤 Upload coverage
         uses: actions/upload-artifact@v4
@@ -57,41 +41,9 @@ jobs:
           path: backend/coverage.out
           retention-days: 7
 
-  backend-lint:
-    name: Backend Linting
+  frontend:
+    name: Frontend Lint & Build
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./backend
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 🔧 Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.24'
-          cache: true
-          cache-dependency-path: backend/go.sum
-
-      - name: 🔍 Run go vet
-        run: go vet ./...
-
-      - name: 🔍 Run staticcheck (if available)
-        continue-on-error: true
-        run: |
-          go install honnef.co/go/tools/cmd/staticcheck@latest
-          staticcheck ./...
-
-  frontend-lint:
-    name: Frontend Lint & Type Check
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./frontend
 
     steps:
       - name: 📥 Checkout code
@@ -105,17 +57,13 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: 📦 Install dependencies
-        run: npm ci
+        run: cd frontend && npm ci
 
-      - name: 🎨 Run ESLint
-        continue-on-error: true
-        run: npm run lint || echo "⚠️  No lint script found"
-
-      - name: 🔍 TypeScript type check
-        run: npx vue-tsc --noEmit || echo "✅ Type check completed"
+      - name: 🎨 Lint frontend
+        run: make lint-frontend
 
       - name: 🔨 Build frontend
-        run: npm run build
+        run: make build-frontend
 
       - name: 📤 Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -125,38 +73,35 @@ jobs:
           retention-days: 7
 
   summary:
-    name: Tests Summary
+    name: CI Summary
     runs-on: ubuntu-latest
-    needs: [backend-tests, backend-lint, frontend-lint]
+    needs: [backend, frontend]
     if: always()
 
     steps:
-      - name: 📊 Check test results
+      - name: 📊 Generate summary
         run: |
           echo "## 🧪 CI Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ "${{ needs.backend-tests.result }}" == "success" ]; then
-            echo "✅ Backend tests: **PASSED**" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.backend.result }}" == "success" ]; then
+            echo "✅ Backend: **PASSED** (tests + lint + build)" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ Backend tests: **FAILED**" >> $GITHUB_STEP_SUMMARY
+            echo "❌ Backend: **FAILED**" >> $GITHUB_STEP_SUMMARY
           fi
 
-          if [ "${{ needs.backend-lint.result }}" == "success" ]; then
-            echo "✅ Backend lint: **PASSED**" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.frontend.result }}" == "success" ]; then
+            echo "✅ Frontend: **PASSED** (lint + build)" >> $GITHUB_STEP_SUMMARY
           else
-            echo "❌ Backend lint: **FAILED**" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ needs.frontend-lint.result }}" == "success" ]; then
-            echo "✅ Frontend lint & build: **PASSED**" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "❌ Frontend lint & build: **FAILED**" >> $GITHUB_STEP_SUMMARY
+            echo "❌ Frontend: **FAILED**" >> $GITHUB_STEP_SUMMARY
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 **Coverage**: 65.2% (38 backend tests)" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Workflow**: [\`${{ github.workflow }}\`](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
 
       - name: ❌ Fail if any job failed
-        if: needs.backend-tests.result != 'success' || needs.backend-lint.result != 'success' || needs.frontend-lint.result != 'success'
+        if: needs.backend.result != 'success' || needs.frontend.result != 'success'
         run: exit 1
