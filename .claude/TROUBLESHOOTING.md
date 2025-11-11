@@ -294,3 +294,103 @@ docker compose -f docker-compose.dev.yml up -d --build frontend
 ```bash
 docker compose -f docker-compose.dev.yml up -d --build backend
 ```
+
+---
+
+## Supabase Database Issues
+
+### 8. Supabase IPv6 Connection Errors
+
+**Symptoms:**
+```
+dial tcp [2a05:...]:5432: connect: cannot assign requested address
+unknown driver DATABASE_URL=postgresql
+failed to connect to user=appuser database=
+Database migrations failed (continuing anyway)
+Failed to connect to database, running in stateless mode
+```
+
+**Cause:**
+Supabase now uses IPv6-only for direct database connections (`db.xxxxx.supabase.co`). If your server/Docker environment doesn't support IPv6, connections will fail.
+
+**Solution: Use Supabase Connection Pooler (IPv4 compatible)**
+
+#### Step 1: Get Connection Pooler URL
+
+1. Go to https://supabase.com/dashboard
+2. Select your project
+3. **Project Settings** → **Database**
+4. Scroll to **Connection pooling**
+5. Copy the **Session mode** URL (port 5432)
+
+It looks like:
+```
+postgresql://postgres.xxxxx:[PASSWORD]@aws-0-region.pooler.supabase.com:5432/postgres
+```
+
+**Important:**
+- Use **Session mode** (port 5432) - required for migrations
+- NOT Transaction mode (port 6543) - doesn't support DDL statements
+
+#### Step 2: Update DATABASE_URL
+
+**In GitHub Secrets** (for GitHub Actions deployment):
+1. Go to repo **Settings** → **Secrets and variables** → **Actions**
+2. Update `DATABASE_URL` secret with the pooler URL
+3. **IMPORTANT:** Only put the URL, NOT `DATABASE_URL=url`
+   - ✅ Correct: `postgresql://postgres.xxxxx:pwd@aws-0-region.pooler.supabase.com:5432/postgres`
+   - ❌ Wrong: `DATABASE_URL=postgresql://...` (causes double `DATABASE_URL=DATABASE_URL=`)
+
+**On your server** (manual configuration):
+```bash
+cd /docker/db-importer
+nano .env
+```
+
+Update the DATABASE_URL line:
+```env
+# BEFORE (IPv6 only - fails)
+DATABASE_URL=postgresql://postgres:pwd@db.xxxxx.supabase.co:5432/postgres
+
+# AFTER (IPv4+IPv6 pooler - works)
+DATABASE_URL=postgresql://postgres.xxxxx:pwd@aws-0-region.pooler.supabase.com:5432/postgres
+```
+
+**Common mistake:** Double `DATABASE_URL=`
+```env
+# ❌ WRONG (causes "unknown driver" error)
+DATABASE_URL=DATABASE_URL=postgresql://...
+
+# ✅ CORRECT
+DATABASE_URL=postgresql://...
+```
+
+#### Step 3: Restart Application
+
+```bash
+docker compose down
+docker compose up -d
+docker compose logs backend -f
+```
+
+You should see:
+```
+✅ Database connection established successfully
+Database migrations completed successfully
+```
+
+#### Benefits of Connection Pooler
+
+✅ **IPv4 + IPv6 support** - Works in any environment
+✅ **Connection pooling** - Better performance for production
+✅ **Free** - Included in all Supabase plans
+✅ **No network config** - No server changes needed
+✅ **Scalable** - Handles many concurrent connections
+
+#### Additional References
+
+- [Medium Article: Supabase IPv6 Connection Issues](https://medium.com/@lhc1990/solving-supabase-ipv6-connection-issues-96f8481f42c1)
+- [Supabase Connection Pooling Docs](https://supabase.com/docs/guides/database/connecting-to-postgres#connection-pooler)
+- See also: `SUPABASE_CONNECTION.md` in project root
+
+---
