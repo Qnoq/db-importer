@@ -12,7 +12,7 @@
         <div class="prose prose-green dark:prose-invert max-w-none px-8 py-6">
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">1. Site Publisher</h2>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               This website is published by SQLSheetr.
             </p>
             <div class="bg-neon-green-50 dark:bg-neon-green-950/20 border border-neon-green-200 dark:border-neon-green-800 rounded-lg p-6 mb-4">
@@ -64,10 +64,10 @@
             <li>Logos and branding elements</li>
             <li>Database schema and architecture</li>
           </ul>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               is the property of SQLSheetr and is protected by international copyright laws.
             </p>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               <strong>Open Source Components:</strong> This service uses open-source libraries and frameworks (Go, Vue.js, PrimeVue, etc.) which retain their respective licenses. The service's proprietary code and implementation remain the exclusive property of SQLSheetr.
             </p>
             <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4">
@@ -79,7 +79,7 @@
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">4. Trademarks</h2>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               "SQLSheetr" and all related logos and service marks are trademarks of SQLSheetr.
           </p>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
@@ -174,17 +174,17 @@
 
         <section class="mb-8">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">12. Modification of Legal Notice</h2>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               SQLSheetr reserves the right to modify this legal notice at any time. Any changes will be effective immediately upon posting on this page. Your continued use of the website after changes constitutes acceptance of the modified legal notice.
             </p>
           </section>
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">13. Contact</h2>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               For any questions regarding this legal notice or the website, please contact us.
             </p>
-            <p style="color: var(--p-text-color)" mb-4">
+            <p class="mb-4" style="color: var(--p-text-color)">
               <em>Note: Please add specific contact information (email, phone, postal address) as required by law.</em>
             </p>
           </section>
