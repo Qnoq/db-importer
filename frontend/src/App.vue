@@ -21,8 +21,8 @@
                 @click="handleNewImport"
                 class="px-4 py-2 text-sm font-medium rounded-lg transition-all cursor-pointer"
                 :class="router.currentRoute.value.path === '/'
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+                  ? 'bg-neon-green-50 text-neon-green-700 dark:bg-neon-green-500/20 dark:text-neon-green-400'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'"
               >
                 <i class="pi pi-plus-circle mr-2"></i>
                 New Import
@@ -31,8 +31,8 @@
                 to="/history"
                 class="px-4 py-2 text-sm font-medium rounded-lg transition-all"
                 :class="router.currentRoute.value.path === '/history'
-                  ? 'bg-blue-50 text-blue-700'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+                  ? 'bg-neon-green-50 text-neon-green-700 dark:bg-neon-green-500/20 dark:text-neon-green-400'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'"
               >
                 <i class="pi pi-history mr-2"></i>
                 History
@@ -40,27 +40,37 @@
             </nav>
           </div>
 
-          <!-- Right: Authentication Actions -->
+          <!-- Right: Dark Mode Toggle + Authentication Actions -->
           <div class="flex items-center space-x-3">
+            <!-- Dark Mode Toggle -->
+            <Button
+              :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
+              text
+              rounded
+              severity="secondary"
+              @click="toggleDark"
+              v-tooltip.bottom="isDark ? 'Light Mode' : 'Dark Mode'"
+              class="hover:bg-gray-100 dark:hover:bg-gray-800"
+            />
             <!-- Authenticated User Menu -->
             <div v-if="authStore.isAuthenticated" class="flex items-center space-x-3">
-              <div class="hidden md:flex items-center space-x-3 px-3 py-1.5 rounded-lg bg-gray-50">
+              <div class="hidden md:flex items-center space-x-3 px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-800">
                 <Avatar
                   :label="userInitials"
-                  class="bg-blue-600 text-white"
+                  class="bg-neon-green-600 dark:bg-neon-green-500 text-white"
                   shape="circle"
                   size="normal"
                 />
                 <div>
-                  <p class="text-sm font-medium text-gray-900">
+                  <p class="text-sm font-medium text-gray-900 dark:text-white">
                     {{ authStore.userDisplayName }}
                   </p>
-                  <p class="text-xs text-gray-500">{{ authStore.user?.email }}</p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ authStore.user?.email }}</p>
                 </div>
               </div>
               <Avatar
                 :label="userInitials"
-                class="md:hidden bg-blue-600 text-white"
+                class="md:hidden bg-neon-green-600 dark:bg-neon-green-500 text-white"
                 shape="circle"
                 size="normal"
               />
@@ -71,7 +81,7 @@
                 severity="secondary"
                 @click="handleLogout"
                 v-tooltip.bottom="'Sign Out'"
-                class="hover:bg-gray-100"
+                class="hover:bg-gray-100 dark:hover:bg-gray-800"
               />
             </div>
 
@@ -82,13 +92,13 @@
                 icon="pi pi-sign-in"
                 text
                 @click="router.push('/login')"
-                class="hidden sm:inline-flex text-gray-700 hover:text-gray-900"
+                class="hidden sm:inline-flex text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
               />
               <Button
                 label="Sign Up"
                 icon="pi pi-user-plus"
                 @click="router.push('/register')"
-                severity="info"
+                class="bg-neon-green-600 hover:bg-neon-green-700 dark:bg-neon-green-500 dark:hover:bg-neon-green-600 border-neon-green-600 dark:border-neon-green-500"
                 size="small"
               />
             </div>
@@ -101,32 +111,32 @@
       <router-view />
     </main>
 
-    <footer class="py-6 border-t border-gray-200 bg-white">
+    <footer class="py-6 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-colors duration-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col items-center space-y-3">
           <div class="flex items-center space-x-4 text-sm">
             <router-link
               to="/terms-of-service"
-              class="text-gray-600 hover:text-blue-600 transition-colors"
+              class="text-gray-600 dark:text-gray-400 hover:text-neon-green-600 dark:hover:text-neon-green-400 transition-colors"
             >
               Terms of Service
             </router-link>
-            <span class="text-gray-300">•</span>
+            <span class="text-gray-300 dark:text-gray-700">•</span>
             <router-link
               to="/privacy-policy"
-              class="text-gray-600 hover:text-blue-600 transition-colors"
+              class="text-gray-600 dark:text-gray-400 hover:text-neon-green-600 dark:hover:text-neon-green-400 transition-colors"
             >
               Privacy Policy
             </router-link>
-            <span class="text-gray-300">•</span>
+            <span class="text-gray-300 dark:text-gray-700">•</span>
             <router-link
               to="/legal-notice"
-              class="text-gray-600 hover:text-blue-600 transition-colors"
+              class="text-gray-600 dark:text-gray-400 hover:text-neon-green-600 dark:hover:text-neon-green-400 transition-colors"
             >
               Legal Notice
             </router-link>
           </div>
-          <div class="text-sm text-gray-500">
+          <div class="text-sm text-gray-500 dark:text-gray-400">
             <span>v{{ appVersion }}</span>
           </div>
         </div>
@@ -140,6 +150,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from './store/authStore'
 import { useMappingStore } from './store/mappingStore'
+import { useDarkMode } from './composables/useDarkMode'
 import { APP_VERSION } from './version'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
@@ -148,6 +159,7 @@ import Toast from 'primevue/toast'
 const router = useRouter()
 const authStore = useAuthStore()
 const mappingStore = useMappingStore()
+const { isDark, toggleDark } = useDarkMode()
 const appVersion = APP_VERSION
 
 const userInitials = computed(() => {
