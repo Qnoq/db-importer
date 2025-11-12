@@ -7,8 +7,9 @@ import Tooltip from 'primevue/tooltip'
 import router from './router'
 import App from './App.vue'
 
-// Import des styles PrimeVue uniquement
+// Import des styles PrimeVue et de l'application
 import 'primeicons/primeicons.css'
+import './style.css'
 
 // Initialiser le thème AVANT le montage pour éviter le flash
 const initTheme = () => {
