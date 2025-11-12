@@ -1,19 +1,18 @@
 <template>
-  <Toast />
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
+    <Toast />
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
+        <div class="flex items-center justify-between h-28">
           <!-- Left: Logo + Navigation -->
           <div class="flex items-center space-x-8">
             <!-- Compact Logo -->
-            <a @click="handleNewImport" class="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer group">
-              <div class="w-9 h-9 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-                <i class="pi pi-database text-white text-lg"></i>
-              </div>
-              <h1 class="text-lg font-bold text-gray-900">
-                SQL Importer
-              </h1>
+            <a @click="handleNewImport" class="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer group">
+              <img
+                src="/logo.png"
+                alt="SQL Importer Logo"
+                class="h-28 w-auto transition-transform group-hover:scale-105"
+              />
             </a>
 
             <!-- Navigation Menu for Authenticated Users -->
@@ -144,7 +143,6 @@ import { useMappingStore } from './store/mappingStore'
 import { APP_VERSION } from './version'
 import Button from 'primevue/button'
 import Avatar from 'primevue/avatar'
-import Tag from 'primevue/tag'
 import Toast from 'primevue/toast'
 
 const router = useRouter()
