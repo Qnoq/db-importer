@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen flex flex-col" style="background: var(--p-surface-ground)">
     <Toast />
-    <header class="sticky top-0 z-50 shadow-sm" style="background: var(--p-surface-card); border-bottom: 1px solid var(--p-surface-border)">
+    <header class="sticky top-0 z-50 shadow-sm" style="background: var(--p-surface-0); border-bottom: 1px solid var(--p-surface-border)">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-28">
           <!-- Left: Logo + Navigation -->
@@ -114,7 +114,7 @@
       <router-view />
     </main>
 
-    <footer class="py-6 transition-colors duration-200" style="border-top: 1px solid var(--p-surface-border); background: var(--p-surface-card)">
+    <footer class="py-6 transition-colors duration-200" style="border-top: 1px solid var(--p-surface-border); background: var(--p-surface-0)">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col items-center space-y-3">
           <div class="flex items-center space-x-4 text-sm">
