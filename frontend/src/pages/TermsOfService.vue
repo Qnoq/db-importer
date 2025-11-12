@@ -34,14 +34,14 @@
         <div class="prose prose-green dark:prose-invert max-w-none px-8 py-6">
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">1. Acceptance of Terms</h2>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               By accessing and using SQLSheetr ("the Service"), you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to abide by the terms below, please do not use this service.
             </p>
           </section>
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">2. Description of Service</h2>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               SQLSheetr is a secure web-based tool that helps you import data from Excel/CSV files into SQL databases. The Service provides the following features:
           </p>
           <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4 ml-4">
@@ -62,7 +62,7 @@
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">3. User Accounts</h2>
-          <p style="color: var(--p-text-color)" mb-4">
+          <p class="mb-4" style="color: var(--p-text-color)">
             To access certain features of the Service, you must register for an account. You agree to:
           </p>
           <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4 ml-4">
@@ -75,7 +75,7 @@
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">4. User Data and Privacy</h2>
-          <p style="color: var(--p-text-color)" mb-4">
+          <p class="mb-4" style="color: var(--p-text-color)">
             You retain all rights to your data. The Service processes your uploaded files (SQL schemas and data files) temporarily to generate SQL statements. Key privacy principles:
           </p>
           <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4 ml-4">
@@ -84,14 +84,14 @@
             <li><strong>You Control Execution:</strong> Generated SQL is downloaded by you and executed in your own environment</li>
             <li><strong>Account Data:</strong> For registered users, we store account information (email, name) and import history metadata (table names, row counts, timestamps) - not the actual data content</li>
           </ul>
-          <p style="color: var(--p-text-color)" mb-4">
+          <p class="mb-4" style="color: var(--p-text-color)">
             For complete details on data handling, please review our <router-link to="/privacy-policy" class="text-neon-green-600 dark:text-neon-green-400 hover:text-neon-green-800 dark:hover:text-neon-green-300 underline">Privacy Policy</router-link>.
           </p>
           </section>
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">5. Acceptable Use</h2>
-          <p style="color: var(--p-text-color)" mb-4">
+          <p class="mb-4" style="color: var(--p-text-color)">
             You agree not to:
           </p>
           <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4 ml-4">
@@ -109,7 +109,7 @@
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">6. Intellectual Property</h2>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               The Service and its original content, features, and functionality are owned by SQLSheetr and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
             </p>
           </section>
@@ -140,7 +140,7 @@
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">8. Disclaimer of Warranties</h2>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               The Service is provided on an "AS IS" and "AS AVAILABLE" basis. SQLSheetr makes no warranties, expressed or implied, regarding:
             </p>
             <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 mb-4 ml-4 space-y-1">
@@ -211,28 +211,28 @@
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">10. Termination</h2>
-          <p style="color: var(--p-text-color)" mb-4">
+          <p class="mb-4" style="color: var(--p-text-color)">
             We may terminate or suspend your account and access to the Service immediately, without prior notice or liability, for any reason, including breach of these Terms. Upon termination, your right to use the Service will immediately cease.
           </p>
           </section>
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">11. Changes to Terms</h2>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               We reserve the right to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days' notice prior to any new terms taking effect. Continued use of the Service after changes constitutes acceptance of the modified Terms.
             </p>
           </section>
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">12. Governing Law</h2>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which SQLSheetr operates, without regard to its conflict of law provisions.
             </p>
           </section>
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">13. Contact Information</h2>
-            <p style="color: var(--p-text-color)" text-lg mb-4">
+            <p class="text-lg mb-4" style="color: var(--p-text-color)">
               If you have any questions about these Terms, please contact us.
             </p>
           </section>
