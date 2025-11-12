@@ -1,22 +1,24 @@
 <template>
-  <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <div class="bg-white rounded-lg shadow-lg p-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-6">Legal Notice</h1>
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50 to-gray-100">
+    <div class="container mx-auto px-4 py-12 max-w-5xl">
+      <!-- Header Section -->
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+        <div class="bg-gradient-to-r from-purple-600 to-indigo-700 px-8 py-10">
+          <h1 class="text-4xl font-extrabold text-white mb-3">Legal Notice</h1>
+          <p class="text-purple-100 text-lg">SQLSheetr Data Import Service</p>
+          <p class="text-purple-200 text-sm mt-2">Last updated: {{ lastUpdated }}</p>
+        </div>
 
-      <div class="prose prose-blue max-w-none">
-        <p class="text-gray-600 mb-6">
-          Last updated: {{ lastUpdated }}
-        </p>
-
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">1. Site Publisher</h2>
-          <p class="text-gray-700 mb-4">
-            This website is published by SQL Data Importer.
-          </p>
-          <div class="bg-gray-50 p-4 rounded-lg mb-4">
-            <p class="text-gray-700"><strong>Service Name:</strong> SQL Data Importer</p>
-            <p class="text-gray-700"><strong>Type:</strong> Web-based SQL Data Import Tool</p>
-            <p class="text-gray-700"><strong>Description:</strong> Secure platform for importing data from Excel/CSV files into SQL databases (MySQL/MariaDB, PostgreSQL)</p>
+        <div class="prose prose-purple max-w-none px-8 py-6">
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-purple-600">1. Site Publisher</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              This website is published by SQLSheetr.
+            </p>
+            <div class="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-4">
+              <p class="text-gray-700"><strong>Service Name:</strong> SQLSheetr</p>
+              <p class="text-gray-700"><strong>Type:</strong> Web-based SQL Data Import Tool</p>
+              <p class="text-gray-700"><strong>Description:</strong> Secure platform for importing data from Excel/CSV files into SQL databases (MySQL/MariaDB, PostgreSQL)</p>
             <p class="text-gray-700 mt-2"><strong>Technology Stack:</strong></p>
             <ul class="list-disc list-inside text-gray-700 ml-4">
               <li>Backend: Go 1.21+</li>
@@ -28,10 +30,10 @@
           <p class="text-gray-700 mb-4">
             <em>Note: Please update this section with your actual company information, including registered business name, business address, company registration number (SIRET/SIREN for France, equivalent for other jurisdictions), and official contact details.</em>
           </p>
-        </section>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">2. Website Hosting</h2>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-purple-600">2. Website Hosting</h2>
           <p class="text-gray-700 mb-4">
             This website uses the following hosting infrastructure:
           </p>
@@ -46,10 +48,10 @@
           <p class="text-gray-700 mb-4">
             <em>Note: Please add your specific VPS hosting provider information (name, address, contact) as required by applicable law in your jurisdiction.</em>
           </p>
-        </section>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">3. Intellectual Property</h2>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-purple-600">3. Intellectual Property</h2>
           <p class="text-gray-700 mb-4">
             All content on this website, including but not limited to:
           </p>
@@ -62,21 +64,23 @@
             <li>Logos and branding elements</li>
             <li>Database schema and architecture</li>
           </ul>
-          <p class="text-gray-700 mb-4">
-            is the property of SQL Data Importer and is protected by international copyright laws.
-          </p>
-          <p class="text-gray-700 mb-4">
-            <strong>Open Source Components:</strong> This service uses open-source libraries and frameworks (Go, Vue.js, PrimeVue, etc.) which retain their respective licenses. The service's proprietary code and implementation remain the exclusive property of SQL Data Importer.
-          </p>
-          <p class="text-gray-700 mb-4">
-            <strong>Your Data:</strong> You retain all intellectual property rights to your uploaded files and data. The Service does not claim any ownership over your SQL schemas or data files.
-          </p>
-        </section>
+            <p class="text-gray-700 text-lg mb-4">
+              is the property of SQLSheetr and is protected by international copyright laws.
+            </p>
+            <p class="text-gray-700 text-lg mb-4">
+              <strong>Open Source Components:</strong> This service uses open-source libraries and frameworks (Go, Vue.js, PrimeVue, etc.) which retain their respective licenses. The service's proprietary code and implementation remain the exclusive property of SQLSheetr.
+            </p>
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4">
+              <p class="text-blue-900 font-semibold">
+                <i class="pi pi-info-circle mr-2"></i><strong>Your Data:</strong> You retain all intellectual property rights to your uploaded files and data. The Service does not claim any ownership over your SQL schemas or data files.
+              </p>
+            </div>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">4. Trademarks</h2>
-          <p class="text-gray-700 mb-4">
-            "SQL Data Importer" and "SQL Importer" and all related logos and service marks are trademarks of SQL Data Importer.
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-purple-600">4. Trademarks</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              "SQLSheetr" and all related logos and service marks are trademarks of SQLSheetr.
           </p>
           <p class="text-gray-700 mb-4">
             Third-party trademarks referenced on this site:
@@ -169,42 +173,42 @@
         </section>
 
         <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">12. Modification of Legal Notice</h2>
-          <p class="text-gray-700 mb-4">
-            SQL Importer reserves the right to modify this legal notice at any time. Any changes will be effective immediately upon posting on this page. Your continued use of the website after changes constitutes acceptance of the modified legal notice.
-          </p>
-        </section>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-purple-600">12. Modification of Legal Notice</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              SQLSheetr reserves the right to modify this legal notice at any time. Any changes will be effective immediately upon posting on this page. Your continued use of the website after changes constitutes acceptance of the modified legal notice.
+            </p>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">13. Contact</h2>
-          <p class="text-gray-700 mb-4">
-            For any questions regarding this legal notice or the website, please contact us.
-          </p>
-          <p class="text-gray-700 mb-4">
-            <em>Note: Please add specific contact information (email, phone, postal address) as required by law.</em>
-          </p>
-        </section>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-purple-600">13. Contact</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              For any questions regarding this legal notice or the website, please contact us.
+            </p>
+            <p class="text-gray-700 mb-4">
+              <em>Note: Please add specific contact information (email, phone, postal address) as required by law.</em>
+            </p>
+          </section>
 
-        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-8">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <i class="pi pi-exclamation-triangle text-yellow-400"></i>
-            </div>
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-yellow-800">Important Notice</h3>
-              <div class="mt-2 text-sm text-yellow-700">
-                <p>This legal notice template should be customized with your actual company information and reviewed by legal counsel to ensure compliance with applicable laws in your jurisdiction. Areas requiring customization are marked with <em>italic notes</em>.</p>
+          <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 mt-8 rounded-lg">
+            <div class="flex items-start">
+              <i class="pi pi-exclamation-triangle text-yellow-600 text-xl mr-3 mt-1"></i>
+              <div>
+                <h3 class="text-lg font-bold text-yellow-900 mb-2">Important Notice</h3>
+                <p class="text-yellow-800">
+                  This legal notice template should be customized with your actual company information and reviewed by legal counsel to ensure compliance with applicable laws in your jurisdiction. Areas requiring customization are marked with <em>italic notes</em>.
+                </p>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="mt-8 pt-6 border-t border-gray-200">
-        <router-link to="/" class="text-blue-600 hover:text-blue-800 flex items-center">
-          <i class="pi pi-arrow-left mr-2"></i>
-          Back to Home
-        </router-link>
+        <!-- Footer Navigation -->
+        <div class="bg-gradient-to-r from-gray-50 to-purple-50 px-8 py-6 border-t border-gray-200">
+          <router-link to="/" class="inline-flex items-center text-purple-600 hover:text-purple-800 font-semibold transition-colors">
+            <i class="pi pi-arrow-left mr-2"></i>
+            Back to Home
+          </router-link>
+        </div>
       </div>
     </div>
   </div>
