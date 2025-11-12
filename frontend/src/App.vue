@@ -104,8 +104,32 @@
 
     <footer class="py-6 border-t border-gray-200 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-center text-sm text-gray-500">
-          <span>v{{ appVersion }}</span>
+        <div class="flex flex-col items-center space-y-3">
+          <div class="flex items-center space-x-4 text-sm">
+            <router-link
+              to="/terms-of-service"
+              class="text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              Terms of Service
+            </router-link>
+            <span class="text-gray-300">•</span>
+            <router-link
+              to="/privacy-policy"
+              class="text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              Privacy Policy
+            </router-link>
+            <span class="text-gray-300">•</span>
+            <router-link
+              to="/legal-notice"
+              class="text-gray-600 hover:text-blue-600 transition-colors"
+            >
+              Legal Notice
+            </router-link>
+          </div>
+          <div class="text-sm text-gray-500">
+            <span>v{{ appVersion }}</span>
+          </div>
         </div>
       </div>
     </footer>

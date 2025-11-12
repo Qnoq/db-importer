@@ -7,6 +7,9 @@ import Mapping from '../pages/Mapping.vue'
 import Login from '../pages/Login.vue'
 import Register from '../pages/Register.vue'
 import History from '../pages/History.vue'
+import TermsOfService from '../pages/TermsOfService.vue'
+import PrivacyPolicy from '../pages/PrivacyPolicy.vue'
+import LegalNotice from '../pages/LegalNotice.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -52,6 +55,24 @@ const router = createRouter({
       name: 'History',
       component: History,
       meta: { requiresAuth: true }
+    },
+    {
+      path: '/terms-of-service',
+      name: 'TermsOfService',
+      component: TermsOfService,
+      meta: { requiresAuth: false }
+    },
+    {
+      path: '/privacy-policy',
+      name: 'PrivacyPolicy',
+      component: PrivacyPolicy,
+      meta: { requiresAuth: false }
+    },
+    {
+      path: '/legal-notice',
+      name: 'LegalNotice',
+      component: LegalNotice,
+      meta: { requiresAuth: false }
     }
   ]
 })
