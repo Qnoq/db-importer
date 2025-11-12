@@ -4,8 +4,8 @@
 
     <!-- Page Header -->
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Import History</h1>
-      <p class="text-gray-600">View and manage your import history</p>
+      <h1 class="text-3xl font-bold mb-2">Import History</h1>
+      <p style="color: var(--p-text-muted-color)">View and manage your import history</p>
     </div>
 
     <!-- Stats Cards -->
@@ -14,10 +14,10 @@
         <template #content>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-500">Total Imports</p>
+              <p class="text-sm" style="color: var(--p-text-muted-color)">Total Imports</p>
               <p class="text-2xl font-bold">{{ importStore.stats.totalImports }}</p>
             </div>
-            <i class="pi pi-database text-3xl text-blue-500"></i>
+            <i class="pi pi-database text-3xl" style="color: var(--p-primary-color)"></i>
           </div>
         </template>
       </Card>
@@ -26,10 +26,10 @@
         <template #content>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-500">Total Rows</p>
+              <p class="text-sm" style="color: var(--p-text-muted-color)">Total Rows</p>
               <p class="text-2xl font-bold">{{ formatNumber(importStore.stats.totalRows) }}</p>
             </div>
-            <i class="pi pi-chart-line text-3xl text-green-500"></i>
+            <i class="pi pi-chart-line text-3xl" style="color: var(--p-green-500)"></i>
           </div>
         </template>
       </Card>
@@ -38,10 +38,10 @@
         <template #content>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-500">Success Rate</p>
+              <p class="text-sm" style="color: var(--p-text-muted-color)">Success Rate</p>
               <p class="text-2xl font-bold">{{ importStore.stats.successRate.toFixed(1) }}%</p>
             </div>
-            <i class="pi pi-check-circle text-3xl text-emerald-500"></i>
+            <i class="pi pi-check-circle text-3xl" style="color: var(--p-green-600)"></i>
           </div>
         </template>
       </Card>
@@ -50,10 +50,10 @@
         <template #content>
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-500">Most Used Table</p>
+              <p class="text-sm" style="color: var(--p-text-muted-color)">Most Used Table</p>
               <p class="text-lg font-bold truncate">{{ importStore.stats.mostUsedTable || 'N/A' }}</p>
             </div>
-            <i class="pi pi-table text-3xl text-purple-500"></i>
+            <i class="pi pi-table text-3xl" style="color: var(--p-purple-500)"></i>
           </div>
         </template>
       </Card>
@@ -64,7 +64,7 @@
       <template #content>
         <div class="flex flex-wrap gap-4">
           <div class="flex-1 min-w-[200px]">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Table Name</label>
+            <label class="block text-sm font-medium mb-2">Table Name</label>
             <InputText
               v-model="filters.tableName"
               placeholder="Filter by table name..."
@@ -73,7 +73,7 @@
           </div>
 
           <div class="min-w-[150px]">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <label class="block text-sm font-medium mb-2">Status</label>
             <Dropdown
               v-model="filters.status"
               :options="statusOptions"
@@ -103,7 +103,7 @@
           responsiveLayout="scroll"
         >
           <template #empty>
-            <div class="text-center py-8 text-gray-500">
+            <div class="text-center py-8" style="color: var(--p-text-muted-color)">
               <i class="pi pi-inbox text-4xl mb-3"></i>
               <p>No imports found</p>
             </div>
@@ -132,19 +132,19 @@
 
           <Column field="errorCount" header="Errors">
             <template #body="{ data }">
-              <span v-if="data.errorCount > 0" class="text-red-600 font-medium">
+              <span v-if="data.errorCount > 0" class="font-medium" style="color: var(--p-red-500)">
                 {{ data.errorCount }}
               </span>
-              <span v-else class="text-gray-400">0</span>
+              <span v-else style="color: var(--p-text-muted-color)">0</span>
             </template>
           </Column>
 
           <Column field="warningCount" header="Warnings">
             <template #body="{ data }">
-              <span v-if="data.warningCount > 0" class="text-orange-600 font-medium">
+              <span v-if="data.warningCount > 0" class="font-medium" style="color: var(--p-orange-500)">
                 {{ data.warningCount }}
               </span>
-              <span v-else class="text-gray-400">0</span>
+              <span v-else style="color: var(--p-text-muted-color)">0</span>
             </template>
           </Column>
 

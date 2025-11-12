@@ -3,12 +3,13 @@
     <!-- Progress Stepper with Navigation -->
     <StepperNav />
 
-    <div class="bg-white shadow-lg rounded-xl p-8 border border-gray-200">
+    <Card class="shadow-lg">
+      <template #content>
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
         <div>
-          <h2 class="text-3xl font-bold text-gray-900 mb-2">Map Columns</h2>
-          <p class="text-gray-600 mt-1">
+          <h2 class="text-3xl font-bold mb-2">Map Columns</h2>
+          <p class="mt-1" style="color: var(--p-text-muted-color)">
             Match your Excel/CSV columns to database fields and apply transformations
           </p>
         </div>
@@ -18,7 +19,8 @@
         <p class="text-yellow-700">Missing data. Please complete previous steps.</p>
         <button
           @click="router.push('/')"
-          class="mt-3 text-blue-600 hover:text-blue-700 font-semibold"
+          class="mt-3 font-semibold"
+          style="color: var(--p-primary-color)"
         >
           <i class="pi pi-arrow-left mr-2"></i>
           Start over
@@ -85,7 +87,7 @@
         <!-- Info Banner -->
         <div class="mb-4 bg-blue-50 border border-blue-200 rounded-md p-4 flex items-center justify-between">
           <div class="flex-1">
-            <p class="text-sm text-blue-800">
+            <p class="text-sm" style="color: var(--p-primary-700)">
               <i class="pi pi-info-circle mr-2"></i>
               Target table: <strong>{{ store.selectedTable?.name }}</strong> |
               Data rows: <strong>{{ store.excelData.length }}</strong>
@@ -107,7 +109,7 @@
         <!-- Column Mapping -->
         <div class="mb-6">
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Column Mapping</h3>
+            <h3 class="text-lg font-semibold">Column Mapping</h3>
             <div class="flex gap-2">
               <button
                 @click="autoMap"
@@ -130,7 +132,8 @@
             <div
               v-for="(field, index) in store.selectedTable?.fields"
               :key="index"
-              class="bg-white border-2 rounded-lg p-4 hover:border-blue-300 transition-all"
+              class="border-2 rounded-lg p-4 transition-all"
+              style="background: var(--p-surface-card); border-color: var(--p-surface-border)"
               :class="{
                 'border-green-300 bg-green-50': getMappedExcelColumn(field.name) && !hasYearWarning(field.name),
                 'border-orange-400 bg-orange-50': getMappedExcelColumn(field.name) && hasYearWarning(field.name),
@@ -140,7 +143,7 @@
               <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                 <!-- DB Field (Target) -->
                 <div class="md:col-span-3">
-                  <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                  <label class="block text-xs font-medium uppercase tracking-wide mb-1" style="color: var(--p-text-muted-color)">
                     Database Field
                   </label>
                   <div class="flex items-center gap-2">
@@ -149,7 +152,7 @@
                     </div>
                     <div class="flex-1 min-w-0">
                       <div class="flex items-center gap-2">
-                        <p class="font-semibold text-gray-900 truncate" :title="field.name">
+                        <p class="font-semibold truncate" :title="field.name">
                           {{ field.name }}{{ field.nullable ? '' : ' *' }}
                         </p>
                         <span v-if="isAutoIncrementField(field)" class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full whitespace-nowrap">
@@ -160,7 +163,7 @@
                           YEAR
                         </span>
                       </div>
-                      <p class="text-xs text-gray-500">
+                      <p class="text-xs" style="color: var(--p-text-muted-color)">
                         {{ field.type }}
                       </p>
                     </div>
@@ -178,7 +181,7 @@
 
                 <!-- Excel Column (Source) -->
                 <div class="md:col-span-4">
-                  <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                  <label class="block text-xs font-medium uppercase tracking-wide mb-1" style="color: var(--p-text-muted-color)">
                     Excel Column
                   </label>
                   <Dropdown
@@ -190,14 +193,14 @@
                     placeholder="-- Skip this field --"
                     class="w-full"
                   />
-                  <p v-if="getMappedExcelColumn(field.name)" class="text-xs text-gray-500 mt-1">
+                  <p v-if="getMappedExcelColumn(field.name)" class="text-xs mt-1" style="color: var(--p-text-muted-color)">
                     Sample: {{ getSampleValue(getMappedExcelColumn(field.name)!) }}
                   </p>
                 </div>
 
                 <!-- Transformation -->
                 <div class="md:col-span-3">
-                  <label class="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                  <label class="block text-xs font-medium uppercase tracking-wide mb-1" style="color: var(--p-text-muted-color)">
                     Transformation
                   </label>
                   <Dropdown
@@ -216,7 +219,8 @@
                   <button
                     v-if="fieldTransformations[field.name] && fieldTransformations[field.name] !== 'none' && getMappedExcelColumn(field.name)"
                     @click="showTransformPreviewForField(field.name)"
-                    class="flex items-center justify-center w-8 h-8 text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                    class="flex items-center justify-center w-8 h-8 rounded-lg transition"
+                    style="color: var(--p-primary-color)"
                     title="Preview transformation"
                   >
                     <i class="pi pi-eye text-sm"></i>
@@ -235,7 +239,7 @@
                       :binary="true"
                       inputId="`skip-${field.name}`"
                     />
-                    <span class="text-xs text-gray-600 group-hover:text-gray-900 font-medium whitespace-nowrap">Skip</span>
+                    <span class="text-xs font-medium whitespace-nowrap" style="color: var(--p-text-muted-color)">Skip</span>
                   </label>
                 </div>
               </div>
@@ -277,7 +281,7 @@
         </div>
 
         <!-- Data Preview with Highlighting -->
-        <div v-if="showPreview" class="mb-6 bg-gray-50 border border-gray-300 rounded-md p-4">
+        <div v-if="showPreview" class="mb-6 rounded-md p-4 border" style="background: var(--p-surface-50); border-color: var(--p-surface-border)">
           <div class="flex justify-between items-center mb-3">
             <h3 class="text-lg font-semibold">Data Preview with Validation</h3>
             <button
@@ -292,14 +296,14 @@
             <table class="min-w-full divide-y divide-gray-300">
               <thead class="sticky top-0 bg-gray-100">
                 <tr>
-                  <th class="px-3 py-2 text-left text-xs font-semibold text-gray-900 uppercase">#</th>
+                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase">#</th>
                   <th
                     v-for="(header, idx) in store.excelHeaders"
                     :key="idx"
-                    class="px-3 py-2 text-left text-xs font-semibold text-gray-900 uppercase"
+                    class="px-3 py-2 text-left text-xs font-semibold uppercase"
                   >
                     {{ header }}
-                    <div v-if="localMapping[header]" class="text-xs font-normal text-blue-600">
+                    <div v-if="localMapping[header]" class="text-xs font-normal" style="color: var(--p-primary-color)">
                       → {{ localMapping[header] }}
                     </div>
                   </th>
@@ -307,7 +311,7 @@
               </thead>
               <tbody class="divide-y divide-gray-200">
                 <tr v-for="(row, rowIdx) in previewData" :key="rowIdx">
-                  <td class="px-3 py-2 text-sm text-gray-500">{{ rowIdx + 1 }}</td>
+                  <td class="px-3 py-2 text-sm" style="color: var(--p-text-muted-color)">{{ rowIdx + 1 }}</td>
                   <td
                     v-for="(cell, cellIdx) in row"
                     :key="cellIdx"
@@ -351,7 +355,7 @@
 
         <!-- Loading Indicator -->
         <div v-if="loading" class="flex items-center justify-center py-8">
-          <i class="pi pi-spin pi-spinner text-4xl text-blue-600"></i>
+          <i class="pi pi-spin pi-spinner text-4xl" style="color: var(--p-primary-color)"></i>
         </div>
 
         <!-- Error Display -->
@@ -359,7 +363,8 @@
           <p class="text-red-700">{{ error }}</p>
         </div>
       </div>
-    </div>
+      </template>
+    </Card>
 
     <!-- Transform Preview Dialog -->
     <div v-if="transformPreviewColumn" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="transformPreviewColumn = null">
@@ -391,7 +396,7 @@
             <tbody class="divide-y divide-gray-200">
               <tr v-for="(preview, idx) in getTransformPreview(transformPreviewColumn)" :key="idx">
                 <td class="px-3 py-2 text-sm">{{ preview.original }}</td>
-                <td class="px-3 py-2 text-sm font-medium text-blue-600">{{ preview.transformed }}</td>
+                <td class="px-3 py-2 text-sm font-medium" style="color: var(--p-primary-color)">{{ preview.transformed }}</td>
               </tr>
             </tbody>
           </table>
@@ -409,8 +414,8 @@
       <div class="flex items-start gap-3">
         <i class="pi pi-exclamation-triangle text-3xl text-orange-500"></i>
         <div>
-          <p class="text-gray-700 mb-2">Are you sure you want to clear all column mappings?</p>
-          <p class="text-sm text-gray-600">This will remove all mappings and transformations.</p>
+          <p class="mb-2">Are you sure you want to clear all column mappings?</p>
+          <p class="text-sm" style="color: var(--p-text-muted-color)">This will remove all mappings and transformations.</p>
         </div>
       </div>
 
@@ -435,6 +440,7 @@ import Dialog from 'primevue/dialog'
 import Button from 'primevue/button'
 import Dropdown from 'primevue/dropdown'
 import Checkbox from 'primevue/checkbox'
+import Card from 'primevue/card'
 
 const router = useRouter()
 const store = useMappingStore()

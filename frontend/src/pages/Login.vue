@@ -3,9 +3,9 @@
     <Card class="w-full max-w-md shadow-lg">
       <template #title>
         <div class="text-center">
-          <i class="pi pi-sign-in text-4xl text-blue-600 mb-3"></i>
-          <h2 class="text-2xl font-bold text-gray-900">Sign In</h2>
-          <p class="text-sm text-gray-500 mt-2">
+          <i class="pi pi-sign-in text-4xl mb-3" style="color: var(--p-primary-color)"></i>
+          <h2 class="text-2xl font-bold">Sign In</h2>
+          <p class="text-sm mt-2" style="color: var(--p-text-muted-color)">
             Sign in to access your history, templates, and more
           </p>
         </div>
@@ -25,7 +25,7 @@
 
           <!-- Email Field -->
           <div class="field">
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="email" class="block text-sm font-medium mb-2">
               Email
             </label>
             <InputText
@@ -43,7 +43,7 @@
 
           <!-- Password Field -->
           <div class="field">
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="password" class="block text-sm font-medium mb-2">
               Password
             </label>
             <Password
@@ -64,7 +64,7 @@
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <Checkbox v-model="rememberMe" inputId="remember" :binary="true" />
-              <label for="remember" class="text-sm text-gray-600 select-none">
+              <label for="remember" class="text-sm select-none" style="color: var(--p-text-muted-color)">
                 Remember me (7 days)
               </label>
             </div>
@@ -82,7 +82,7 @@
 
           <!-- Divider -->
           <Divider align="center">
-            <span class="text-sm text-gray-500">OR</span>
+            <span class="text-sm" style="color: var(--p-text-muted-color)">OR</span>
           </Divider>
 
           <!-- Continue as Guest -->
@@ -98,12 +98,13 @@
 
           <!-- Register Link -->
           <div class="text-center mt-4">
-            <span class="text-sm text-gray-600">
+            <span class="text-sm" style="color: var(--p-text-muted-color)">
               Don't have an account?
             </span>
             <router-link
               to="/register"
-              class="text-sm text-blue-600 hover:text-blue-700 font-medium ml-1"
+              class="text-sm font-medium ml-1"
+              style="color: var(--p-primary-color)"
             >
               Sign Up
             </router-link>
@@ -212,28 +213,8 @@ const handleContinueAsGuest = () => {
 :deep(.p-inputtext),
 :deep(.p-password input) {
   border-radius: 8px;
-  border: 1px solid #d1d5db;
   padding: 0.75rem;
-  transition: border-color 0.2s;
 }
-
-:deep(.p-inputtext:hover),
-:deep(.p-password input:hover) {
-  border-color: #9ca3af;
-}
-
-:deep(.p-inputtext:focus),
-:deep(.p-password input:focus) {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-:deep(.p-invalid .p-inputtext),
-:deep(.p-invalid input) {
-  border-color: #ef4444;
-}
-
 
 :deep(.p-button) {
   border-radius: 8px;

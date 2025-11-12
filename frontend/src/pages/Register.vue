@@ -3,9 +3,9 @@
     <Card class="w-full max-w-md shadow-lg">
       <template #title>
         <div class="text-center">
-          <i class="pi pi-user-plus text-4xl text-blue-600 mb-3"></i>
-          <h2 class="text-2xl font-bold text-gray-900">Create Account</h2>
-          <p class="text-sm text-gray-500 mt-2">
+          <i class="pi pi-user-plus text-4xl mb-3" style="color: var(--p-primary-color)"></i>
+          <h2 class="text-2xl font-bold">Create Account</h2>
+          <p class="text-sm mt-2" style="color: var(--p-text-muted-color)">
             Sign up to save your history, templates, and unlimited imports
           </p>
         </div>
@@ -20,8 +20,8 @@
 
           <!-- First Name Field -->
           <div class="field">
-            <label for="firstName" class="block text-sm font-medium text-gray-700 mb-2">
-              First Name <span class="text-gray-400">(Optional)</span>
+            <label for="firstName" class="block text-sm font-medium mb-2">
+              First Name <span style="color: var(--p-text-muted-color)">(Optional)</span>
             </label>
             <InputText
               id="firstName"
@@ -34,8 +34,8 @@
 
           <!-- Last Name Field -->
           <div class="field">
-            <label for="lastName" class="block text-sm font-medium text-gray-700 mb-2">
-              Last Name <span class="text-gray-400">(Optional)</span>
+            <label for="lastName" class="block text-sm font-medium mb-2">
+              Last Name <span style="color: var(--p-text-muted-color)">(Optional)</span>
             </label>
             <InputText
               id="lastName"
@@ -48,7 +48,7 @@
 
           <!-- Email Field -->
           <div class="field">
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="email" class="block text-sm font-medium mb-2">
               Email *
             </label>
             <InputText
@@ -66,7 +66,7 @@
 
           <!-- Password Field -->
           <div class="field">
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="password" class="block text-sm font-medium mb-2">
               Password *
             </label>
             <Password
@@ -82,8 +82,8 @@
             >
               <template #footer>
                 <Divider />
-                <p class="text-xs text-gray-600 mt-2">Suggestions</p>
-                <ul class="text-xs text-gray-600 ml-4 mt-1">
+                <p class="text-xs mt-2" style="color: var(--p-text-muted-color)">Suggestions</p>
+                <ul class="text-xs ml-4 mt-1" style="color: var(--p-text-muted-color)">
                   <li>At least 8 characters</li>
                   <li>Mix of letters, numbers, and symbols</li>
                 </ul>
@@ -94,7 +94,7 @@
 
           <!-- Confirm Password Field -->
           <div class="field">
-            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+            <label for="confirmPassword" class="block text-sm font-medium mb-2">
               Confirm Password *
             </label>
             <Password
@@ -114,11 +114,11 @@
           <!-- Terms and Conditions -->
           <div class="flex items-start">
             <Checkbox v-model="acceptedTerms" inputId="terms" :binary="true" class="mt-1" />
-            <label for="terms" class="ml-2 text-sm text-gray-600">
+            <label for="terms" class="ml-2 text-sm" style="color: var(--p-text-muted-color)">
               I agree to the
-              <a href="#" class="text-blue-600 hover:text-blue-700">Terms of Service</a>
+              <a href="#" style="color: var(--p-primary-color)">Terms of Service</a>
               and
-              <a href="#" class="text-blue-600 hover:text-blue-700">Privacy Policy</a>
+              <a href="#" style="color: var(--p-primary-color)">Privacy Policy</a>
             </label>
           </div>
           <small v-if="termsError" class="p-error block">{{ termsError }}</small>
@@ -135,7 +135,7 @@
 
           <!-- Divider -->
           <Divider align="center">
-            <span class="text-sm text-gray-500">OR</span>
+            <span class="text-sm" style="color: var(--p-text-muted-color)">OR</span>
           </Divider>
 
           <!-- Continue as Guest -->
@@ -151,12 +151,13 @@
 
           <!-- Login Link -->
           <div class="text-center mt-4">
-            <span class="text-sm text-gray-600">
+            <span class="text-sm" style="color: var(--p-text-muted-color)">
               Already have an account?
             </span>
             <router-link
               to="/login"
-              class="text-sm text-blue-600 hover:text-blue-700 font-medium ml-1"
+              class="text-sm font-medium ml-1"
+              style="color: var(--p-primary-color)"
             >
               Sign In
             </router-link>
@@ -281,26 +282,7 @@ const handleContinueAsGuest = () => {
 :deep(.p-inputtext),
 :deep(.p-password input) {
   border-radius: 8px;
-  border: 1px solid #d1d5db;
   padding: 0.75rem;
-  transition: border-color 0.2s;
-}
-
-:deep(.p-inputtext:hover),
-:deep(.p-password input:hover) {
-  border-color: #9ca3af;
-}
-
-:deep(.p-inputtext:focus),
-:deep(.p-password input:focus) {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-:deep(.p-invalid .p-inputtext),
-:deep(.p-invalid input) {
-  border-color: #ef4444;
 }
 
 :deep(.p-button) {

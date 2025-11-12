@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex flex-col">
+  <div class="min-h-screen flex flex-col" style="background: var(--p-surface-ground)">
     <Toast />
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+    <header class="sticky top-0 z-50 shadow-sm" style="background: var(--p-surface-card); border-bottom: 1px solid var(--p-surface-border)">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-28">
           <!-- Left: Logo + Navigation -->
@@ -22,7 +22,8 @@
                 class="px-4 py-2 text-sm font-medium rounded-lg transition-all cursor-pointer"
                 :class="router.currentRoute.value.path === '/'
                   ? 'bg-neon-green-50 text-neon-green-700 dark:bg-neon-green-500/20 dark:text-neon-green-400'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'"
+                  : ''"
+                :style="router.currentRoute.value.path !== '/' ? { color: 'var(--p-text-muted-color)' } : {}"
               >
                 <i class="pi pi-plus-circle mr-2"></i>
                 New Import
@@ -32,7 +33,8 @@
                 class="px-4 py-2 text-sm font-medium rounded-lg transition-all"
                 :class="router.currentRoute.value.path === '/history'
                   ? 'bg-neon-green-50 text-neon-green-700 dark:bg-neon-green-500/20 dark:text-neon-green-400'
-                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'"
+                  : ''"
+                :style="router.currentRoute.value.path !== '/history' ? { color: 'var(--p-text-muted-color)' } : {}"
               >
                 <i class="pi pi-history mr-2"></i>
                 History
@@ -50,11 +52,11 @@
               severity="secondary"
               @click="toggleDark"
               v-tooltip.bottom="isDark ? 'Light Mode' : 'Dark Mode'"
-              class="hover:bg-gray-100 dark:hover:bg-gray-800"
+              class=""
             />
             <!-- Authenticated User Menu -->
             <div v-if="authStore.isAuthenticated" class="flex items-center space-x-3">
-              <div class="hidden md:flex items-center space-x-3 px-3 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-800">
+              <div class="hidden md:flex items-center space-x-3 px-3 py-1.5 rounded-lg" style="background: var(--p-surface-100)">
                 <Avatar
                   :label="userInitials"
                   class="bg-neon-green-600 dark:bg-neon-green-500 text-white"
@@ -62,10 +64,10 @@
                   size="normal"
                 />
                 <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">
+                  <p class="text-sm font-medium">
                     {{ authStore.userDisplayName }}
                   </p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">{{ authStore.user?.email }}</p>
+                  <p class="text-xs" style="color: var(--p-text-muted-color)">{{ authStore.user?.email }}</p>
                 </div>
               </div>
               <Avatar
@@ -81,7 +83,7 @@
                 severity="secondary"
                 @click="handleLogout"
                 v-tooltip.bottom="'Sign Out'"
-                class="hover:bg-gray-100 dark:hover:bg-gray-800"
+                class=""
               />
             </div>
 
@@ -92,7 +94,8 @@
                 icon="pi pi-sign-in"
                 text
                 @click="router.push('/login')"
-                class="hidden sm:inline-flex text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                class="hidden sm:inline-flex"
+                style="color: var(--p-text-color)"
               />
               <Button
                 label="Sign Up"
@@ -111,32 +114,35 @@
       <router-view />
     </main>
 
-    <footer class="py-6 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-colors duration-200">
+    <footer class="py-6 transition-colors duration-200" style="border-top: 1px solid var(--p-surface-border); background: var(--p-surface-card)">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col items-center space-y-3">
           <div class="flex items-center space-x-4 text-sm">
             <router-link
               to="/terms-of-service"
-              class="text-gray-600 dark:text-gray-400 hover:text-neon-green-600 dark:hover:text-neon-green-400 transition-colors"
+              class="transition-colors"
+              style="color: var(--p-text-muted-color)"
             >
               Terms of Service
             </router-link>
-            <span class="text-gray-300 dark:text-gray-700">•</span>
+            <span style="color: var(--p-surface-400)">•</span>
             <router-link
               to="/privacy-policy"
-              class="text-gray-600 dark:text-gray-400 hover:text-neon-green-600 dark:hover:text-neon-green-400 transition-colors"
+              class="transition-colors"
+              style="color: var(--p-text-muted-color)"
             >
               Privacy Policy
             </router-link>
-            <span class="text-gray-300 dark:text-gray-700">•</span>
+            <span style="color: var(--p-surface-400)">•</span>
             <router-link
               to="/legal-notice"
-              class="text-gray-600 dark:text-gray-400 hover:text-neon-green-600 dark:hover:text-neon-green-400 transition-colors"
+              class="transition-colors"
+              style="color: var(--p-text-muted-color)"
             >
               Legal Notice
             </router-link>
           </div>
-          <div class="text-sm text-gray-500 dark:text-gray-400">
+          <div class="text-sm" style="color: var(--p-text-muted-color)">
             <span>v{{ appVersion }}</span>
           </div>
         </div>

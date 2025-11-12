@@ -3,55 +3,50 @@
     <!-- Progress Stepper with Navigation -->
     <StepperNav />
 
-    <div class="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-8 border border-gray-200 dark:border-gray-800 transition-colors duration-200">
-      <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Upload SQL Schema</h2>
-        <p class="text-gray-600 dark:text-gray-300">
-          Upload your MySQL/MariaDB or PostgreSQL dump file to get started
-        </p>
-      </div>
+    <Card>
+      <template #title>
+        <h2 class="text-3xl font-bold">Upload SQL Schema</h2>
+      </template>
 
+      <template #subtitle>
+        Upload your MySQL/MariaDB or PostgreSQL dump file to get started
+      </template>
+
+      <template #content>
       <!-- Important: Single Table Note -->
-      <div class="mb-6 bg-neon-green-50 dark:bg-neon-green-950/20 border-l-4 border-neon-green-500 dark:border-neon-green-400 rounded-lg p-4">
-        <div class="flex items-start gap-3">
-          <i class="pi pi-info-circle text-neon-green-600 dark:text-neon-green-400 text-xl"></i>
-          <div class="flex-1">
-            <h3 class="font-semibold text-neon-green-900 dark:text-neon-green-300 mb-1">💡 Pro Tip: Export Only Your Target Table</h3>
-            <p class="text-sm text-neon-green-800 dark:text-neon-green-300 mb-2">
-              You only need the <strong>CREATE TABLE</strong> statement for the table you want to import data into.
-              No need to upload your entire database dump!
-            </p>
-            <div class="text-xs text-neon-green-700 dark:text-neon-green-300 bg-neon-green-100 dark:bg-neon-green-900/30 rounded px-3 py-2 font-mono">
-              <strong>Example export command:</strong><br/>
-              <code class="block mt-1">mysqldump -u user -p --no-data database_name table_name > table.sql</code>
-              <code class="block mt-1">pg_dump -U user --schema-only -t table_name database > table.sql</code>
-            </div>
+      <InlineMessage severity="info" class="mb-6 w-full">
+        <div class="flex-1">
+          <strong>💡 Pro Tip: Export Only Your Target Table</strong>
+          <p class="text-sm mb-2">
+            You only need the <strong>CREATE TABLE</strong> statement for the table you want to import data into.
+            No need to upload your entire database dump!
+          </p>
+          <div class="text-xs p-2 font-mono" style="background: var(--p-surface-50)">
+            <strong>Example export command:</strong><br/>
+            <code class="block mt-1">mysqldump -u user -p --no-data database_name table_name > table.sql</code>
+            <code class="block mt-1">pg_dump -U user --schema-only -t table_name database > table.sql</code>
           </div>
         </div>
-      </div>
+      </InlineMessage>
 
       <!-- Upload Area -->
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-          SQL Schema File
-        </label>
+      <Panel header="SQL Schema File" class="mb-6">
         <div
-          class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 text-center hover:border-neon-green-400 dark:hover:border-neon-green-500 transition cursor-pointer bg-gray-50 dark:bg-gray-800"
+          class="border-2 border-dashed rounded-xl p-8 text-center transition cursor-pointer"
+          style="border-color: var(--p-surface-border)"
           @click="fileInput?.click()"
           @dragover.prevent
           @drop.prevent="handleDrop"
         >
           <div class="flex flex-col items-center">
-            <div class="w-16 h-16 bg-neon-green-100 dark:bg-neon-green-900/30 rounded-full flex items-center justify-center mb-4">
-              <i class="pi pi-cloud-upload text-neon-green-600 dark:text-neon-green-400 text-3xl"></i>
-            </div>
-            <p class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <i class="pi pi-cloud-upload text-5xl mb-4" style="color: var(--p-primary-color)"></i>
+            <p class="text-lg font-medium mb-1">
               Drop your SQL file here, or click to browse
             </p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">
+            <p class="text-sm" style="color: var(--p-text-muted-color)">
               Supports MySQL, MariaDB, and PostgreSQL dump files
             </p>
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
+            <p class="text-xs mt-2" style="color: var(--p-text-muted-color)">
               A single table schema is typically &lt; 50KB
             </p>
           </div>
@@ -63,23 +58,20 @@
           ref="fileInput"
           class="hidden"
         />
-      </div>
+      </Panel>
 
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-12">
-        <i class="pi pi-spin pi-spinner text-5xl text-neon-green-600 dark:text-neon-green-400 mb-4"></i>
-        <p class="text-gray-600 dark:text-gray-300 font-medium">Parsing your SQL schema...</p>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">This may take a few seconds</p>
+        <i class="pi pi-spin pi-spinner text-5xl mb-4" style="color: var(--p-primary-color)"></i>
+        <p class="font-medium">Parsing your SQL schema...</p>
+        <p class="text-sm mt-2" style="color: var(--p-text-muted-color)">This may take a few seconds</p>
       </div>
 
       <!-- Error State -->
-      <div v-if="error" class="bg-red-50 dark:bg-red-950/20 border-l-4 border-red-500 dark:border-red-400 rounded-lg p-4 mb-4 flex items-start">
-        <i class="pi pi-exclamation-circle text-red-500 dark:text-red-400 text-xl mr-3 mt-0.5"></i>
-        <div>
-          <p class="font-medium text-red-800 dark:text-red-300">Upload Failed</p>
-          <p class="text-red-700 dark:text-red-400 text-sm mt-1">{{ error }}</p>
-        </div>
-      </div>
+      <InlineMessage v-if="error" severity="error" class="mb-4 w-full">
+        <strong>Upload Failed</strong>
+        <p class="text-sm mt-1">{{ error }}</p>
+      </InlineMessage>
 
       <!-- Single Table Auto-Select Modal -->
       <div v-if="showSingleTableDialog" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50" @click="cancelSingleTableDialog">
@@ -213,7 +205,8 @@
           </button>
         </div>
       </div>
-    </div>
+      </template>
+    </Card>
   </div>
 </template>
 
@@ -222,6 +215,9 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMappingStore } from '../store/mappingStore'
 import StepperNav from '../components/StepperNav.vue'
+import Card from 'primevue/card'
+import Panel from 'primevue/panel'
+import InlineMessage from 'primevue/inlinemessage'
 
 const router = useRouter()
 const store = useMappingStore()

@@ -17,13 +17,14 @@
           <div
             class="w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-200"
             :class="getStepClasses(step.id)"
+            :style="getStepCircleStyle(step.id)"
           >
             <i v-if="isStepCompleted(step.id)" class="pi pi-check text-sm"></i>
             <span v-else>{{ index + 1 }}</span>
           </div>
           <span
             class="ml-3 text-sm font-medium transition-colors"
-            :class="currentStep === step.id ? 'text-blue-600' : isStepCompleted(step.id) ? 'text-green-600' : 'text-gray-500'"
+            :style="getStepTextColor(step.id)"
           >
             {{ step.label }}
           </span>
@@ -33,7 +34,7 @@
         <div
           v-if="index < steps.length - 1"
           class="w-16 h-0.5 mx-4 transition-colors"
-          :class="isStepCompleted(step.id) ? 'bg-green-500' : 'bg-gray-300'"
+          :style="{ backgroundColor: isStepCompleted(step.id) ? 'var(--p-green-500)' : 'var(--p-surface-300)' }"
         ></div>
       </div>
     </div>
@@ -43,7 +44,8 @@
       <button
         v-if="canGoBack"
         @click="goBack"
-        class="text-gray-600 hover:text-gray-800 font-medium flex items-center transition group"
+        class="font-medium flex items-center transition group"
+        style="color: var(--p-text-muted-color)"
       >
         <i class="pi pi-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
         Previous Step
@@ -53,7 +55,8 @@
       <button
         v-if="canReset"
         @click="showResetDialog = true"
-        class="text-red-600 hover:text-red-700 font-medium flex items-center transition"
+        class="font-medium flex items-center transition"
+        style="color: var(--p-red-500)"
       >
         <i class="pi pi-refresh mr-2"></i>
         Start Over
@@ -68,10 +71,10 @@
       :style="{ width: '30rem' }"
     >
       <div class="flex items-start gap-3">
-        <i class="pi pi-exclamation-triangle text-3xl text-orange-500"></i>
+        <i class="pi pi-exclamation-triangle text-3xl" style="color: var(--p-orange-500)"></i>
         <div>
-          <p class="text-gray-700 mb-2">Are you sure you want to start over?</p>
-          <p class="text-sm text-gray-600">This will clear all your current data and mappings.</p>
+          <p class="mb-2">Are you sure you want to start over?</p>
+          <p class="text-sm" style="color: var(--p-text-muted-color)">This will clear all your current data and mappings.</p>
         </div>
       </div>
 
@@ -119,13 +122,35 @@ const canReset = computed(() => {
 
 function getStepClasses(stepId: string) {
   if (currentStep.value === stepId) {
-    return 'bg-blue-600 text-white shadow-lg scale-110'
+    return 'text-white shadow-lg scale-110'
   } else if (isStepCompleted(stepId)) {
-    return 'bg-green-500 text-white shadow-md'
+    return 'text-white shadow-md'
   } else if (canNavigateTo(stepId)) {
-    return 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+    return 'hover:opacity-80'
   } else {
-    return 'bg-gray-200 text-gray-400 opacity-50'
+    return 'opacity-50'
+  }
+}
+
+function getStepTextColor(stepId: string) {
+  if (currentStep.value === stepId) {
+    return { color: 'var(--p-primary-color)' }
+  } else if (isStepCompleted(stepId)) {
+    return { color: 'var(--p-green-500)' }
+  } else {
+    return { color: 'var(--p-text-muted-color)' }
+  }
+}
+
+function getStepCircleStyle(stepId: string) {
+  if (currentStep.value === stepId) {
+    return { backgroundColor: 'var(--p-primary-color)' }
+  } else if (isStepCompleted(stepId)) {
+    return { backgroundColor: 'var(--p-green-500)' }
+  } else if (canNavigateTo(stepId)) {
+    return { backgroundColor: 'var(--p-surface-200)', color: 'var(--p-text-muted-color)' }
+  } else {
+    return { backgroundColor: 'var(--p-surface-200)', color: 'var(--p-text-muted-color)' }
   }
 }
 
