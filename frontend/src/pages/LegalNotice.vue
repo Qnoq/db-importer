@@ -9,7 +9,7 @@
           <p class="text-white/70 text-sm mt-2">Last updated: {{ lastUpdated }}</p>
         </div>
 
-        <div class="prose prose-purple max-w-none px-8 py-6">
+        <div class="prose prose-green dark:prose-invert max-w-none px-8 py-6">
           <section class="mb-10">
             <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500">1. Site Publisher</h2>
             <p class="text-gray-700 dark:text-gray-300 text-lg mb-4">
