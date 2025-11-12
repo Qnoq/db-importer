@@ -3,17 +3,17 @@
     <!-- Progress Stepper with Navigation -->
     <StepperNav />
 
-    <div class="bg-white shadow-lg rounded-xl p-8 border border-gray-200">
-      <h2 class="text-3xl font-bold text-gray-900 mb-2">Select Target Table</h2>
-      <p class="text-gray-600 mb-6">
+    <div class="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-8 border border-gray-200 dark:border-gray-800 transition-colors duration-200">
+      <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Select Target Table</h2>
+      <p class="text-gray-600 dark:text-gray-300 mb-6">
         Choose the table where you want to import data
       </p>
 
-      <div v-if="!store.hasSchema" class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-        <p class="text-yellow-700">No schema loaded. Please upload a SQL file first.</p>
+      <div v-if="!store.hasSchema" class="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-md p-4">
+        <p class="text-yellow-700 dark:text-yellow-400">No schema loaded. Please upload a SQL file first.</p>
         <button
           @click="router.push('/')"
-          class="mt-3 text-blue-600 hover:text-blue-700 font-semibold"
+          class="mt-3 text-neon-green-600 dark:text-neon-green-400 hover:text-neon-green-700 dark:hover:text-neon-green-300 font-semibold"
         >
           <i class="pi pi-arrow-left mr-2"></i>
           Go back to upload schema
@@ -37,7 +37,7 @@
             <div v-if="searchQuery" class="absolute inset-y-0 right-0 pr-3 flex items-center z-10">
               <button
                 @click="searchQuery = ''"
-                class="text-gray-400 hover:text-gray-600 transition"
+                class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition"
               >
                 <i class="pi pi-times"></i>
               </button>
@@ -45,25 +45,25 @@
           </div>
 
           <!-- Stats and Sorting -->
-          <div class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3">
+          <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-lg px-4 py-3">
             <div class="flex items-center space-x-4 text-sm">
               <div class="flex items-center">
-                <i class="pi pi-database text-blue-600 mr-2"></i>
-                <span class="font-medium text-gray-700">
+                <i class="pi pi-database text-neon-green-600 dark:text-neon-green-400 mr-2"></i>
+                <span class="font-medium text-gray-700 dark:text-gray-300">
                   {{ filteredTables.length }} of {{ store.tables.length }} tables
                 </span>
               </div>
-              <div v-if="selectedTableName" class="flex items-center text-green-600">
+              <div v-if="selectedTableName" class="flex items-center text-neon-green-600 dark:text-neon-green-400">
                 <i class="pi pi-check-circle mr-2"></i>
                 <span class="font-medium">1 selected</span>
               </div>
             </div>
 
             <div class="flex items-center space-x-2">
-              <label class="text-sm text-gray-600">Sort by:</label>
+              <label class="text-sm text-gray-600 dark:text-gray-400">Sort by:</label>
               <select
                 v-model="sortBy"
-                class="text-sm border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                class="text-sm border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-neon-green-500 dark:focus:ring-neon-green-400"
               >
                 <option value="name">Name A-Z</option>
                 <option value="name-desc">Name Z-A</option>
@@ -76,12 +76,12 @@
 
         <!-- Empty State -->
         <div v-if="filteredTables.length === 0" class="text-center py-12">
-          <i class="pi pi-inbox text-6xl text-gray-300 mb-4"></i>
-          <p class="text-gray-500 text-lg font-medium mb-2">No tables found</p>
-          <p class="text-gray-400 text-sm">Try adjusting your search query</p>
+          <i class="pi pi-inbox text-6xl text-gray-300 dark:text-gray-700 mb-4"></i>
+          <p class="text-gray-500 dark:text-gray-400 text-lg font-medium mb-2">No tables found</p>
+          <p class="text-gray-400 dark:text-gray-500 text-sm">Try adjusting your search query</p>
           <button
             @click="searchQuery = ''"
-            class="mt-4 text-blue-600 hover:text-blue-700 font-medium"
+            class="mt-4 text-neon-green-600 dark:text-neon-green-400 hover:text-neon-green-700 dark:hover:text-neon-green-300 font-medium"
           >
             Clear search
           </button>
@@ -95,33 +95,33 @@
             @click="selectTable(table.name)"
             class="group border-2 rounded-lg p-5 cursor-pointer transition-all duration-200 hover:shadow-lg"
             :class="selectedTableName === table.name
-              ? 'border-blue-500 bg-blue-50 shadow-md'
-              : 'border-gray-200 hover:border-blue-300 bg-white'"
+              ? 'border-neon-green-500 dark:border-neon-green-400 bg-neon-green-50 dark:bg-neon-green-950/20 shadow-md'
+              : 'border-gray-200 dark:border-gray-700 hover:border-neon-green-300 dark:hover:border-neon-green-500 bg-white dark:bg-gray-800'"
           >
             <!-- Table Header -->
             <div class="flex items-start justify-between mb-3">
               <div class="flex items-center flex-1 min-w-0">
-                <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
-                  <i class="pi pi-table text-blue-600 text-lg"></i>
+                <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-neon-green-100 dark:bg-neon-green-900/30 flex items-center justify-center mr-3">
+                  <i class="pi pi-table text-neon-green-600 dark:text-neon-green-400 text-lg"></i>
                 </div>
                 <div class="flex-1 min-w-0">
-                  <h3 class="font-semibold text-lg text-gray-900 truncate" :title="table.name">
+                  <h3 class="font-semibold text-lg text-gray-900 dark:text-white truncate" :title="table.name">
                     {{ table.name }}
                   </h3>
-                  <p class="text-sm text-gray-500 mt-1">
+                  <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     <i class="pi pi-list text-xs mr-1"></i>
                     {{ table.fields.length }} column{{ table.fields.length !== 1 ? 's' : '' }}
                   </p>
                 </div>
               </div>
               <div v-if="selectedTableName === table.name" class="flex-shrink-0 ml-2">
-                <i class="pi pi-check-circle text-blue-600 text-xl"></i>
+                <i class="pi pi-check-circle text-neon-green-600 dark:text-neon-green-400 text-xl"></i>
               </div>
             </div>
 
             <!-- Column Preview -->
-            <div class="mt-4 pt-4 border-t border-gray-200">
-              <p class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-2">
+            <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-semibold mb-2">
                 Columns
               </p>
               <div class="space-y-1.5">
@@ -130,11 +130,11 @@
                   :key="field.name"
                   class="flex items-center text-sm"
                 >
-                  <i class="pi pi-circle-fill text-xs text-gray-400 mr-2"></i>
-                  <span class="text-gray-700 truncate">{{ field.name }}</span>
-                  <span class="ml-auto text-xs text-gray-500 pl-2">{{ formatType(field.type) }}</span>
+                  <i class="pi pi-circle-fill text-xs text-gray-400 dark:text-gray-600 mr-2"></i>
+                  <span class="text-gray-700 dark:text-gray-300 truncate">{{ field.name }}</span>
+                  <span class="ml-auto text-xs text-gray-500 dark:text-gray-400 pl-2">{{ formatType(field.type) }}</span>
                 </div>
-                <div v-if="table.fields.length > 4" class="text-xs text-gray-400 italic pl-4">
+                <div v-if="table.fields.length > 4" class="text-xs text-gray-400 dark:text-gray-500 italic pl-4">
                   + {{ table.fields.length - 4 }} more...
                 </div>
               </div>
@@ -143,15 +143,15 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="filteredTables.length > itemsPerPage" class="mt-6 flex items-center justify-between border-t border-gray-200 pt-6">
-          <div class="text-sm text-gray-600">
+        <div v-if="filteredTables.length > itemsPerPage" class="mt-6 flex items-center justify-between border-t border-gray-200 dark:border-gray-800 pt-6">
+          <div class="text-sm text-gray-600 dark:text-gray-400">
             Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, filteredTables.length) }} of {{ filteredTables.length }} tables
           </div>
           <div class="flex items-center space-x-2">
             <button
               @click="currentPage--"
               :disabled="currentPage === 1"
-              class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+              class="px-3 py-1 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition"
             >
               <i class="pi pi-chevron-left"></i>
             </button>
@@ -162,8 +162,8 @@
                 @click="currentPage = page"
                 class="px-3 py-1 border rounded-md text-sm font-medium transition"
                 :class="page === currentPage
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'border-gray-300 hover:bg-gray-50'"
+                  ? 'bg-neon-green-600 dark:bg-neon-green-500 text-white border-neon-green-600 dark:border-neon-green-500'
+                  : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'"
               >
                 {{ page }}
               </button>
@@ -171,7 +171,7 @@
             <button
               @click="currentPage++"
               :disabled="currentPage === totalPages"
-              class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+              class="px-3 py-1 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 transition"
             >
               <i class="pi pi-chevron-right"></i>
             </button>
@@ -179,17 +179,17 @@
         </div>
 
         <!-- Continue Button -->
-        <div v-if="selectedTableName" class="mt-8 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div v-if="selectedTableName" class="mt-8 flex items-center justify-between bg-neon-green-50 dark:bg-neon-green-950/20 border border-neon-green-200 dark:border-neon-green-800 rounded-lg p-4">
           <div class="flex items-center">
-            <i class="pi pi-check-circle text-blue-600 text-2xl mr-3"></i>
+            <i class="pi pi-check-circle text-neon-green-600 dark:text-neon-green-400 text-2xl mr-3"></i>
             <div>
-              <p class="font-semibold text-blue-900">Table selected: {{ selectedTableName }}</p>
-              <p class="text-sm text-blue-700">Ready to upload your data file</p>
+              <p class="font-semibold text-neon-green-900 dark:text-neon-green-300">Table selected: {{ selectedTableName }}</p>
+              <p class="text-sm text-neon-green-700 dark:text-neon-green-400">Ready to upload your data file</p>
             </div>
           </div>
           <button
             @click="goToUploadData"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-sm hover:shadow-md flex items-center"
+            class="bg-neon-green-600 hover:bg-neon-green-700 dark:bg-neon-green-500 dark:hover:bg-neon-green-600 text-white font-semibold py-3 px-6 rounded-lg transition shadow-sm hover:shadow-md flex items-center"
           >
             Continue to Data Upload
             <i class="pi pi-arrow-right ml-2"></i>

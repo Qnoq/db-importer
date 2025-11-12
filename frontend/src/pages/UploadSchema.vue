@@ -3,25 +3,25 @@
     <!-- Progress Stepper with Navigation -->
     <StepperNav />
 
-    <div class="bg-white shadow-lg rounded-xl p-8 border border-gray-200">
+    <div class="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-8 border border-gray-200 dark:border-gray-800 transition-colors duration-200">
       <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-2">Upload SQL Schema</h2>
-        <p class="text-gray-600">
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Upload SQL Schema</h2>
+        <p class="text-gray-600 dark:text-gray-300">
           Upload your MySQL/MariaDB or PostgreSQL dump file to get started
         </p>
       </div>
 
       <!-- Important: Single Table Note -->
-      <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4">
+      <div class="mb-6 bg-neon-green-50 dark:bg-neon-green-950/20 border-l-4 border-neon-green-500 dark:border-neon-green-400 rounded-lg p-4">
         <div class="flex items-start gap-3">
-          <i class="pi pi-info-circle text-blue-600 text-xl"></i>
+          <i class="pi pi-info-circle text-neon-green-600 dark:text-neon-green-400 text-xl"></i>
           <div class="flex-1">
-            <h3 class="font-semibold text-blue-900 mb-1">💡 Pro Tip: Export Only Your Target Table</h3>
-            <p class="text-sm text-blue-800 mb-2">
+            <h3 class="font-semibold text-neon-green-900 dark:text-neon-green-300 mb-1">💡 Pro Tip: Export Only Your Target Table</h3>
+            <p class="text-sm text-neon-green-800 dark:text-neon-green-300 mb-2">
               You only need the <strong>CREATE TABLE</strong> statement for the table you want to import data into.
               No need to upload your entire database dump!
             </p>
-            <div class="text-xs text-blue-700 bg-blue-100 rounded px-3 py-2 font-mono">
+            <div class="text-xs text-neon-green-700 dark:text-neon-green-300 bg-neon-green-100 dark:bg-neon-green-900/30 rounded px-3 py-2 font-mono">
               <strong>Example export command:</strong><br/>
               <code class="block mt-1">mysqldump -u user -p --no-data database_name table_name > table.sql</code>
               <code class="block mt-1">pg_dump -U user --schema-only -t table_name database > table.sql</code>
@@ -32,26 +32,26 @@
 
       <!-- Upload Area -->
       <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-3">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
           SQL Schema File
         </label>
         <div
-          class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 transition cursor-pointer bg-gray-50"
+          class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 text-center hover:border-neon-green-400 dark:hover:border-neon-green-500 transition cursor-pointer bg-gray-50 dark:bg-gray-800"
           @click="fileInput?.click()"
           @dragover.prevent
           @drop.prevent="handleDrop"
         >
           <div class="flex flex-col items-center">
-            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-              <i class="pi pi-cloud-upload text-blue-600 text-3xl"></i>
+            <div class="w-16 h-16 bg-neon-green-100 dark:bg-neon-green-900/30 rounded-full flex items-center justify-center mb-4">
+              <i class="pi pi-cloud-upload text-neon-green-600 dark:text-neon-green-400 text-3xl"></i>
             </div>
-            <p class="text-lg font-medium text-gray-700 mb-1">
+            <p class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
               Drop your SQL file here, or click to browse
             </p>
-            <p class="text-sm text-gray-500">
+            <p class="text-sm text-gray-500 dark:text-gray-400">
               Supports MySQL, MariaDB, and PostgreSQL dump files
             </p>
-            <p class="text-xs text-gray-400 mt-2">
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
               A single table schema is typically &lt; 50KB
             </p>
           </div>
@@ -67,27 +67,27 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-12">
-        <i class="pi pi-spin pi-spinner text-5xl text-blue-600 mb-4"></i>
-        <p class="text-gray-600 font-medium">Parsing your SQL schema...</p>
-        <p class="text-sm text-gray-500 mt-2">This may take a few seconds</p>
+        <i class="pi pi-spin pi-spinner text-5xl text-neon-green-600 dark:text-neon-green-400 mb-4"></i>
+        <p class="text-gray-600 dark:text-gray-300 font-medium">Parsing your SQL schema...</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">This may take a few seconds</p>
       </div>
 
       <!-- Error State -->
-      <div v-if="error" class="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 mb-4 flex items-start">
-        <i class="pi pi-exclamation-circle text-red-500 text-xl mr-3 mt-0.5"></i>
+      <div v-if="error" class="bg-red-50 dark:bg-red-950/20 border-l-4 border-red-500 dark:border-red-400 rounded-lg p-4 mb-4 flex items-start">
+        <i class="pi pi-exclamation-circle text-red-500 dark:text-red-400 text-xl mr-3 mt-0.5"></i>
         <div>
-          <p class="font-medium text-red-800">Upload Failed</p>
-          <p class="text-red-700 text-sm mt-1">{{ error }}</p>
+          <p class="font-medium text-red-800 dark:text-red-300">Upload Failed</p>
+          <p class="text-red-700 dark:text-red-400 text-sm mt-1">{{ error }}</p>
         </div>
       </div>
 
       <!-- Single Table Auto-Select Modal -->
-      <div v-if="showSingleTableDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click="cancelSingleTableDialog">
-        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-md mx-4 transform transition-all relative" @click.stop>
+      <div v-if="showSingleTableDialog" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50" @click="cancelSingleTableDialog">
+        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 max-w-md mx-4 transform transition-all relative border border-transparent dark:border-gray-800" @click.stop>
           <!-- Close button -->
           <button
             @click="cancelSingleTableDialog"
-            class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
+            class="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition"
             aria-label="Close"
           >
             <i class="pi pi-times text-xl"></i>
@@ -95,27 +95,27 @@
 
           <div class="text-center">
             <!-- Success Icon -->
-            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <i class="pi pi-check-circle text-green-600 text-5xl"></i>
+            <div class="w-20 h-20 bg-neon-green-100 dark:bg-neon-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <i class="pi pi-check-circle text-neon-green-600 dark:text-neon-green-400 text-5xl"></i>
             </div>
 
             <!-- Title -->
-            <h3 class="text-2xl font-bold text-gray-900 mb-3">
+            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
               Single Table Detected
             </h3>
 
             <!-- Message -->
-            <p class="text-gray-600 mb-2">
-              We found only <strong class="text-blue-600">1 table</strong> in your schema:
+            <p class="text-gray-600 dark:text-gray-300 mb-2">
+              We found only <strong class="text-neon-green-600 dark:text-neon-green-400">1 table</strong> in your schema:
             </p>
 
             <!-- Table Name -->
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div class="bg-neon-green-50 dark:bg-neon-green-950/20 border border-neon-green-200 dark:border-neon-green-800 rounded-lg p-4 mb-6">
               <div class="flex items-center justify-center gap-3">
-                <i class="pi pi-table text-blue-600 text-2xl"></i>
+                <i class="pi pi-table text-neon-green-600 dark:text-neon-green-400 text-2xl"></i>
                 <div class="text-left">
-                  <p class="font-bold text-blue-900 text-lg">{{ store.tables[0]?.name }}</p>
-                  <p class="text-sm text-blue-700">
+                  <p class="font-bold text-neon-green-900 dark:text-neon-green-300 text-lg">{{ store.tables[0]?.name }}</p>
+                  <p class="text-sm text-neon-green-700 dark:text-neon-green-400">
                     {{ store.tables[0]?.fields.length }} column{{ store.tables[0]?.fields.length !== 1 ? 's' : '' }}
                   </p>
                 </div>
@@ -123,7 +123,7 @@
             </div>
 
             <!-- Explanation -->
-            <p class="text-gray-500 text-sm mb-6">
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">
               Since there's only one table, we'll auto-select it and skip the table selection step.
             </p>
 
@@ -131,14 +131,14 @@
             <div class="flex flex-col gap-3">
               <button
                 @click="continueToProceed"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                class="w-full bg-neon-green-600 hover:bg-neon-green-700 dark:bg-neon-green-500 dark:hover:bg-neon-green-600 text-white font-semibold py-4 px-6 rounded-lg transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
               >
                 Continue to Upload Data
                 <i class="pi pi-arrow-right"></i>
               </button>
               <button
                 @click="cancelSingleTableDialog"
-                class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2"
+                class="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2"
               >
                 <i class="pi pi-upload"></i>
                 Upload a Different File
@@ -151,11 +151,11 @@
       <!-- Success State -->
       <div v-if="store.hasSchema && !loading && !showSingleTableDialog" class="space-y-6">
         <!-- Success Banner -->
-        <div class="bg-green-50 border-l-4 border-green-500 rounded-lg p-4 flex items-start">
-          <i class="pi pi-check-circle text-green-500 text-xl mr-3 mt-0.5"></i>
+        <div class="bg-neon-green-50 dark:bg-neon-green-950/20 border-l-4 border-neon-green-500 dark:border-neon-green-400 rounded-lg p-4 flex items-start">
+          <i class="pi pi-check-circle text-neon-green-500 dark:text-neon-green-400 text-xl mr-3 mt-0.5"></i>
           <div class="flex-1">
-            <p class="font-medium text-green-800">Schema parsed successfully!</p>
-            <p class="text-green-700 text-sm mt-1">
+            <p class="font-medium text-neon-green-800 dark:text-neon-green-300">Schema parsed successfully!</p>
+            <p class="text-neon-green-700 dark:text-neon-green-400 text-sm mt-1">
               Found {{ store.tables.length }} table{{ store.tables.length !== 1 ? 's' : '' }} in your database dump
             </p>
           </div>
@@ -164,28 +164,28 @@
         <!-- Tables Preview -->
         <div>
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900">Detected Tables</h3>
-            <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Detected Tables</h3>
+            <span class="px-3 py-1 bg-neon-green-100 dark:bg-neon-green-900/30 text-neon-green-800 dark:text-neon-green-300 rounded-full text-sm font-medium">
               {{ store.tables.length }} tables
             </span>
           </div>
 
-          <div class="bg-gradient-to-br from-gray-50 to-blue-50 rounded-lg p-4 max-h-96 overflow-y-auto border border-gray-200">
+          <div class="bg-gradient-to-br from-gray-50 to-neon-green-50 dark:from-gray-800 dark:to-gray-900 rounded-lg p-4 max-h-96 overflow-y-auto border border-gray-200 dark:border-gray-700">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               <div
                 v-for="table in store.tables"
                 :key="table.name"
-                class="bg-white rounded-lg p-3 border border-gray-200 hover:border-blue-300 hover:shadow-md transition"
+                class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:border-neon-green-300 dark:hover:border-neon-green-500 hover:shadow-md transition"
               >
                 <div class="flex items-center">
-                  <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
-                    <i class="pi pi-table text-blue-600 text-sm"></i>
+                  <div class="w-8 h-8 bg-neon-green-100 dark:bg-neon-green-900/30 rounded-lg flex items-center justify-center mr-2">
+                    <i class="pi pi-table text-neon-green-600 dark:text-neon-green-400 text-sm"></i>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <p class="font-medium text-gray-900 truncate" :title="table.name">
+                    <p class="font-medium text-gray-900 dark:text-white truncate" :title="table.name">
                       {{ table.name }}
                     </p>
-                    <p class="text-xs text-gray-500">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
                       {{ table.fields.length }} column{{ table.fields.length !== 1 ? 's' : '' }}
                     </p>
                   </div>
@@ -196,17 +196,17 @@
         </div>
 
         <!-- Continue Button (only show for multiple tables) -->
-        <div v-if="store.tables.length > 1" class="flex items-center justify-between pt-6 border-t border-gray-200">
+        <div v-if="store.tables.length > 1" class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-800">
           <button
             @click="fileInput?.click()"
-            class="text-blue-600 hover:text-blue-700 font-medium flex items-center transition"
+            class="text-neon-green-600 dark:text-neon-green-400 hover:text-neon-green-700 dark:hover:text-neon-green-300 font-medium flex items-center transition"
           >
             <i class="pi pi-refresh mr-2"></i>
             Upload a different file
           </button>
           <button
             @click="goToSelectTable"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition shadow-md hover:shadow-lg flex items-center"
+            class="bg-neon-green-600 hover:bg-neon-green-700 dark:bg-neon-green-500 dark:hover:bg-neon-green-600 text-white font-semibold py-3 px-8 rounded-lg transition shadow-md hover:shadow-lg flex items-center"
           >
             Continue to Table Selection
             <i class="pi pi-arrow-right ml-2"></i>
