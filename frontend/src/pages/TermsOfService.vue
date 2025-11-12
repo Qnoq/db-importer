@@ -1,24 +1,48 @@
 <template>
-  <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <div class="bg-white rounded-lg shadow-lg p-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-6">Terms of Service</h1>
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100">
+    <div class="container mx-auto px-4 py-12 max-w-5xl">
+      <!-- Header Section -->
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-10">
+          <h1 class="text-4xl font-extrabold text-white mb-3">Terms of Service</h1>
+          <p class="text-blue-100 text-lg">SQLSheetr Data Import Service</p>
+          <p class="text-blue-200 text-sm mt-2">Last updated: {{ lastUpdated }}</p>
+        </div>
 
-      <div class="prose prose-blue max-w-none">
-        <p class="text-gray-600 mb-6">
-          Last updated: {{ lastUpdated }}
-        </p>
+        <!-- Critical Warning Banner -->
+        <div class="bg-red-50 border-l-4 border-red-500 p-6 m-6">
+          <div class="flex items-start">
+            <i class="pi pi-exclamation-triangle text-red-500 text-2xl mr-4 mt-1"></i>
+            <div>
+              <h3 class="text-lg font-bold text-red-900 mb-2">⚠️ CRITICAL: READ BEFORE USE</h3>
+              <p class="text-red-800 font-semibold mb-2">
+                By using this service, you acknowledge and accept full responsibility for:
+              </p>
+              <ul class="list-disc list-inside text-red-800 space-y-1 ml-4">
+                <li><strong>ALWAYS creating complete database backups before executing any generated SQL</strong></li>
+                <li>Testing all generated SQL on development/staging environments first</li>
+                <li>Reviewing and validating all SQL statements before execution</li>
+                <li>Any and all consequences of executing generated SQL in your databases</li>
+              </ul>
+              <p class="text-red-900 font-bold mt-3">
+                WE ARE NOT LIABLE FOR ANY DATA LOSS, CORRUPTION, OR DAMAGE TO YOUR DATABASES.
+              </p>
+            </div>
+          </div>
+        </div>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">1. Acceptance of Terms</h2>
-          <p class="text-gray-700 mb-4">
-            By accessing and using SQL Importer ("the Service"), you accept and agree to be bound by the terms and provision of this agreement. If you do not agree to abide by the above, please do not use this service.
-          </p>
-        </section>
+        <div class="prose prose-blue max-w-none px-8 py-6">
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">1. Acceptance of Terms</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              By accessing and using SQLSheetr ("the Service"), you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to abide by the terms below, please do not use this service.
+            </p>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">2. Description of Service</h2>
-          <p class="text-gray-700 mb-4">
-            SQL Data Importer is a secure web-based tool that helps you safely import data from Excel/CSV files into SQL databases. The Service provides the following features:
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">2. Description of Service</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              SQLSheetr is a secure web-based tool that helps you import data from Excel/CSV files into SQL databases. The Service provides the following features:
           </p>
           <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
             <li><strong>SQL Schema Parsing:</strong> Upload SQL dump files (.sql) containing CREATE TABLE statements for MySQL/MariaDB or PostgreSQL</li>
@@ -28,13 +52,16 @@
             <li><strong>SQL Generation:</strong> Generate type-safe, injection-proof INSERT statements ready for execution</li>
             <li><strong>Import History:</strong> Track your past imports and download generated SQL files (for registered users)</li>
           </ul>
-          <p class="text-gray-700 mb-4">
-            <strong>Important:</strong> The Service does NOT connect to your database directly. You download the generated SQL and execute it yourself in your own environment, ensuring full control and security.
-          </p>
-        </section>
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-6">
+              <p class="text-blue-900 font-semibold">
+                <i class="pi pi-info-circle mr-2"></i>
+                <strong>Important:</strong> The Service does NOT connect to your database directly. You download the generated SQL and execute it yourself in your own environment, ensuring full control and security.
+              </p>
+            </div>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">3. User Accounts</h2>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">3. User Accounts</h2>
           <p class="text-gray-700 mb-4">
             To access certain features of the Service, you must register for an account. You agree to:
           </p>
@@ -44,10 +71,10 @@
             <li>Notify us immediately of any unauthorized use of your account</li>
             <li>Be responsible for all activities that occur under your account</li>
           </ul>
-        </section>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">4. User Data and Privacy</h2>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">4. User Data and Privacy</h2>
           <p class="text-gray-700 mb-4">
             You retain all rights to your data. The Service processes your uploaded files (SQL schemas and data files) temporarily to generate SQL statements. Key privacy principles:
           </p>
@@ -60,10 +87,10 @@
           <p class="text-gray-700 mb-4">
             For complete details on data handling, please review our <router-link to="/privacy-policy" class="text-blue-600 hover:text-blue-800 underline">Privacy Policy</router-link>.
           </p>
-        </section>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">5. Acceptable Use</h2>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">5. Acceptable Use</h2>
           <p class="text-gray-700 mb-4">
             You agree not to:
           </p>
@@ -78,91 +105,146 @@
             <li>Impersonate any person or entity or misrepresent your affiliation</li>
             <li>Reverse engineer or attempt to extract the source code of the Service</li>
           </ul>
-        </section>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">6. Intellectual Property</h2>
-          <p class="text-gray-700 mb-4">
-            The Service and its original content, features, and functionality are owned by SQL Importer and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
-          </p>
-        </section>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">6. Intellectual Property</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              The Service and its original content, features, and functionality are owned by SQLSheetr and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
+            </p>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">7. Limitation of Liability</h2>
-          <p class="text-gray-700 mb-4">
-            In no event shall SQL Importer, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from:
-          </p>
-          <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
-            <li>Your access to or use of or inability to access or use the Service</li>
-            <li>Any conduct or content of any third party on the Service</li>
-            <li>Any content obtained from the Service</li>
-            <li>Unauthorized access, use, or alteration of your transmissions or content</li>
-          </ul>
-        </section>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-red-600">7. Limitation of Liability</h2>
+            <div class="bg-red-50 border border-red-200 rounded-lg p-6 mb-4">
+              <p class="text-red-900 font-bold text-lg mb-3">
+                <i class="pi pi-exclamation-circle mr-2"></i>PLEASE READ THIS SECTION CAREFULLY
+              </p>
+              <p class="text-red-800 text-lg mb-4">
+                In no event shall SQLSheetr, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation:
+              </p>
+              <ul class="list-disc list-inside text-red-800 mb-4 ml-4 space-y-2">
+                <li><strong>Loss of data or database corruption</strong></li>
+                <li><strong>Loss of profits, revenue, or business opportunities</strong></li>
+                <li><strong>Downtime or service interruptions</strong></li>
+                <li><strong>Errors in generated SQL statements</strong></li>
+                <li><strong>Data integrity issues resulting from executed SQL</strong></li>
+                <li>Any conduct or content of any third party on the Service</li>
+                <li>Unauthorized access, use, or alteration of your transmissions or content</li>
+              </ul>
+              <p class="text-red-900 font-bold mt-4">
+                YOU ARE SOLELY RESPONSIBLE FOR BACKING UP YOUR DATABASES BEFORE EXECUTING ANY GENERATED SQL.
+              </p>
+            </div>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">8. Disclaimer of Warranties</h2>
-          <p class="text-gray-700 mb-4">
-            The Service is provided on an "AS IS" and "AS AVAILABLE" basis. SQL Importer makes no warranties, expressed or implied, regarding the Service, including but not limited to:
-          </p>
-          <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
-            <li>Merchantability, fitness for a particular purpose, or non-infringement</li>
-            <li>That the Service will be uninterrupted, secure, or error-free</li>
-            <li>That any defects will be corrected</li>
-          </ul>
-        </section>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">8. Disclaimer of Warranties</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              The Service is provided on an "AS IS" and "AS AVAILABLE" basis. SQLSheetr makes no warranties, expressed or implied, regarding:
+            </p>
+            <ul class="list-disc list-inside text-gray-700 mb-4 ml-4 space-y-1">
+              <li><strong>Accuracy or correctness of generated SQL statements</strong></li>
+              <li><strong>Suitability of generated SQL for your specific use case</strong></li>
+              <li>Merchantability, fitness for a particular purpose, or non-infringement</li>
+              <li>That the Service will be uninterrupted, secure, or error-free</li>
+              <li>That any defects will be corrected</li>
+              <li><strong>That the generated SQL will not cause data loss or corruption</strong></li>
+            </ul>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">9. Data Backup and User Responsibility</h2>
-          <p class="text-gray-700 mb-4">
-            <strong>Critical responsibilities:</strong>
-          </p>
-          <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
-            <li><strong>Test Generated SQL:</strong> Always test generated SQL on a development/staging database before executing in production</li>
-            <li><strong>Backup Your Database:</strong> Create complete backups before running any import operations</li>
-            <li><strong>Review SQL Output:</strong> Carefully review the generated SQL statements before execution</li>
-            <li><strong>Save Downloaded Files:</strong> Once you download generated SQL, you are responsible for storing it securely</li>
-            <li><strong>Verify Data Accuracy:</strong> Ensure your source data (Excel/CSV) is accurate and complete</li>
-          </ul>
-          <p class="text-gray-700 mb-4">
-            We are not liable for any data loss, corruption, or errors that occur in your database as a result of executing generated SQL statements. The Service generates SQL based on the inputs you provide, but you are solely responsible for validating and executing it.
-          </p>
-        </section>
+          <section class="mb-10 bg-yellow-50 border-2 border-yellow-400 rounded-xl p-6">
+            <h2 class="text-3xl font-bold text-yellow-900 mb-4 pb-2 border-b-2 border-yellow-600">
+              <i class="pi pi-shield text-yellow-600 mr-2"></i>9. Data Backup and User Responsibility
+            </h2>
+            <div class="bg-white border-2 border-red-400 rounded-lg p-6 mb-4">
+              <p class="text-gray-900 font-bold text-xl mb-4">
+                <i class="pi pi-exclamation-triangle text-red-600 mr-2"></i>MANDATORY USER RESPONSIBILITIES:
+              </p>
+              <div class="space-y-4">
+                <div class="flex items-start">
+                  <span class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3 flex-shrink-0">1</span>
+                  <div>
+                    <p class="font-bold text-red-900">ALWAYS BACKUP YOUR DATABASE FIRST</p>
+                    <p class="text-gray-700">Create a complete backup of your database before executing ANY generated SQL. This is NON-NEGOTIABLE.</p>
+                  </div>
+                </div>
+                <div class="flex items-start">
+                  <span class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3 flex-shrink-0">2</span>
+                  <div>
+                    <p class="font-bold text-red-900">Test on Development/Staging Environment</p>
+                    <p class="text-gray-700">Never execute generated SQL directly in production without testing it first.</p>
+                  </div>
+                </div>
+                <div class="flex items-start">
+                  <span class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3 flex-shrink-0">3</span>
+                  <div>
+                    <p class="font-bold text-red-900">Review Every SQL Statement</p>
+                    <p class="text-gray-700">Carefully review the generated SQL before execution. Understand what it will do to your database.</p>
+                  </div>
+                </div>
+                <div class="flex items-start">
+                  <span class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3 flex-shrink-0">4</span>
+                  <div>
+                    <p class="font-bold text-red-900">Verify Data Accuracy</p>
+                    <p class="text-gray-700">Ensure your source data (Excel/CSV) is accurate and complete before generating SQL.</p>
+                  </div>
+                </div>
+                <div class="flex items-start">
+                  <span class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-3 flex-shrink-0">5</span>
+                  <div>
+                    <p class="font-bold text-red-900">Save Generated SQL Files</p>
+                    <p class="text-gray-700">Once downloaded, you are responsible for securely storing the SQL files.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="bg-red-100 border-l-4 border-red-600 p-4 mt-6">
+              <p class="text-red-900 font-bold text-lg">
+                ⚠️ CRITICAL DISCLAIMER
+              </p>
+              <p class="text-red-800 mt-2">
+                SQLSheetr is NOT liable for any data loss, corruption, errors, or damages that occur in your database as a result of executing generated SQL statements. The Service generates SQL based on YOUR inputs, but YOU are SOLELY RESPONSIBLE for validating, testing, and executing it. By using this service, you accept FULL RESPONSIBILITY for all consequences.
+              </p>
+            </div>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">10. Termination</h2>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">10. Termination</h2>
           <p class="text-gray-700 mb-4">
             We may terminate or suspend your account and access to the Service immediately, without prior notice or liability, for any reason, including breach of these Terms. Upon termination, your right to use the Service will immediately cease.
           </p>
-        </section>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">11. Changes to Terms</h2>
-          <p class="text-gray-700 mb-4">
-            We reserve the right to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days' notice prior to any new terms taking effect. Continued use of the Service after changes constitutes acceptance of the modified Terms.
-          </p>
-        </section>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">11. Changes to Terms</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              We reserve the right to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days' notice prior to any new terms taking effect. Continued use of the Service after changes constitutes acceptance of the modified Terms.
+            </p>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">12. Governing Law</h2>
-          <p class="text-gray-700 mb-4">
-            These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which SQL Importer operates, without regard to its conflict of law provisions.
-          </p>
-        </section>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">12. Governing Law</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              These Terms shall be governed by and construed in accordance with the laws of the jurisdiction in which SQLSheetr operates, without regard to its conflict of law provisions.
+            </p>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">13. Contact Information</h2>
-          <p class="text-gray-700 mb-4">
-            If you have any questions about these Terms, please contact us.
-          </p>
-        </section>
-      </div>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-600">13. Contact Information</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              If you have any questions about these Terms, please contact us.
+            </p>
+          </section>
+        </div>
 
-      <div class="mt-8 pt-6 border-t border-gray-200">
-        <router-link to="/" class="text-blue-600 hover:text-blue-800 flex items-center">
-          <i class="pi pi-arrow-left mr-2"></i>
-          Back to Home
-        </router-link>
+        <!-- Footer Navigation -->
+        <div class="bg-gradient-to-r from-gray-50 to-blue-50 px-8 py-6 border-t border-gray-200">
+          <router-link to="/" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold transition-colors">
+            <i class="pi pi-arrow-left mr-2"></i>
+            Back to Home
+          </router-link>
+        </div>
       </div>
     </div>
   </div>

@@ -1,28 +1,43 @@
 <template>
-  <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <div class="bg-white rounded-lg shadow-lg p-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-6">Privacy Policy</h1>
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-green-50 to-gray-100">
+    <div class="container mx-auto px-4 py-12 max-w-5xl">
+      <!-- Header Section -->
+      <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+        <div class="bg-gradient-to-r from-green-600 to-emerald-700 px-8 py-10">
+          <h1 class="text-4xl font-extrabold text-white mb-3">Privacy Policy</h1>
+          <p class="text-green-100 text-lg">SQLSheetr Data Import Service</p>
+          <p class="text-green-200 text-sm mt-2">Last updated: {{ lastUpdated }}</p>
+        </div>
 
-      <div class="prose prose-blue max-w-none">
-        <p class="text-gray-600 mb-6">
-          Last updated: {{ lastUpdated }}
-        </p>
+        <!-- Privacy Commitment Banner -->
+        <div class="bg-green-50 border-l-4 border-green-500 p-6 m-6">
+          <div class="flex items-start">
+            <i class="pi pi-shield text-green-600 text-2xl mr-4 mt-1"></i>
+            <div>
+              <h3 class="text-lg font-bold text-green-900 mb-2">🔒 Our Privacy Commitment</h3>
+              <p class="text-green-800 font-semibold mb-2">
+                <strong>Key Privacy Principle:</strong> We do NOT access, connect to, or store data from your actual databases.
+              </p>
+              <p class="text-green-800">
+                SQLSheetr only processes files you upload temporarily to generate SQL statements. You maintain full control of your data and databases at all times.
+              </p>
+            </div>
+          </div>
+        </div>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">1. Introduction</h2>
-          <p class="text-gray-700 mb-4">
-            SQL Data Importer ("we", "our", or "us") is a secure web-based tool for importing data from Excel/CSV files into SQL databases. We are committed to protecting your privacy and handling your data transparently.
-          </p>
-          <p class="text-gray-700 mb-4">
-            This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Service. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Service.
-          </p>
-          <p class="text-gray-700 mb-4">
-            <strong>Key Privacy Principle:</strong> We do NOT access, connect to, or store data from your actual databases. The Service only processes files you upload to generate SQL statements, which you then execute yourself in your own environment.
-          </p>
-        </section>
+        <div class="prose prose-green max-w-none px-8 py-6">
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-green-600">1. Introduction</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              SQLSheetr ("we", "our", or "us") is a secure web-based tool for importing data from Excel/CSV files into SQL databases. We are committed to protecting your privacy and handling your data transparently.
+            </p>
+            <p class="text-gray-700 text-lg mb-4">
+              This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Service. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Service.
+            </p>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">2. Information We Collect</h2>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-green-600">2. Information We Collect</h2>
 
           <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">2.1 Personal Information</h3>
           <p class="text-gray-700 mb-4">
@@ -76,10 +91,10 @@
           <p class="text-gray-700 mb-4">
             These logs do NOT include the content of your uploaded files or generated SQL.
           </p>
-        </section>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">3. How We Use Your Information</h2>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-green-600">3. How We Use Your Information</h2>
           <p class="text-gray-700 mb-4">
             We use the information we collect for the following purposes:
           </p>
@@ -98,10 +113,10 @@
           <p class="text-gray-700 mb-4">
             <strong>We do NOT:</strong> Access your actual databases, store your sensitive data permanently, or share your data with third parties for marketing purposes.
           </p>
-        </section>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">4. Data Storage and Security</h2>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-green-600">4. Data Storage and Security</h2>
 
           <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">4.1 Security Measures</h3>
           <p class="text-gray-700 mb-4">
@@ -252,21 +267,23 @@
             <li><strong>Legitimate Interests:</strong> For improving and securing the Service</li>
             <li><strong>Legal Obligation:</strong> To comply with applicable laws</li>
           </ul>
-        </section>
+          </section>
 
-        <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">14. Contact Us</h2>
-          <p class="text-gray-700 mb-4">
-            If you have any questions about this Privacy Policy or our privacy practices, please contact us.
-          </p>
-        </section>
-      </div>
+          <section class="mb-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-green-600">14. Contact Us</h2>
+            <p class="text-gray-700 text-lg mb-4">
+              If you have any questions about this Privacy Policy or our privacy practices, please contact us.
+            </p>
+          </section>
+        </div>
 
-      <div class="mt-8 pt-6 border-t border-gray-200">
-        <router-link to="/" class="text-blue-600 hover:text-blue-800 flex items-center">
-          <i class="pi pi-arrow-left mr-2"></i>
-          Back to Home
-        </router-link>
+        <!-- Footer Navigation -->
+        <div class="bg-gradient-to-r from-gray-50 to-green-50 px-8 py-6 border-t border-gray-200">
+          <router-link to="/" class="inline-flex items-center text-green-600 hover:text-green-800 font-semibold transition-colors">
+            <i class="pi pi-arrow-left mr-2"></i>
+            Back to Home
+          </router-link>
+        </div>
       </div>
     </div>
   </div>
