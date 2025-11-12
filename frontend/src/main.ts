@@ -7,7 +7,7 @@ import router from './router'
 import App from './App.vue'
 
 import './style.css'
-import 'primevue/resources/themes/lara-light-blue/theme.css'
+// PrimeVue theme is now loaded dynamically by useDarkMode composable
 import 'primeicons/primeicons.css'
 
 const app = createApp(App)
