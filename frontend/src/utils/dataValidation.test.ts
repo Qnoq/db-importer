@@ -288,22 +288,22 @@ describe('validateDataset', () => {
 describe('getCellClass', () => {
   it('should return error class', () => {
     const validation = { valid: false, severity: 'error' as ValidationSeverity }
-    expect(getCellClass(validation)).toContain('bg-red-50')
+    expect(getCellClass(validation)).toBe('validation-error')
   })
 
   it('should return warning class', () => {
     const validation = { valid: true, severity: 'warning' as ValidationSeverity }
-    expect(getCellClass(validation)).toContain('bg-yellow-50')
+    expect(getCellClass(validation)).toBe('validation-warning')
   })
 
   it('should return info class', () => {
     const validation = { valid: true, severity: 'info' as ValidationSeverity }
-    expect(getCellClass(validation)).toContain('bg-blue-50')
+    expect(getCellClass(validation)).toBe('validation-info')
   })
 
   it('should return success class', () => {
     const validation = { valid: true, severity: 'success' as ValidationSeverity }
-    expect(getCellClass(validation)).toContain('bg-green-50')
+    expect(getCellClass(validation)).toBe('validation-success')
   })
 
   it('should return empty string for null', () => {

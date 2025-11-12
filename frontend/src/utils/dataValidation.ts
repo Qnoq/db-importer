@@ -376,19 +376,20 @@ export function validateDataset(
 
 /**
  * Get CSS class for cell based on validation
+ * Returns semantic class names to be styled with PrimeVue CSS variables
  */
 export function getCellClass(validation: ValidationResult | null): string {
   if (!validation) return ''
 
   switch (validation.severity) {
     case 'error':
-      return 'bg-red-50 border-red-300 text-red-900'
+      return 'validation-error'
     case 'warning':
-      return 'bg-yellow-50 border-yellow-300 text-yellow-900'
+      return 'validation-warning'
     case 'info':
-      return 'bg-blue-50 border-blue-200 text-blue-700'
+      return 'validation-info'
     case 'success':
-      return 'bg-green-50 border-green-200 text-green-700'
+      return 'validation-success'
     default:
       return ''
   }

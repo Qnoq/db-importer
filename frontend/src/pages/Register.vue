@@ -1,18 +1,18 @@
 <template>
-  <div class="flex items-center justify-center min-h-[calc(100vh-200px)]">
-    <Card class="w-full max-w-md shadow-lg">
+  <div class="register-page">
+    <Card class="register-card">
       <template #title>
-        <div class="text-center">
-          <i class="pi pi-user-plus text-4xl mb-3" style="color: var(--p-primary-color)"></i>
-          <h2 class="text-2xl font-bold">Create Account</h2>
-          <p class="text-sm mt-2" style="color: var(--p-text-muted-color)">
+        <div class="card-title">
+          <i class="pi pi-user-plus title-icon"></i>
+          <h2>Create Account</h2>
+          <p class="subtitle">
             Sign up to save your history, templates, and unlimited imports
           </p>
         </div>
       </template>
 
       <template #content>
-        <form @submit.prevent="handleRegister" class="space-y-4">
+        <form @submit.prevent="handleRegister" class="register-form">
           <!-- Error Message -->
           <Message v-if="authStore.error" severity="error" :closable="false">
             {{ authStore.error }}
@@ -20,35 +20,33 @@
 
           <!-- First Name Field -->
           <div class="field">
-            <label for="firstName" class="block text-sm font-medium mb-2">
-              First Name <span style="color: var(--p-text-muted-color)">(Optional)</span>
+            <label for="firstName" class="field-label">
+              First Name <span class="optional-text">(Optional)</span>
             </label>
             <InputText
               id="firstName"
               v-model="firstName"
               type="text"
               placeholder="John"
-              class="w-full"
             />
           </div>
 
           <!-- Last Name Field -->
           <div class="field">
-            <label for="lastName" class="block text-sm font-medium mb-2">
-              Last Name <span style="color: var(--p-text-muted-color)">(Optional)</span>
+            <label for="lastName" class="field-label">
+              Last Name <span class="optional-text">(Optional)</span>
             </label>
             <InputText
               id="lastName"
               v-model="lastName"
               type="text"
               placeholder="Doe"
-              class="w-full"
             />
           </div>
 
           <!-- Email Field -->
           <div class="field">
-            <label for="email" class="block text-sm font-medium mb-2">
+            <label for="email" class="field-label">
               Email *
             </label>
             <InputText
@@ -56,7 +54,6 @@
               v-model="email"
               type="email"
               placeholder="your@email.com"
-              class="w-full"
               :class="{ 'p-invalid': emailError }"
               required
               autofocus
@@ -66,7 +63,7 @@
 
           <!-- Password Field -->
           <div class="field">
-            <label for="password" class="block text-sm font-medium mb-2">
+            <label for="password" class="field-label">
               Password *
             </label>
             <Password
@@ -75,15 +72,14 @@
               placeholder="At least 8 characters"
               :feedback="true"
               toggleMask
-              class="w-full"
               :class="{ 'p-invalid': passwordError }"
-              inputClass="w-full"
+              inputClass="password-input"
               required
             >
               <template #footer>
                 <Divider />
-                <p class="text-xs mt-2" style="color: var(--p-text-muted-color)">Suggestions</p>
-                <ul class="text-xs ml-4 mt-1" style="color: var(--p-text-muted-color)">
+                <p class="password-hint-title">Suggestions</p>
+                <ul class="password-hints">
                   <li>At least 8 characters</li>
                   <li>Mix of letters, numbers, and symbols</li>
                 </ul>
@@ -94,7 +90,7 @@
 
           <!-- Confirm Password Field -->
           <div class="field">
-            <label for="confirmPassword" class="block text-sm font-medium mb-2">
+            <label for="confirmPassword" class="field-label">
               Confirm Password *
             </label>
             <Password
@@ -103,46 +99,45 @@
               placeholder="Confirm your password"
               :feedback="false"
               toggleMask
-              class="w-full"
               :class="{ 'p-invalid': confirmPasswordError }"
-              inputClass="w-full"
+              inputClass="password-input"
               required
             />
             <small v-if="confirmPasswordError" class="p-error">{{ confirmPasswordError }}</small>
           </div>
 
           <!-- Terms and Conditions -->
-          <div class="flex items-start">
-            <Checkbox v-model="acceptedTerms" inputId="terms" :binary="true" class="mt-1" />
-            <label for="terms" class="ml-2 text-sm" style="color: var(--p-text-muted-color)">
+          <div class="terms-section">
+            <Checkbox v-model="acceptedTerms" inputId="terms" :binary="true" class="terms-checkbox" />
+            <label for="terms" class="terms-label">
               I agree to the
-              <a href="#" style="color: var(--p-primary-color)">Terms of Service</a>
+              <a href="#" class="terms-link">Terms of Service</a>
               and
-              <a href="#" style="color: var(--p-primary-color)">Privacy Policy</a>
+              <a href="#" class="terms-link">Privacy Policy</a>
             </label>
           </div>
-          <small v-if="termsError" class="p-error block">{{ termsError }}</small>
+          <small v-if="termsError" class="p-error terms-error">{{ termsError }}</small>
 
           <!-- Submit Button -->
           <Button
             type="submit"
             label="Create Account"
             icon="pi pi-user-plus"
-            class="w-full mt-4"
+            class="submit-button"
             :loading="authStore.loading"
             :disabled="authStore.loading"
           />
 
           <!-- Divider -->
           <Divider align="center">
-            <span class="text-sm" style="color: var(--p-text-muted-color)">OR</span>
+            <span class="divider-text">OR</span>
           </Divider>
 
           <!-- Continue as Guest -->
           <Button
             label="Continue as Guest"
             icon="pi pi-user"
-            class="w-full"
+            class="guest-button"
             severity="secondary"
             outlined
             @click="handleContinueAsGuest"
@@ -150,14 +145,13 @@
           />
 
           <!-- Login Link -->
-          <div class="text-center mt-4">
-            <span class="text-sm" style="color: var(--p-text-muted-color)">
+          <div class="login-link">
+            <span class="login-text">
               Already have an account?
             </span>
             <router-link
               to="/login"
-              class="text-sm font-medium ml-1"
-              style="color: var(--p-primary-color)"
+              class="login-link-text"
             >
               Sign In
             </router-link>
@@ -266,6 +260,130 @@ const handleContinueAsGuest = () => {
 </script>
 
 <style scoped>
+.register-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 200px);
+}
+
+.register-card {
+  width: 100%;
+  max-width: 28rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  text-align: center;
+}
+
+.title-icon {
+  font-size: 2.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--p-primary-color);
+}
+
+.card-title h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0 0;
+  color: var(--p-text-muted-color);
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.optional-text {
+  color: var(--p-text-muted-color);
+}
+
+.password-hint-title {
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  color: var(--p-text-muted-color);
+}
+
+.password-hints {
+  font-size: 0.75rem;
+  margin: 0.25rem 0 0 1rem;
+  color: var(--p-text-muted-color);
+}
+
+.terms-section {
+  display: flex;
+  align-items: flex-start;
+}
+
+.terms-checkbox {
+  margin-top: 0.25rem;
+}
+
+.terms-label {
+  margin-left: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+}
+
+.terms-link {
+  color: var(--p-primary-color);
+  text-decoration: none;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
+}
+
+.terms-error {
+  display: block;
+}
+
+.divider-text {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.login-text {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+}
+
+.login-link-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-left: 0.25rem;
+  color: var(--p-primary-color);
+  text-decoration: none;
+}
+
+.login-link-text:hover {
+  text-decoration: underline;
+}
+
 :deep(.p-card) {
   border-radius: 12px;
   overflow: hidden;
@@ -281,12 +399,26 @@ const handleContinueAsGuest = () => {
 
 :deep(.p-inputtext),
 :deep(.p-password input) {
+  width: 100%;
   border-radius: 8px;
   padding: 0.75rem;
+}
+
+:deep(.p-password) {
+  width: 100%;
+}
+
+:deep(.password-input) {
+  width: 100%;
 }
 
 :deep(.p-button) {
   border-radius: 8px;
   padding: 0.75rem 1rem;
+}
+
+:deep(.submit-button),
+:deep(.guest-button) {
+  width: 100%;
 }
 </style>

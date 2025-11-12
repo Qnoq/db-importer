@@ -1,86 +1,84 @@
 <template>
-  <div class="p-6 max-w-7xl mx-auto">
+  <div class="history-page">
     <Toast />
 
     <!-- Page Header -->
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold mb-2">Import History</h1>
-      <p style="color: var(--p-text-muted-color)">View and manage your import history</p>
+    <div class="page-header">
+      <h1>Import History</h1>
+      <p class="header-subtitle">View and manage your import history</p>
     </div>
 
     <!-- Stats Cards -->
-    <div v-if="importStore.stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div v-if="importStore.stats" class="stats-grid">
       <Card>
         <template #content>
-          <div class="flex items-center justify-between">
+          <div class="stat-card-content">
             <div>
-              <p class="text-sm" style="color: var(--p-text-muted-color)">Total Imports</p>
-              <p class="text-2xl font-bold">{{ importStore.stats.totalImports }}</p>
+              <p class="stat-label">Total Imports</p>
+              <p class="stat-value">{{ importStore.stats.totalImports }}</p>
             </div>
-            <i class="pi pi-database text-3xl" style="color: var(--p-primary-color)"></i>
+            <i class="pi pi-database stat-icon" style="color: var(--p-primary-color)"></i>
           </div>
         </template>
       </Card>
 
       <Card>
         <template #content>
-          <div class="flex items-center justify-between">
+          <div class="stat-card-content">
             <div>
-              <p class="text-sm" style="color: var(--p-text-muted-color)">Total Rows</p>
-              <p class="text-2xl font-bold">{{ formatNumber(importStore.stats.totalRows) }}</p>
+              <p class="stat-label">Total Rows</p>
+              <p class="stat-value">{{ formatNumber(importStore.stats.totalRows) }}</p>
             </div>
-            <i class="pi pi-chart-line text-3xl" style="color: var(--p-green-500)"></i>
+            <i class="pi pi-chart-line stat-icon" style="color: var(--p-green-500)"></i>
           </div>
         </template>
       </Card>
 
       <Card>
         <template #content>
-          <div class="flex items-center justify-between">
+          <div class="stat-card-content">
             <div>
-              <p class="text-sm" style="color: var(--p-text-muted-color)">Success Rate</p>
-              <p class="text-2xl font-bold">{{ importStore.stats.successRate.toFixed(1) }}%</p>
+              <p class="stat-label">Success Rate</p>
+              <p class="stat-value">{{ importStore.stats.successRate.toFixed(1) }}%</p>
             </div>
-            <i class="pi pi-check-circle text-3xl" style="color: var(--p-green-600)"></i>
+            <i class="pi pi-check-circle stat-icon" style="color: var(--p-green-600)"></i>
           </div>
         </template>
       </Card>
 
       <Card>
         <template #content>
-          <div class="flex items-center justify-between">
+          <div class="stat-card-content">
             <div>
-              <p class="text-sm" style="color: var(--p-text-muted-color)">Most Used Table</p>
-              <p class="text-lg font-bold truncate">{{ importStore.stats.mostUsedTable || 'N/A' }}</p>
+              <p class="stat-label">Most Used Table</p>
+              <p class="stat-value-text">{{ importStore.stats.mostUsedTable || 'N/A' }}</p>
             </div>
-            <i class="pi pi-table text-3xl" style="color: var(--p-purple-500)"></i>
+            <i class="pi pi-table stat-icon" style="color: var(--p-purple-500)"></i>
           </div>
         </template>
       </Card>
     </div>
 
     <!-- Filters -->
-    <Card class="mb-6">
+    <Card class="filters-card">
       <template #content>
-        <div class="flex flex-wrap gap-4">
-          <div class="flex-1 min-w-[200px]">
-            <label class="block text-sm font-medium mb-2">Table Name</label>
+        <div class="filters-wrapper">
+          <div class="filter-field">
+            <label class="filter-label">Table Name</label>
             <InputText
               v-model="filters.tableName"
               placeholder="Filter by table name..."
-              class="w-full"
             />
           </div>
 
-          <div class="min-w-[150px]">
-            <label class="block text-sm font-medium mb-2">Status</label>
+          <div class="filter-field-narrow">
+            <label class="filter-label">Status</label>
             <Dropdown
               v-model="filters.status"
               :options="statusOptions"
               optionLabel="label"
               optionValue="value"
               placeholder="All statuses"
-              class="w-full"
               showClear
             />
           </div>
@@ -103,15 +101,15 @@
           responsiveLayout="scroll"
         >
           <template #empty>
-            <div class="text-center py-8" style="color: var(--p-text-muted-color)">
-              <i class="pi pi-inbox text-4xl mb-3"></i>
+            <div class="empty-state">
+              <i class="pi pi-inbox empty-icon"></i>
               <p>No imports found</p>
             </div>
           </template>
 
           <Column field="tableName" header="Table" sortable>
             <template #body="{ data }">
-              <span class="font-medium">{{ data.tableName }}</span>
+              <span class="table-name">{{ data.tableName }}</span>
             </template>
           </Column>
 
@@ -132,7 +130,7 @@
 
           <Column field="errorCount" header="Errors">
             <template #body="{ data }">
-              <span v-if="data.errorCount > 0" class="font-medium" style="color: var(--p-red-500)">
+              <span v-if="data.errorCount > 0" class="error-count">
                 {{ data.errorCount }}
               </span>
               <span v-else style="color: var(--p-text-muted-color)">0</span>
@@ -141,7 +139,7 @@
 
           <Column field="warningCount" header="Warnings">
             <template #body="{ data }">
-              <span v-if="data.warningCount > 0" class="font-medium" style="color: var(--p-orange-500)">
+              <span v-if="data.warningCount > 0" class="warning-count">
                 {{ data.warningCount }}
               </span>
               <span v-else style="color: var(--p-text-muted-color)">0</span>
@@ -156,7 +154,7 @@
 
           <Column header="Actions" style="width: 200px">
             <template #body="{ data }">
-              <div class="flex gap-2">
+              <div class="action-buttons">
                 <Button
                   icon="pi pi-eye"
                   text
@@ -196,54 +194,54 @@
       :style="{ width: '60rem' }"
       :modal="true"
     >
-      <div v-if="selectedImport" class="space-y-6">
+      <div v-if="selectedImport" class="details-content">
         <!-- Basic Info -->
-        <div class="grid grid-cols-3 gap-4">
-          <div>
-            <p class="text-sm text-gray-500">Table Name</p>
-            <p class="font-medium">{{ selectedImport.tableName }}</p>
+        <div class="details-grid">
+          <div class="detail-item">
+            <p class="detail-label">Table Name</p>
+            <p class="detail-value">{{ selectedImport.tableName }}</p>
           </div>
-          <div>
-            <p class="text-sm text-gray-500">Status</p>
+          <div class="detail-item">
+            <p class="detail-label">Status</p>
             <Tag :value="selectedImport.status" :severity="getStatusSeverity(selectedImport.status)" />
           </div>
-          <div>
-            <p class="text-sm text-gray-500">Row Count</p>
-            <p class="font-medium">{{ formatNumber(selectedImport.rowCount) }}</p>
+          <div class="detail-item">
+            <p class="detail-label">Row Count</p>
+            <p class="detail-value">{{ formatNumber(selectedImport.rowCount) }}</p>
           </div>
-          <div>
-            <p class="text-sm text-gray-500">Errors / Warnings</p>
-            <p class="font-medium">{{ selectedImport.errorCount }} / {{ selectedImport.warningCount }}</p>
+          <div class="detail-item">
+            <p class="detail-label">Errors / Warnings</p>
+            <p class="detail-value">{{ selectedImport.errorCount }} / {{ selectedImport.warningCount }}</p>
           </div>
-          <div>
-            <p class="text-sm text-gray-500">Created At</p>
-            <p class="font-medium">{{ formatDate(selectedImport.createdAt) }}</p>
+          <div class="detail-item">
+            <p class="detail-label">Created At</p>
+            <p class="detail-value">{{ formatDate(selectedImport.createdAt) }}</p>
           </div>
-          <div v-if="selectedImport.metadata.sourceFileName">
-            <p class="text-sm text-gray-500">Source File</p>
-            <p class="font-medium truncate" :title="selectedImport.metadata.sourceFileName">{{ selectedImport.metadata.sourceFileName }}</p>
+          <div v-if="selectedImport.metadata.sourceFileName" class="detail-item">
+            <p class="detail-label">Source File</p>
+            <p class="detail-value-truncate" :title="selectedImport.metadata.sourceFileName">{{ selectedImport.metadata.sourceFileName }}</p>
           </div>
         </div>
 
         <!-- Column Mapping -->
-        <div v-if="selectedImport.metadata.mappingSummary && Object.keys(selectedImport.metadata.mappingSummary).length > 0">
-          <p class="text-sm font-semibold text-gray-700 mb-2">Column Mapping:</p>
-          <div class="bg-gray-50 rounded-lg p-3 max-h-40 overflow-y-auto">
-            <div class="grid grid-cols-2 gap-2 text-sm">
-              <div v-for="(dbCol, excelCol) in selectedImport.metadata.mappingSummary" :key="excelCol" class="flex items-center gap-2">
-                <span class="text-gray-600">{{ excelCol }}</span>
-                <i class="pi pi-arrow-right text-xs text-gray-400"></i>
-                <span class="font-medium text-gray-800">{{ dbCol }}</span>
+        <div v-if="selectedImport.metadata.mappingSummary && Object.keys(selectedImport.metadata.mappingSummary).length > 0" class="detail-section">
+          <p class="section-title">Column Mapping:</p>
+          <div class="mapping-box">
+            <div class="mapping-grid">
+              <div v-for="(dbCol, excelCol) in selectedImport.metadata.mappingSummary" :key="excelCol" class="mapping-item">
+                <span class="mapping-source">{{ excelCol }}</span>
+                <i class="pi pi-arrow-right mapping-arrow"></i>
+                <span class="mapping-target">{{ dbCol }}</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Transformations -->
-        <div v-if="selectedImport.metadata.transformations && selectedImport.metadata.transformations.length > 0">
-          <p class="text-sm font-semibold text-gray-700 mb-2">Transformations Applied:</p>
-          <div class="bg-blue-50 rounded-lg p-3">
-            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+        <div v-if="selectedImport.metadata.transformations && selectedImport.metadata.transformations.length > 0" class="detail-section">
+          <p class="section-title">Transformations Applied:</p>
+          <div class="transformations-box">
+            <ul class="list-disc">
               <li v-for="(transformation, idx) in selectedImport.metadata.transformations" :key="idx">
                 {{ transformation }}
               </li>
@@ -252,9 +250,9 @@
         </div>
 
         <!-- SQL Preview -->
-        <div v-if="selectedImportSQL">
-          <div class="flex items-center justify-between mb-2">
-            <p class="text-sm font-semibold text-gray-700">SQL Preview:</p>
+        <div v-if="selectedImportSQL" class="detail-section">
+          <div class="sql-header">
+            <p class="section-title">SQL Preview:</p>
             <Button
               label="Download Full SQL"
               icon="pi pi-download"
@@ -264,16 +262,16 @@
               @click="downloadFullSQL"
             />
           </div>
-          <div class="bg-gray-900 rounded-lg p-4 max-h-60 overflow-y-auto">
-            <pre class="text-sm text-green-400 whitespace-pre-wrap font-mono">{{ getSQLPreview(selectedImportSQL) }}</pre>
+          <div class="sql-preview">
+            <pre class="sql-code">{{ getSQLPreview(selectedImportSQL) }}</pre>
           </div>
         </div>
 
         <!-- Errors -->
-        <div v-if="selectedImport.metadata.validationErrors?.length">
-          <p class="text-sm font-semibold text-red-600 mb-2">Errors:</p>
-          <div class="bg-red-50 rounded-lg p-3 max-h-32 overflow-y-auto">
-            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+        <div v-if="selectedImport.metadata.validationErrors?.length" class="detail-section">
+          <p class="section-title error-title">Errors:</p>
+          <div class="errors-box">
+            <ul class="list-disc">
               <li v-for="(error, idx) in selectedImport.metadata.validationErrors" :key="idx">
                 {{ error }}
               </li>
@@ -282,10 +280,10 @@
         </div>
 
         <!-- Warnings -->
-        <div v-if="selectedImport.metadata.validationWarnings?.length">
-          <p class="text-sm font-semibold text-orange-600 mb-2">Warnings:</p>
-          <div class="bg-orange-50 rounded-lg p-3 max-h-32 overflow-y-auto">
-            <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+        <div v-if="selectedImport.metadata.validationWarnings?.length" class="detail-section">
+          <p class="section-title warning-title">Warnings:</p>
+          <div class="warnings-box">
+            <ul class="list-disc">
               <li v-for="(warning, idx) in selectedImport.metadata.validationWarnings" :key="idx">
                 {{ warning }}
               </li>
@@ -302,8 +300,8 @@
       :modal="true"
       :style="{ width: '30rem' }"
     >
-      <div class="flex items-center gap-3">
-        <i class="pi pi-exclamation-triangle text-3xl text-orange-500"></i>
+      <div class="delete-content">
+        <i class="pi pi-exclamation-triangle delete-icon"></i>
         <span>Are you sure you want to delete this import?</span>
       </div>
 
@@ -465,6 +463,280 @@ const getStatusSeverity = (status: string): 'success' | 'warning' | 'danger' => 
 </script>
 
 <style scoped>
+.history-page {
+  padding: 1.5rem;
+  max-width: 112rem;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-header h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.header-subtitle {
+  color: var(--p-text-muted-color);
+  margin: 0;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+  margin: 0 0 0.25rem 0;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.stat-value-text {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stat-icon {
+  font-size: 1.875rem;
+}
+
+.filters-card {
+  margin-bottom: 1.5rem;
+}
+
+.filters-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.filter-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-field-narrow {
+  min-width: 150px;
+}
+
+.filter-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--p-text-muted-color);
+}
+
+.empty-icon {
+  font-size: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.table-name {
+  font-weight: 500;
+}
+
+.error-count {
+  font-weight: 500;
+  color: var(--p-red-500);
+}
+
+.warning-count {
+  font-weight: 500;
+  color: var(--p-orange-500);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.details-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+  margin: 0 0 0.25rem 0;
+}
+
+.detail-value {
+  font-weight: 500;
+  margin: 0;
+}
+
+.detail-value-truncate {
+  font-weight: 500;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-section {
+  margin-top: 1rem;
+}
+
+.section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--p-text-color);
+}
+
+.error-title {
+  color: var(--p-red-600);
+}
+
+.warning-title {
+  color: var(--p-orange-600);
+}
+
+.mapping-box {
+  background: var(--p-surface-50);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  max-height: 10rem;
+  overflow-y: auto;
+}
+
+.mapping-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.mapping-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mapping-source {
+  color: var(--p-text-muted-color);
+}
+
+.mapping-arrow {
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+}
+
+.mapping-target {
+  font-weight: 500;
+  color: var(--p-text-color);
+}
+
+.transformations-box {
+  background: var(--p-blue-50);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+}
+
+.list-disc {
+  list-style-type: disc;
+  list-style-position: inside;
+  font-size: 0.875rem;
+  margin: 0;
+  padding-left: 0;
+}
+
+.list-disc li {
+  margin-bottom: 0.25rem;
+  color: var(--p-text-color);
+}
+
+.sql-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.sql-preview {
+  background: var(--p-surface-900);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.sql-code {
+  font-size: 0.875rem;
+  color: var(--p-green-400);
+  white-space: pre-wrap;
+  font-family: monospace;
+  margin: 0;
+}
+
+.errors-box {
+  background: var(--p-red-50);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  max-height: 8rem;
+  overflow-y: auto;
+}
+
+.warnings-box {
+  background: var(--p-orange-50);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  max-height: 8rem;
+  overflow-y: auto;
+}
+
+.delete-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.delete-icon {
+  font-size: 1.875rem;
+  color: var(--p-orange-500);
+}
+
 :deep(.p-card) {
   border-radius: 12px;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
@@ -473,5 +745,13 @@ const getStatusSeverity = (status: string): 'success' | 'warning' | 'danger' => 
 :deep(.p-datatable) {
   border-radius: 8px;
   overflow: hidden;
+}
+
+:deep(.p-inputtext) {
+  width: 100%;
+}
+
+:deep(.p-dropdown) {
+  width: 100%;
 }
 </style>

@@ -1,48 +1,44 @@
 <template>
-  <div class="px-4 py-6">
+  <div class="mapping-page">
     <!-- Progress Stepper with Navigation -->
     <StepperNav />
 
-    <Card class="shadow-lg">
+    <Card class="main-card">
       <template #content>
       <!-- Header -->
-      <div class="flex justify-between items-center mb-6">
+      <div class="page-header">
         <div>
-          <h2 class="text-3xl font-bold mb-2">Map Columns</h2>
-          <p class="mt-1" style="color: var(--p-text-muted-color)">
+          <h2 class="page-title">Map Columns</h2>
+          <p class="page-subtitle">
             Match your Excel/CSV columns to database fields and apply transformations
           </p>
         </div>
       </div>
 
-      <div v-if="!store.hasExcelData || !store.hasSelectedTable" class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
-        <p class="text-yellow-700">Missing data. Please complete previous steps.</p>
-        <button
-          @click="router.push('/')"
-          class="mt-3 font-semibold"
-          style="color: var(--p-primary-color)"
-        >
+      <Message v-if="!store.hasExcelData || !store.hasSelectedTable" severity="warn">
+        <p>Missing data. Please complete previous steps.</p>
+        <button @click="router.push('/')" class="restart-button">
           <i class="pi pi-arrow-left mr-2"></i>
           Start over
         </button>
-      </div>
+      </Message>
 
       <div v-else>
         <!-- Auto-mapping Success Banner -->
-        <div v-if="autoMappingStats" class="mb-4 rounded-md p-4"
-             :class="autoMappingStats.mapped > autoMappingStats.total / 2
-                     ? 'bg-green-50 border border-green-200'
-                     : 'bg-yellow-50 border border-yellow-200'">
-          <div class="flex items-start gap-3">
-            <div class="flex-shrink-0">
-              <i class="text-2xl" :class="autoMappingStats.mapped > autoMappingStats.total / 2
-                                          ? 'pi pi-check-circle text-green-600'
-                                          : 'pi pi-exclamation-triangle text-yellow-600'"></i>
+        <Message
+          v-if="autoMappingStats"
+          :severity="autoMappingStats.mapped > autoMappingStats.total / 2 ? 'success' : 'warn'"
+          class="auto-mapping-banner"
+        >
+          <div class="banner-content">
+            <div class="banner-icon">
+              <i
+                class="banner-icon-large"
+                :class="autoMappingStats.mapped > autoMappingStats.total / 2 ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle'"
+              ></i>
             </div>
-            <div class="flex-1">
-              <h3 class="font-semibold mb-1" :class="autoMappingStats.mapped > autoMappingStats.total / 2
-                                                     ? 'text-green-900'
-                                                     : 'text-yellow-900'">
+            <div class="banner-text">
+              <h3 class="banner-title">
                 <template v-if="autoMappingStats.mapped > autoMappingStats.total / 2">
                   Auto-mapping successful!
                 </template>
@@ -50,29 +46,23 @@
                   Limited auto-mapping
                 </template>
               </h3>
-              <p class="text-sm" :class="autoMappingStats.mapped > autoMappingStats.total / 2
-                                         ? 'text-green-800'
-                                         : 'text-yellow-800'">
+              <p class="banner-description">
                 The system automatically mapped <strong>{{ autoMappingStats.mapped }} of {{ autoMappingStats.total }} columns</strong>
                 by comparing your Excel column names with database field names.
               </p>
 
               <!-- Low match warning -->
-              <div v-if="autoMappingStats.mapped < autoMappingStats.total / 2" class="mt-3 bg-yellow-100 rounded-lg p-3">
-                <p class="text-sm text-yellow-900 font-medium mb-1">
-                  💡 Tip: Improve auto-mapping
-                </p>
-                <p class="text-sm text-yellow-800">
+              <div v-if="autoMappingStats.mapped < autoMappingStats.total / 2" class="low-match-warning">
+                <p class="warning-title">💡 Tip: Improve auto-mapping</p>
+                <p class="warning-text">
                   Only <strong>{{ Math.round((autoMappingStats.mapped / autoMappingStats.total) * 100) }}%</strong> of columns were auto-mapped.
                   For better results, <strong>rename your Excel headers to match database field names</strong>
-                  (e.g., <code class="bg-white px-1 rounded text-xs">{{ store.selectedTable?.fields[0]?.name }}</code>,
-                  <code class="bg-white px-1 rounded text-xs">{{ store.selectedTable?.fields[1]?.name }}</code>).
+                  (e.g., <code class="code-example">{{ store.selectedTable?.fields[0]?.name }}</code>,
+                  <code class="code-example">{{ store.selectedTable?.fields[1]?.name }}</code>).
                 </p>
               </div>
 
-              <p class="text-sm mt-2" :class="autoMappingStats.mapped > autoMappingStats.total / 2
-                                              ? 'text-green-700'
-                                              : 'text-yellow-700'">
+              <p class="banner-footer">
                 <i class="pi pi-info-circle mr-1"></i>
                 Review the mappings below and adjust if needed.
                 <template v-if="getAutoIncrementFieldNames().length > 0">
@@ -82,108 +72,99 @@
               </p>
             </div>
           </div>
-        </div>
+        </Message>
 
         <!-- Info Banner -->
-        <div class="mb-4 bg-blue-50 border border-blue-200 rounded-md p-4 flex items-center justify-between">
-          <div class="flex-1">
-            <p class="text-sm" style="color: var(--p-primary-700)">
+        <Message severity="info" class="info-banner">
+          <div class="info-content">
+            <p>
               <i class="pi pi-info-circle mr-2"></i>
               Target table: <strong>{{ store.selectedTable?.name }}</strong> |
               Data rows: <strong>{{ store.excelData.length }}</strong>
             </p>
           </div>
-          <div v-if="validationStats" class="flex gap-4 text-sm">
-            <span class="text-green-700">
+          <div v-if="validationStats" class="validation-stats">
+            <span class="stat-success">
               <i class="pi pi-check-circle"></i> {{ validationStats.validRowCount }} valid
             </span>
-            <span v-if="validationStats.warningCount > 0" class="text-yellow-700">
+            <span v-if="validationStats.warningCount > 0" class="stat-warning">
               <i class="pi pi-exclamation-triangle"></i> {{ validationStats.warningCount }} warnings
             </span>
-            <span v-if="validationStats.errorCount > 0" class="text-red-700">
+            <span v-if="validationStats.errorCount > 0" class="stat-error">
               <i class="pi pi-times-circle"></i> {{ validationStats.errorCount }} errors
             </span>
           </div>
-        </div>
+        </Message>
 
         <!-- Column Mapping -->
-        <div class="mb-6">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold">Column Mapping</h3>
-            <div class="flex gap-2">
-              <button
+        <div class="mapping-section">
+          <div class="section-header">
+            <h3 class="section-title">Column Mapping</h3>
+            <div class="action-buttons">
+              <Button
+                label="Auto-map Columns"
+                icon="pi pi-bolt"
                 @click="autoMap"
-                class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition flex items-center gap-2 shadow-sm"
-              >
-                <i class="pi pi-bolt"></i>
-                Auto-map Columns
-              </button>
-              <button
+                severity="info"
+              />
+              <Button
+                label="Clear All"
+                icon="pi pi-times"
                 @click="showClearDialog = true"
-                class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-lg transition flex items-center gap-2 shadow-sm"
-              >
-                <i class="pi pi-times"></i>
-                Clear All
-              </button>
+                severity="secondary"
+              />
             </div>
           </div>
 
-          <div class="space-y-3">
+          <div class="mapping-list">
             <div
               v-for="(field, index) in store.selectedTable?.fields"
               :key="index"
-              class="border-2 rounded-lg p-4 transition-all"
-              style="background: var(--p-surface-card); border-color: var(--p-surface-border)"
+              class="mapping-card"
               :class="{
-                'border-green-300 bg-green-50': getMappedExcelColumn(field.name) && !hasYearWarning(field.name),
-                'border-orange-400 bg-orange-50': getMappedExcelColumn(field.name) && hasYearWarning(field.name),
-                'border-gray-200': !getMappedExcelColumn(field.name)
+                'mapped': getMappedExcelColumn(field.name) && !hasYearWarning(field.name),
+                'warning': getMappedExcelColumn(field.name) && hasYearWarning(field.name),
+                'unmapped': !getMappedExcelColumn(field.name)
               }"
             >
-              <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+              <div class="mapping-grid">
                 <!-- DB Field (Target) -->
-                <div class="md:col-span-3">
-                  <label class="block text-xs font-medium uppercase tracking-wide mb-1" style="color: var(--p-text-muted-color)">
-                    Database Field
-                  </label>
-                  <div class="flex items-center gap-2">
-                    <div class="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                      <i class="pi pi-database text-purple-600"></i>
+                <div class="field-column">
+                  <label class="field-label">Database Field</label>
+                  <div class="field-content">
+                    <div class="field-icon">
+                      <i class="pi pi-database"></i>
                     </div>
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-center gap-2">
-                        <p class="font-semibold truncate" :title="field.name">
+                    <div class="field-info">
+                      <div class="field-name-row">
+                        <p class="field-name" :title="field.name">
                           {{ field.name }}{{ field.nullable ? '' : ' *' }}
                         </p>
-                        <span v-if="isAutoIncrementField(field)" class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full whitespace-nowrap">
-                          AUTO
-                        </span>
-                        <span v-if="hasYearWarning(field.name)" class="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-700 rounded-full whitespace-nowrap flex items-center gap-1">
-                          <i class="pi pi-exclamation-triangle text-xs"></i>
-                          YEAR
+                        <span v-if="isAutoIncrementField(field)" class="badge badge-success">AUTO</span>
+                        <span v-if="hasYearWarning(field.name)" class="badge badge-warning">
+                          <i class="pi pi-exclamation-triangle"></i> YEAR
                         </span>
                       </div>
-                      <p class="text-xs" style="color: var(--p-text-muted-color)">
-                        {{ field.type }}
-                      </p>
+                      <p class="field-type">{{ field.type }}</p>
                     </div>
                   </div>
                 </div>
 
                 <!-- Arrow -->
-                <div class="md:col-span-1 flex justify-center">
-                  <i class="pi pi-arrow-left text-2xl" :class="{
-                    'text-green-600': getMappedExcelColumn(field.name) && !hasYearWarning(field.name),
-                    'text-orange-500': getMappedExcelColumn(field.name) && hasYearWarning(field.name),
-                    'text-gray-300': !getMappedExcelColumn(field.name)
-                  }"></i>
+                <div class="arrow-column">
+                  <i
+                    class="pi pi-arrow-left mapping-arrow"
+                    :class="{
+                      'arrow-mapped': getMappedExcelColumn(field.name) && !hasYearWarning(field.name),
+                      'arrow-warning': getMappedExcelColumn(field.name) && hasYearWarning(field.name),
+                      'arrow-unmapped': !getMappedExcelColumn(field.name)
+                    }"
+                  ></i>
                 </div>
 
                 <!-- Excel Column (Source) -->
-                <div class="md:col-span-4">
-                  <label class="block text-xs font-medium uppercase tracking-wide mb-1" style="color: var(--p-text-muted-color)">
-                    Excel Column
-                  </label>
+                <div class="excel-column">
+                  <label class="field-label">Excel Column</label>
                   <Dropdown
                     :modelValue="getMappedExcelColumn(field.name)"
                     @update:modelValue="(value) => onFieldMappingChange(field.name, value)"
@@ -193,16 +174,14 @@
                     placeholder="-- Skip this field --"
                     class="w-full"
                   />
-                  <p v-if="getMappedExcelColumn(field.name)" class="text-xs mt-1" style="color: var(--p-text-muted-color)">
+                  <p v-if="getMappedExcelColumn(field.name)" class="sample-value">
                     Sample: {{ getSampleValue(getMappedExcelColumn(field.name)!) }}
                   </p>
                 </div>
 
                 <!-- Transformation -->
-                <div class="md:col-span-3">
-                  <label class="block text-xs font-medium uppercase tracking-wide mb-1" style="color: var(--p-text-muted-color)">
-                    Transformation
-                  </label>
+                <div class="transform-column">
+                  <label class="field-label">Transformation</label>
                   <Dropdown
                     v-model="fieldTransformations[field.name]"
                     @update:modelValue="() => onTransformationChange(field.name)"
@@ -215,32 +194,25 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="md:col-span-1 flex gap-2 justify-end items-center">
-                  <button
+                <div class="actions-column">
+                  <Button
                     v-if="fieldTransformations[field.name] && fieldTransformations[field.name] !== 'none' && getMappedExcelColumn(field.name)"
                     @click="showTransformPreviewForField(field.name)"
-                    class="flex items-center justify-center w-8 h-8 rounded-lg transition"
-                    style="color: var(--p-primary-color)"
-                    title="Preview transformation"
-                  >
-                    <i class="pi pi-eye text-sm"></i>
-                  </button>
-                  <button
-                    v-else
-                    class="flex items-center justify-center w-8 h-8 opacity-0 pointer-events-none"
-                    disabled
-                  >
-                    <i class="pi pi-eye text-sm"></i>
-                  </button>
-                  <label class="flex items-center gap-1.5 cursor-pointer group px-2 py-1.5 hover:bg-gray-100 rounded-lg transition h-8">
+                    icon="pi pi-eye"
+                    text
+                    rounded
+                    severity="secondary"
+                    v-tooltip.top="'Preview transformation'"
+                  />
+                  <div class="skip-checkbox">
                     <Checkbox
                       :modelValue="!getMappedExcelColumn(field.name)"
                       @update:modelValue="() => toggleSkipField(field.name)"
                       :binary="true"
-                      inputId="`skip-${field.name}`"
+                      :inputId="`skip-${field.name}`"
                     />
-                    <span class="text-xs font-medium whitespace-nowrap" style="color: var(--p-text-muted-color)">Skip</span>
-                  </label>
+                    <label :for="`skip-${field.name}`" class="skip-label">Skip</label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -248,82 +220,83 @@
         </div>
 
         <!-- Validation Errors -->
-        <div v-if="validationErrors.length > 0" class="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-4">
-          <h3 class="font-semibold text-yellow-800 mb-2">
+        <Message v-if="validationErrors.length > 0" severity="warn" class="validation-message">
+          <h3>
             <i class="pi pi-exclamation-triangle mr-2"></i>
             Mapping Warnings
           </h3>
-          <ul class="list-disc list-inside text-sm text-yellow-700 space-y-1">
+          <ul class="error-list">
             <li v-for="(err, index) in validationErrors" :key="index">{{ err }}</li>
           </ul>
-        </div>
+        </Message>
 
         <!-- Transformation Warnings -->
-        <div v-if="transformationWarnings.length > 0" class="bg-orange-50 border border-orange-300 rounded-md p-4 mb-4">
-          <h3 class="font-semibold text-orange-900 mb-2">
+        <Message v-if="transformationWarnings.length > 0" severity="warn" class="validation-message">
+          <h3>
             <i class="pi pi-exclamation-triangle mr-2"></i>
             Date Transformation Warning
           </h3>
-          <ul class="list-disc list-inside text-sm text-orange-800 space-y-1">
+          <ul class="error-list">
             <li v-for="(warning, index) in transformationWarnings" :key="index">{{ warning }}</li>
           </ul>
-        </div>
+        </Message>
 
         <!-- Server Validation Errors -->
-        <div v-if="serverValidationErrors.length > 0" class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
-          <h3 class="font-semibold text-red-800 mb-2">
+        <Message v-if="serverValidationErrors.length > 0" severity="error" class="validation-message">
+          <h3>
             <i class="pi pi-times-circle mr-2"></i>
             Data Validation Errors
           </h3>
-          <ul class="list-disc list-inside text-sm text-red-700 space-y-1 max-h-60 overflow-y-auto">
+          <ul class="error-list scrollable">
             <li v-for="(err, index) in serverValidationErrors" :key="index">{{ err }}</li>
           </ul>
-        </div>
+        </Message>
 
         <!-- Data Preview with Highlighting -->
-        <div v-if="showPreview" class="mb-6 rounded-md p-4 border" style="background: var(--p-surface-50); border-color: var(--p-surface-border)">
-          <div class="flex justify-between items-center mb-3">
-            <h3 class="text-lg font-semibold">Data Preview with Validation</h3>
-            <button
+        <div v-if="showPreview" class="preview-section">
+          <div class="preview-header">
+            <h3 class="section-title">Data Preview with Validation</h3>
+            <Button
               @click="showPreview = !showPreview"
-              class="text-gray-600 hover:text-gray-800"
-            >
-              <i class="pi pi-times"></i>
-            </button>
+              icon="pi pi-times"
+              text
+              rounded
+              severity="secondary"
+            />
           </div>
 
-          <div class="overflow-x-auto max-h-96 overflow-y-auto">
-            <table class="min-w-full divide-y divide-gray-300">
-              <thead class="sticky top-0 bg-gray-100">
+          <div class="preview-table-wrapper">
+            <table class="preview-table">
+              <thead>
                 <tr>
-                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase">#</th>
+                  <th class="row-number-header">#</th>
                   <th
                     v-for="(header, idx) in store.excelHeaders"
                     :key="idx"
-                    class="px-3 py-2 text-left text-xs font-semibold uppercase"
+                    class="column-header"
                   >
                     {{ header }}
-                    <div v-if="localMapping[header]" class="text-xs font-normal" style="color: var(--p-primary-color)">
+                    <div v-if="localMapping[header]" class="mapped-field">
                       → {{ localMapping[header] }}
                     </div>
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-200">
+              <tbody>
                 <tr v-for="(row, rowIdx) in previewData" :key="rowIdx">
-                  <td class="px-3 py-2 text-sm" style="color: var(--p-text-muted-color)">{{ rowIdx + 1 }}</td>
+                  <td class="row-number">{{ rowIdx + 1 }}</td>
                   <td
                     v-for="(cell, cellIdx) in row"
                     :key="cellIdx"
-                    class="px-3 py-2 text-sm"
+                    class="data-cell"
                     :class="getCellValidationClass(rowIdx, cellIdx)"
                     :title="getCellValidationMessage(rowIdx, cellIdx)"
                   >
-                    <div class="flex items-center gap-2">
+                    <div class="cell-content">
                       <span>{{ formatCellValue(cell) }}</span>
                       <i
                         v-if="getCellValidationIcon(rowIdx, cellIdx)"
-                        :class="`pi ${getCellValidationIcon(rowIdx, cellIdx)} text-xs`"
+                        :class="`pi ${getCellValidationIcon(rowIdx, cellIdx)}`"
                       ></i>
                     </div>
                   </td>
@@ -334,75 +307,68 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex gap-4 flex-wrap">
-          <button
+        <div class="bottom-actions">
+          <Button
+            label="Generate & Download SQL"
+            icon="pi pi-download"
             @click="generateSQL"
             :disabled="loading || !canGenerate"
-            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            <i class="pi pi-download"></i>
-            Generate & Download SQL
-          </button>
+            severity="success"
+            size="large"
+          />
 
-          <button
+          <Button
+            :label="showPreview ? 'Hide' : 'Show' + ' Preview'"
+            icon="pi pi-eye"
             @click="showPreview = !showPreview"
-            class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-md transition flex items-center gap-2"
-          >
-            <i class="pi pi-eye"></i>
-            {{ showPreview ? 'Hide' : 'Show' }} Preview
-          </button>
+            severity="secondary"
+          />
         </div>
 
         <!-- Loading Indicator -->
-        <div v-if="loading" class="flex items-center justify-center py-8">
-          <i class="pi pi-spin pi-spinner text-4xl" style="color: var(--p-primary-color)"></i>
+        <div v-if="loading" class="loading-container">
+          <i class="pi pi-spin pi-spinner loading-spinner"></i>
         </div>
 
         <!-- Error Display -->
-        <div v-if="error" class="mt-4 bg-red-50 border border-red-200 rounded-md p-4">
-          <p class="text-red-700">{{ error }}</p>
-        </div>
+        <Message v-if="error" severity="error">{{ error }}</Message>
       </div>
       </template>
     </Card>
 
     <!-- Transform Preview Dialog -->
-    <div v-if="transformPreviewColumn" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" @click.self="transformPreviewColumn = null">
-      <div class="bg-white rounded-lg p-6 max-w-3xl w-full max-h-[80vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-xl font-semibold">Transformation Preview: {{ transformPreviewColumn }}</h3>
-          <button @click="transformPreviewColumn = null" class="text-gray-600 hover:text-gray-800">
-            <i class="pi pi-times text-xl"></i>
-          </button>
-        </div>
-
-        <div class="mb-4">
-          <p class="text-sm text-gray-600">
-            Transformation: <strong>{{ transformations[fieldTransformations[transformPreviewColumn]]?.label }}</strong>
-          </p>
-          <p class="text-sm text-gray-600">
-            {{ transformations[fieldTransformations[transformPreviewColumn]]?.description }}
-          </p>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-300">
-            <thead>
-              <tr>
-                <th class="px-3 py-2 text-left text-xs font-semibold text-gray-900 uppercase">Original</th>
-                <th class="px-3 py-2 text-left text-xs font-semibold text-gray-900 uppercase">Transformed</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr v-for="(preview, idx) in getTransformPreview(transformPreviewColumn)" :key="idx">
-                <td class="px-3 py-2 text-sm">{{ preview.original }}</td>
-                <td class="px-3 py-2 text-sm font-medium" style="color: var(--p-primary-color)">{{ preview.transformed }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+    <Dialog
+      v-model:visible="transformPreviewColumn"
+      :header="`Transformation Preview: ${transformPreviewColumn}`"
+      :style="{ width: '50rem' }"
+      :modal="true"
+    >
+      <div v-if="transformPreviewColumn" class="dialog-content">
+        <p><strong>Transformation:</strong> {{ transformations[fieldTransformations[transformPreviewColumn]]?.label }}</p>
+        <p class="dialog-description">{{ transformations[fieldTransformations[transformPreviewColumn]]?.description }}</p>
       </div>
-    </div>
+
+      <div class="preview-dialog-table">
+        <table class="dialog-table">
+          <thead>
+            <tr>
+              <th>Original</th>
+              <th>Transformed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(preview, idx) in getTransformPreview(transformPreviewColumn)" :key="idx">
+              <td>{{ preview.original }}</td>
+              <td class="transformed-value">{{ preview.transformed }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <template #footer>
+        <Button label="Close" @click="transformPreviewColumn = null" />
+      </template>
+    </Dialog>
 
     <!-- Clear Mappings Confirmation Dialog -->
     <Dialog
@@ -411,11 +377,11 @@
       :modal="true"
       :style="{ width: '30rem' }"
     >
-      <div class="flex items-start gap-3">
-        <i class="pi pi-exclamation-triangle text-3xl text-orange-500"></i>
+      <div class="confirm-dialog-content">
+        <i class="pi pi-exclamation-triangle dialog-warning-icon"></i>
         <div>
-          <p class="mb-2">Are you sure you want to clear all column mappings?</p>
-          <p class="text-sm" style="color: var(--p-text-muted-color)">This will remove all mappings and transformations.</p>
+          <p>Are you sure you want to clear all column mappings?</p>
+          <p class="dialog-subtitle">This will remove all mappings and transformations.</p>
         </div>
       </div>
 
@@ -441,6 +407,7 @@ import Button from 'primevue/button'
 import Dropdown from 'primevue/dropdown'
 import Checkbox from 'primevue/checkbox'
 import Card from 'primevue/card'
+import Message from 'primevue/message'
 
 const router = useRouter()
 const store = useMappingStore()
@@ -1176,3 +1143,504 @@ async function generateSQL() {
   }
 }
 </script>
+
+<style scoped>
+.mapping-page {
+  padding: 1.5rem 1rem;
+}
+
+.main-card {
+  box-shadow: var(--p-shadow-4);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  font-size: 1.875rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: var(--p-text-color);
+}
+
+.page-subtitle {
+  margin-top: 0.25rem;
+  color: var(--p-text-muted-color);
+}
+
+.restart-button {
+  margin-top: 0.75rem;
+  font-weight: 600;
+  color: var(--p-primary-color);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.auto-mapping-banner {
+  margin-bottom: 1rem;
+}
+
+.banner-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.banner-icon {
+  flex-shrink: 0;
+}
+
+.banner-icon-large {
+  font-size: 1.5rem;
+}
+
+.banner-text {
+  flex: 1;
+}
+
+.banner-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.banner-description {
+  font-size: 0.875rem;
+}
+
+.low-match-warning {
+  margin-top: 0.75rem;
+  background: rgba(255, 235, 156, 0.3);
+  border-radius: var(--p-border-radius);
+  padding: 0.75rem;
+}
+
+.warning-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.warning-text {
+  font-size: 0.875rem;
+}
+
+.code-example {
+  background: white;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.banner-footer {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.info-banner {
+  margin-bottom: 1rem;
+}
+
+.info-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+}
+
+.validation-stats {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.stat-success {
+  color: var(--p-green-700);
+}
+
+.stat-warning {
+  color: var(--p-orange-600);
+}
+
+.stat-error {
+  color: var(--p-red-700);
+}
+
+.mapping-section {
+  margin-bottom: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.mapping-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mapping-card {
+  border: 2px solid var(--p-surface-border);
+  border-radius: var(--p-border-radius);
+  padding: 1rem;
+  background: var(--p-surface-card);
+  transition: all 0.2s;
+}
+
+.mapping-card.mapped {
+  border-color: var(--p-green-300);
+  background: rgba(34, 197, 94, 0.05);
+}
+
+.mapping-card.warning {
+  border-color: var(--p-orange-400);
+  background: rgba(251, 146, 60, 0.05);
+}
+
+.mapping-card.unmapped {
+  border-color: var(--p-surface-border);
+}
+
+.mapping-grid {
+  display: grid;
+  grid-template-columns: 1fr auto 2fr 2fr auto;
+  gap: 1rem;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .mapping-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field-column,
+.excel-column,
+.transform-column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--p-text-muted-color);
+  margin-bottom: 0.25rem;
+}
+
+.field-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.field-icon {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  background: rgba(168, 85, 247, 0.1);
+  border-radius: var(--p-border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--p-purple-600);
+}
+
+.field-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.field-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.field-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--p-text-color);
+}
+
+.badge {
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  white-space: nowrap;
+}
+
+.badge-success {
+  background: var(--p-green-100);
+  color: var(--p-green-700);
+}
+
+.badge-warning {
+  background: var(--p-orange-100);
+  color: var(--p-orange-700);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.field-type {
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+}
+
+.arrow-column {
+  display: flex;
+  justify-content: center;
+}
+
+.mapping-arrow {
+  font-size: 1.5rem;
+}
+
+.arrow-mapped {
+  color: var(--p-green-600);
+}
+
+.arrow-warning {
+  color: var(--p-orange-500);
+}
+
+.arrow-unmapped {
+  color: var(--p-surface-300);
+}
+
+.sample-value {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  color: var(--p-text-muted-color);
+}
+
+.actions-column {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.skip-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--p-border-radius);
+  transition: background-color 0.2s;
+}
+
+.skip-checkbox:hover {
+  background-color: var(--p-surface-100);
+}
+
+.skip-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--p-text-muted-color);
+}
+
+.validation-message {
+  margin-bottom: 1rem;
+}
+
+.error-list {
+  list-style: disc;
+  list-style-position: inside;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.error-list.scrollable {
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.preview-section {
+  margin-bottom: 1.5rem;
+  border-radius: var(--p-border-radius);
+  padding: 1rem;
+  border: 1px solid var(--p-surface-border);
+  background: var(--p-surface-50);
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.preview-table-wrapper {
+  overflow-x: auto;
+  max-height: 24rem;
+  overflow-y: auto;
+}
+
+.preview-table {
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+.preview-table thead {
+  position: sticky;
+  top: 0;
+  background: var(--p-surface-100);
+  z-index: 10;
+}
+
+.row-number-header,
+.column-header {
+  padding: 0.75rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--p-text-color);
+}
+
+.mapped-field {
+  font-size: 0.75rem;
+  font-weight: normal;
+  color: var(--p-primary-color);
+}
+
+.preview-table tbody {
+  background: var(--p-surface-0);
+}
+
+.preview-table tbody tr {
+  border-top: 1px solid var(--p-surface-border);
+}
+
+.row-number {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--p-text-muted-color);
+  background: var(--p-surface-0);
+}
+
+.data-cell {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--p-text-color);
+}
+
+.cell-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bottom-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.loading-spinner {
+  font-size: 2.5rem;
+  color: var(--p-primary-color);
+}
+
+.dialog-content {
+  margin-bottom: 1rem;
+}
+
+.dialog-description {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+}
+
+.preview-dialog-table {
+  overflow-x: auto;
+}
+
+.dialog-table {
+  min-width: 100%;
+  border-collapse: collapse;
+  border: 1px solid var(--p-surface-border);
+}
+
+.dialog-table thead {
+  background: var(--p-surface-100);
+}
+
+.dialog-table th {
+  padding: 0.75rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--p-text-color);
+}
+
+.dialog-table tbody tr {
+  border-top: 1px solid var(--p-surface-border);
+}
+
+.dialog-table td {
+  padding: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.transformed-value {
+  font-weight: 500;
+  color: var(--p-primary-color);
+}
+
+.confirm-dialog-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.dialog-warning-icon {
+  font-size: 1.875rem;
+  color: var(--p-orange-500);
+}
+
+.dialog-subtitle {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+}
+</style>

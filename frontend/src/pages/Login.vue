@@ -1,18 +1,18 @@
 <template>
-  <div class="flex items-center justify-center min-h-[calc(100vh-200px)]">
-    <Card class="w-full max-w-md shadow-lg">
+  <div class="login-page">
+    <Card class="login-card">
       <template #title>
-        <div class="text-center">
-          <i class="pi pi-sign-in text-4xl mb-3" style="color: var(--p-primary-color)"></i>
-          <h2 class="text-2xl font-bold">Sign In</h2>
-          <p class="text-sm mt-2" style="color: var(--p-text-muted-color)">
+        <div class="card-title">
+          <i class="pi pi-sign-in title-icon"></i>
+          <h2>Sign In</h2>
+          <p class="subtitle">
             Sign in to access your history, templates, and more
           </p>
         </div>
       </template>
 
       <template #content>
-        <form @submit.prevent="handleLogin" class="space-y-4">
+        <form @submit.prevent="handleLogin" class="login-form">
           <!-- Session Expired Message -->
           <Message v-if="sessionExpiredMessage" severity="warn" :closable="true" @close="sessionExpiredMessage = ''">
             {{ sessionExpiredMessage }}
@@ -25,7 +25,7 @@
 
           <!-- Email Field -->
           <div class="field">
-            <label for="email" class="block text-sm font-medium mb-2">
+            <label for="email" class="field-label">
               Email
             </label>
             <InputText
@@ -33,7 +33,6 @@
               v-model="email"
               type="email"
               placeholder="your@email.com"
-              class="w-full"
               :class="{ 'p-invalid': emailError }"
               required
               autofocus
@@ -43,7 +42,7 @@
 
           <!-- Password Field -->
           <div class="field">
-            <label for="password" class="block text-sm font-medium mb-2">
+            <label for="password" class="field-label">
               Password
             </label>
             <Password
@@ -52,19 +51,18 @@
               placeholder="Enter your password"
               :feedback="false"
               toggleMask
-              class="w-full"
               :class="{ 'p-invalid': passwordError }"
-              inputClass="w-full"
+              inputClass="password-input"
               required
             />
             <small v-if="passwordError" class="p-error">{{ passwordError }}</small>
           </div>
 
           <!-- Remember Me -->
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
+          <div class="remember-section">
+            <div class="remember-checkbox">
               <Checkbox v-model="rememberMe" inputId="remember" :binary="true" />
-              <label for="remember" class="text-sm select-none" style="color: var(--p-text-muted-color)">
+              <label for="remember" class="remember-label">
                 Remember me (7 days)
               </label>
             </div>
@@ -75,21 +73,21 @@
             type="submit"
             label="Sign In"
             icon="pi pi-sign-in"
-            class="w-full"
+            class="submit-button"
             :loading="authStore.loading"
             :disabled="authStore.loading"
           />
 
           <!-- Divider -->
           <Divider align="center">
-            <span class="text-sm" style="color: var(--p-text-muted-color)">OR</span>
+            <span class="divider-text">OR</span>
           </Divider>
 
           <!-- Continue as Guest -->
           <Button
             label="Continue as Guest"
             icon="pi pi-user"
-            class="w-full"
+            class="guest-button"
             severity="secondary"
             outlined
             @click="handleContinueAsGuest"
@@ -97,14 +95,13 @@
           />
 
           <!-- Register Link -->
-          <div class="text-center mt-4">
-            <span class="text-sm" style="color: var(--p-text-muted-color)">
+          <div class="register-link">
+            <span class="register-text">
               Don't have an account?
             </span>
             <router-link
               to="/register"
-              class="text-sm font-medium ml-1"
-              style="color: var(--p-primary-color)"
+              class="register-link-text"
             >
               Sign Up
             </router-link>
@@ -197,6 +194,104 @@ const handleContinueAsGuest = () => {
 </script>
 
 <style scoped>
+.login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 200px);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 28rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  text-align: center;
+}
+
+.title-icon {
+  font-size: 2.25rem;
+  margin-bottom: 0.75rem;
+  color: var(--p-primary-color);
+}
+
+.card-title h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0 0;
+  color: var(--p-text-muted-color);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.remember-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.remember-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.remember-label {
+  font-size: 0.875rem;
+  user-select: none;
+  color: var(--p-text-muted-color);
+}
+
+.divider-text {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+}
+
+.register-link {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.register-text {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+}
+
+.register-link-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-left: 0.25rem;
+  color: var(--p-primary-color);
+  text-decoration: none;
+}
+
+.register-link-text:hover {
+  text-decoration: underline;
+}
+
 :deep(.p-card) {
   border-radius: 12px;
   overflow: hidden;
@@ -212,12 +307,26 @@ const handleContinueAsGuest = () => {
 
 :deep(.p-inputtext),
 :deep(.p-password input) {
+  width: 100%;
   border-radius: 8px;
   padding: 0.75rem;
+}
+
+:deep(.p-password) {
+  width: 100%;
+}
+
+:deep(.password-input) {
+  width: 100%;
 }
 
 :deep(.p-button) {
   border-radius: 8px;
   padding: 0.75rem 1rem;
+}
+
+:deep(.submit-button),
+:deep(.guest-button) {
+  width: 100%;
 }
 </style>
