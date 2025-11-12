@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-black transition-colors duration-200">
+  <div class="min-h-screen transition-colors duration-200" style="background: var(--p-surface-ground)">
     <div class="container mx-auto px-4 py-12 max-w-5xl">
       <!-- Header Section -->
       <div class="rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-neon-green-500/10 overflow-hidden mb-8 border transition-all duration-200" style="background: var(--p-surface-0); border-color: var(--p-surface-border)">
