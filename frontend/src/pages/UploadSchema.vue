@@ -75,11 +75,12 @@
 
       <!-- Single Table Auto-Select Modal -->
       <div v-if="showSingleTableDialog" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50" @click="cancelSingleTableDialog">
-        <div class="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-8 max-w-md mx-4 transform transition-all relative border border-transparent dark:border-gray-800" @click.stop>
+        <div class="rounded-xl shadow-2xl p-8 max-w-md mx-4 transform transition-all relative border" style="background: var(--p-surface-0); border-color: var(--p-surface-border)" @click.stop>
           <!-- Close button -->
           <button
             @click="cancelSingleTableDialog"
-            class="absolute top-4 right-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition"
+            class="absolute top-4 right-4 transition"
+            style="color: var(--p-text-muted-color)"
             aria-label="Close"
           >
             <i class="pi pi-times text-xl"></i>
@@ -92,12 +93,12 @@
             </div>
 
             <!-- Title -->
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+            <h3 class="text-2xl font-bold mb-3" style="color: var(--p-text-color)">
               Single Table Detected
             </h3>
 
             <!-- Message -->
-            <p class="text-gray-600 dark:text-gray-300 mb-2">
+            <p class="mb-2" style="color: var(--p-text-color)">
               We found only <strong class="text-neon-green-600 dark:text-neon-green-400">1 table</strong> in your schema:
             </p>
 
@@ -115,7 +116,7 @@
             </div>
 
             <!-- Explanation -->
-            <p class="text-gray-500 dark:text-gray-400 text-sm mb-6">
+            <p class="text-sm mb-6" style="color: var(--p-text-muted-color)">
               Since there's only one table, we'll auto-select it and skip the table selection step.
             </p>
 
@@ -130,7 +131,8 @@
               </button>
               <button
                 @click="cancelSingleTableDialog"
-                class="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2"
+                class="w-full font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2"
+                style="background: var(--p-surface-100); color: var(--p-text-color)"
               >
                 <i class="pi pi-upload"></i>
                 Upload a Different File
@@ -156,28 +158,29 @@
         <!-- Tables Preview -->
         <div>
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Detected Tables</h3>
+            <h3 class="text-lg font-semibold" style="color: var(--p-text-color)">Detected Tables</h3>
             <span class="px-3 py-1 bg-neon-green-100 dark:bg-neon-green-900/30 text-neon-green-800 dark:text-neon-green-300 rounded-full text-sm font-medium">
               {{ store.tables.length }} tables
             </span>
           </div>
 
-          <div class="bg-gradient-to-br from-gray-50 to-neon-green-50 dark:from-gray-800 dark:to-gray-900 rounded-lg p-4 max-h-96 overflow-y-auto border border-gray-200 dark:border-gray-700">
+          <div class="bg-gradient-to-br from-gray-50 to-neon-green-50 dark:from-gray-800 dark:to-gray-900 rounded-lg p-4 max-h-96 overflow-y-auto border" style="border-color: var(--p-surface-border)">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               <div
                 v-for="table in store.tables"
                 :key="table.name"
-                class="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-200 dark:border-gray-700 hover:border-neon-green-300 dark:hover:border-neon-green-500 hover:shadow-md transition"
+                class="rounded-lg p-3 border hover:border-neon-green-300 dark:hover:border-neon-green-500 hover:shadow-md transition"
+                style="background: var(--p-surface-0); border-color: var(--p-surface-border)"
               >
                 <div class="flex items-center">
                   <div class="w-8 h-8 bg-neon-green-100 dark:bg-neon-green-900/30 rounded-lg flex items-center justify-center mr-2">
                     <i class="pi pi-table text-neon-green-600 dark:text-neon-green-400 text-sm"></i>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <p class="font-medium text-gray-900 dark:text-white truncate" :title="table.name">
+                    <p class="font-medium truncate" style="color: var(--p-text-color)" :title="table.name">
                       {{ table.name }}
                     </p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                    <p class="text-xs" style="color: var(--p-text-muted-color)">
                       {{ table.fields.length }} column{{ table.fields.length !== 1 ? 's' : '' }}
                     </p>
                   </div>
@@ -188,7 +191,7 @@
         </div>
 
         <!-- Continue Button (only show for multiple tables) -->
-        <div v-if="store.tables.length > 1" class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-800">
+        <div v-if="store.tables.length > 1" class="flex items-center justify-between pt-6 border-t" style="border-color: var(--p-surface-border)">
           <button
             @click="fileInput?.click()"
             class="text-neon-green-600 dark:text-neon-green-400 hover:text-neon-green-700 dark:hover:text-neon-green-300 font-medium flex items-center transition"

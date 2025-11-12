@@ -3,10 +3,10 @@
     <!-- Progress Stepper with Navigation -->
     <StepperNav />
 
-    <div class="bg-white dark:bg-gray-900 shadow-lg rounded-xl p-8 border border-gray-200 dark:border-gray-800 transition-colors duration-200">
+    <div class="shadow-lg rounded-xl p-8 border transition-colors duration-200" style="background: var(--p-surface-0); border-color: var(--p-surface-border)">
       <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Upload Data File</h2>
-        <p class="text-gray-600 dark:text-gray-300">
+        <h2 class="text-3xl font-bold mb-2" style="color: var(--p-text-color)">Upload Data File</h2>
+        <p style="color: var(--p-text-muted-color)">
           Upload an Excel or CSV file containing your data
         </p>
       </div>
@@ -57,11 +57,12 @@
 
         <!-- Upload Area -->
         <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          <label class="block text-sm font-medium mb-3" style="color: var(--p-text-color)">
             Data File
           </label>
           <div
-            class="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 text-center hover:border-neon-green-400 dark:hover:border-neon-green-500 transition cursor-pointer bg-gray-50 dark:bg-gray-800"
+            class="border-2 border-dashed rounded-xl p-8 text-center hover:border-neon-green-400 dark:hover:border-neon-green-500 transition cursor-pointer"
+            style="border-color: var(--p-surface-border); background: var(--p-surface-50)"
             @click="fileInput?.click()"
             @dragover.prevent
             @drop.prevent="handleDrop"
@@ -70,13 +71,13 @@
               <div class="w-16 h-16 bg-neon-green-100 dark:bg-neon-green-900/30 rounded-full flex items-center justify-center mb-4">
                 <i class="pi pi-file-excel text-neon-green-600 dark:text-neon-green-400 text-3xl"></i>
               </div>
-              <p class="text-lg font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <p class="text-lg font-medium mb-1" style="color: var(--p-text-color)">
                 Drop your data file here, or click to browse
               </p>
-              <p class="text-sm text-gray-500 dark:text-gray-400">
+              <p class="text-sm" style="color: var(--p-text-muted-color)">
                 Supports Excel (.xlsx, .xls) and CSV files
               </p>
-              <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
+              <p class="text-xs mt-2" style="color: var(--p-text-muted-color)">
                 Maximum file size: 50MB
               </p>
             </div>
@@ -93,8 +94,8 @@
         <!-- Loading State -->
         <div v-if="loading" class="flex flex-col items-center justify-center py-12">
           <i class="pi pi-spin pi-spinner text-5xl text-neon-green-600 dark:text-neon-green-400 mb-4"></i>
-          <p class="text-gray-600 dark:text-gray-300 font-medium">Parsing your data file...</p>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">This may take a few seconds</p>
+          <p class="font-medium" style="color: var(--p-text-color)">Parsing your data file...</p>
+          <p class="text-sm mt-2" style="color: var(--p-text-muted-color)">This may take a few seconds</p>
         </div>
 
         <!-- Error State -->
@@ -122,49 +123,51 @@
           <!-- Data Preview -->
           <div>
             <div class="flex items-center justify-between mb-4">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Data Preview</h3>
+              <h3 class="text-lg font-semibold" style="color: var(--p-text-color)">Data Preview</h3>
               <span class="px-3 py-1 bg-neon-green-100 dark:bg-neon-green-900/30 text-neon-green-800 dark:text-neon-green-300 rounded-full text-sm font-medium">
                 {{ store.excelData.length }} rows
               </span>
             </div>
 
-            <div class="overflow-x-auto bg-gradient-to-br from-gray-50 to-neon-green-50 dark:from-gray-800 dark:to-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-              <table class="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+            <div class="overflow-x-auto bg-gradient-to-br from-gray-50 to-neon-green-50 dark:from-gray-800 dark:to-gray-900 rounded-lg p-4 border" style="border-color: var(--p-surface-border)">
+              <table class="min-w-full divide-y" style="border-color: var(--p-surface-border)">
                 <thead>
                   <tr>
-                    <th class="sticky left-0 px-4 py-3 text-left text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider bg-gray-200 dark:bg-gray-800 z-10">
+                    <th class="sticky left-0 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider z-10" style="color: var(--p-text-color); background: var(--p-surface-100)">
                       #
                     </th>
                     <th
                       v-for="header in store.excelHeaders"
                       :key="header"
-                      class="px-4 py-3 text-left text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider bg-gray-200 dark:bg-gray-800"
+                      class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                      style="color: var(--p-text-color); background: var(--p-surface-100)"
                     >
                       {{ header }}
                     </th>
                   </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="divide-y" style="background: var(--p-surface-0); border-color: var(--p-surface-border)">
                   <tr v-for="(row, index) in store.excelData.slice(0, 10)" :key="index" class="hover:bg-neon-green-50 dark:hover:bg-neon-green-950/20 transition">
-                    <td class="sticky left-0 px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-900">{{ index + 1 }}</td>
+                    <td class="sticky left-0 px-4 py-3 text-sm font-medium" style="color: var(--p-text-muted-color); background: var(--p-surface-0)">{{ index + 1 }}</td>
                     <td
                       v-for="(cell, cellIndex) in row"
                       :key="cellIndex"
-                      class="px-4 py-3 text-sm text-gray-900 dark:text-gray-300 whitespace-nowrap"
+                      class="px-4 py-3 text-sm whitespace-nowrap"
+                      style="color: var(--p-text-color)"
                     >
                       {{ cell }}
                     </td>
                   </tr>
                 </tbody>
               </table>
-              <p v-if="store.excelData.length > 10" class="text-sm text-gray-500 dark:text-gray-400 mt-4 text-center italic">
+              <p v-if="store.excelData.length > 10" class="text-sm mt-4 text-center italic" style="color: var(--p-text-muted-color)">
                 Showing first 10 rows of {{ store.excelData.length }} total rows
               </p>
             </div>
           </div>
 
           <!-- Continue Button -->
-          <div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-800">
+          <div class="flex items-center justify-between pt-6 border-t" style="border-color: var(--p-surface-border)">
             <button
               @click="fileInput?.click()"
               class="text-neon-green-600 dark:text-neon-green-400 hover:text-neon-green-700 dark:hover:text-neon-green-300 font-medium flex items-center transition"

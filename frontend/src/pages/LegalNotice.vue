@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-950 dark:via-gray-900 dark:to-black transition-colors duration-200">
     <div class="container mx-auto px-4 py-12 max-w-5xl">
       <!-- Header Section -->
-      <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-neon-green-500/10 overflow-hidden mb-8 border border-transparent dark:border-gray-800 transition-all duration-200">
+      <div class="rounded-2xl shadow-xl dark:shadow-2xl dark:shadow-neon-green-500/10 overflow-hidden mb-8 border transition-all duration-200" style="background: var(--p-surface-0); border-color: var(--p-surface-border)">
         <div class="bg-gradient-to-r from-neon-green-600 to-emerald-700 dark:from-neon-green-500 dark:to-emerald-600 px-8 py-10">
           <h1 class="text-4xl font-extrabold text-white mb-3">Legal Notice</h1>
           <p class="text-white/90 text-lg">SQLSheetr Data Import Service</p>
@@ -11,8 +11,8 @@
 
         <div class="prose prose-green dark:prose-invert max-w-none px-8 py-6">
           <section class="mb-10">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500">1. Site Publisher</h2>
-            <p class="text-gray-700 dark:text-gray-300 text-lg mb-4">
+            <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">1. Site Publisher</h2>
+            <p style="color: var(--p-text-color)" text-lg mb-4">
               This website is published by SQLSheetr.
             </p>
             <div class="bg-neon-green-50 dark:bg-neon-green-950/20 border border-neon-green-200 dark:border-neon-green-800 rounded-lg p-6 mb-4">
@@ -33,7 +33,7 @@
           </section>
 
           <section class="mb-10">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500">2. Website Hosting</h2>
+            <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">2. Website Hosting</h2>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
             This website uses the following hosting infrastructure:
           </p>
@@ -51,7 +51,7 @@
           </section>
 
           <section class="mb-10">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500">3. Intellectual Property</h2>
+            <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">3. Intellectual Property</h2>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
             All content on this website, including but not limited to:
           </p>
@@ -64,10 +64,10 @@
             <li>Logos and branding elements</li>
             <li>Database schema and architecture</li>
           </ul>
-            <p class="text-gray-700 dark:text-gray-300 text-lg mb-4">
+            <p style="color: var(--p-text-color)" text-lg mb-4">
               is the property of SQLSheetr and is protected by international copyright laws.
             </p>
-            <p class="text-gray-700 dark:text-gray-300 text-lg mb-4">
+            <p style="color: var(--p-text-color)" text-lg mb-4">
               <strong>Open Source Components:</strong> This service uses open-source libraries and frameworks (Go, Vue.js, PrimeVue, etc.) which retain their respective licenses. The service's proprietary code and implementation remain the exclusive property of SQLSheetr.
             </p>
             <div class="bg-blue-50 border-l-4 border-blue-500 p-4 my-4">
@@ -78,8 +78,8 @@
           </section>
 
           <section class="mb-10">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500">4. Trademarks</h2>
-            <p class="text-gray-700 dark:text-gray-300 text-lg mb-4">
+            <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">4. Trademarks</h2>
+            <p style="color: var(--p-text-color)" text-lg mb-4">
               "SQLSheetr" and all related logos and service marks are trademarks of SQLSheetr.
           </p>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
@@ -99,14 +99,14 @@
         </section>
 
         <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">5. Website Director</h2>
+          <h2 class="text-2xl font-semibold mb-4" style="color: var(--p-text-color)">5. Website Director</h2>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
             <em>Note: Please add publication director information as required by applicable law in your jurisdiction.</em>
           </p>
         </section>
 
         <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">6. Personal Data Protection</h2>
+          <h2 class="text-2xl font-semibold mb-4" style="color: var(--p-text-color)">6. Personal Data Protection</h2>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
             SQL Importer is committed to protecting your personal data. For detailed information about how we collect, use, and protect your data, please refer to our <router-link to="/privacy-policy" class="text-blue-600 hover:text-blue-800 underline">Privacy Policy</router-link>.
           </p>
@@ -116,7 +116,7 @@
         </section>
 
         <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">7. Cookies</h2>
+          <h2 class="text-2xl font-semibold mb-4" style="color: var(--p-text-color)">7. Cookies</h2>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
             This website uses cookies to improve user experience and analyze website traffic. By continuing to use this website, you consent to our use of cookies in accordance with our Privacy Policy.
           </p>
@@ -126,7 +126,7 @@
         </section>
 
         <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">8. Limitation of Liability</h2>
+          <h2 class="text-2xl font-semibold mb-4" style="color: var(--p-text-color)">8. Limitation of Liability</h2>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
             SQL Importer strives to ensure the accuracy and reliability of information provided on this website. However, we cannot guarantee:
           </p>
@@ -142,14 +142,14 @@
         </section>
 
         <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">9. External Links</h2>
+          <h2 class="text-2xl font-semibold mb-4" style="color: var(--p-text-color)">9. External Links</h2>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
             This website may contain links to external websites. These links are provided for your convenience. SQL Importer has no control over the content of these external sites and accepts no responsibility for them or for any loss or damage that may arise from your use of them.
           </p>
         </section>
 
         <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">10. Applicable Law</h2>
+          <h2 class="text-2xl font-semibold mb-4" style="color: var(--p-text-color)">10. Applicable Law</h2>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
             This website and these legal notices are governed by and construed in accordance with applicable laws. Any disputes relating to this website shall be subject to the exclusive jurisdiction of the competent courts.
           </p>
@@ -159,7 +159,7 @@
         </section>
 
         <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">11. Report Illegal Content</h2>
+          <h2 class="text-2xl font-semibold mb-4" style="color: var(--p-text-color)">11. Report Illegal Content</h2>
           <p class="text-gray-700 dark:text-gray-300 mb-4">
             If you believe that content on this website is illegal or infringes your rights, please contact us immediately with:
           </p>
@@ -173,18 +173,18 @@
         </section>
 
         <section class="mb-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500">12. Modification of Legal Notice</h2>
-            <p class="text-gray-700 dark:text-gray-300 text-lg mb-4">
+            <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">12. Modification of Legal Notice</h2>
+            <p style="color: var(--p-text-color)" text-lg mb-4">
               SQLSheetr reserves the right to modify this legal notice at any time. Any changes will be effective immediately upon posting on this page. Your continued use of the website after changes constitutes acceptance of the modified legal notice.
             </p>
           </section>
 
           <section class="mb-10">
-            <h2 class="text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500">13. Contact</h2>
-            <p class="text-gray-700 dark:text-gray-300 text-lg mb-4">
+            <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-neon-green-600 dark:border-neon-green-500" style="color: var(--p-text-color)">13. Contact</h2>
+            <p style="color: var(--p-text-color)" text-lg mb-4">
               For any questions regarding this legal notice or the website, please contact us.
             </p>
-            <p class="text-gray-700 dark:text-gray-300 mb-4">
+            <p style="color: var(--p-text-color)" mb-4">
               <em>Note: Please add specific contact information (email, phone, postal address) as required by law.</em>
             </p>
           </section>
