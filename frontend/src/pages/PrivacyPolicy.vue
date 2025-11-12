@@ -11,10 +11,13 @@
         <section class="mb-8">
           <h2 class="text-2xl font-semibold text-gray-900 mb-4">1. Introduction</h2>
           <p class="text-gray-700 mb-4">
-            SQL Importer ("we", "our", or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our service.
+            SQL Data Importer ("we", "our", or "us") is a secure web-based tool for importing data from Excel/CSV files into SQL databases. We are committed to protecting your privacy and handling your data transparently.
           </p>
           <p class="text-gray-700 mb-4">
-            Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the service.
+            This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Service. Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Service.
+          </p>
+          <p class="text-gray-700 mb-4">
+            <strong>Key Privacy Principle:</strong> We do NOT access, connect to, or store data from your actual databases. The Service only processes files you upload to generate SQL statements, which you then execute yourself in your own environment.
           </p>
         </section>
 
@@ -31,89 +34,150 @@
             <li>Use certain features of the Service</li>
           </ul>
 
-          <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">2.2 Database and File Information</h3>
+          <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">2.2 Uploaded Files and Processing</h3>
           <p class="text-gray-700 mb-4">
-            When you use our Service, we collect and process:
+            When you use our Service, we temporarily process:
           </p>
           <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
-            <li>Database schemas and structure information</li>
-            <li>Data files you upload for import</li>
-            <li>Database connection configurations</li>
-            <li>Import history and mapping configurations</li>
+            <li><strong>SQL Schema Files:</strong> SQL dump files (.sql) containing CREATE TABLE statements - processed temporarily to extract table structures</li>
+            <li><strong>Data Files:</strong> Excel (.xlsx, .xls) or CSV files containing your data - processed in memory to generate SQL INSERT statements</li>
+            <li><strong>Generated SQL:</strong> The output SQL statements are generated on-demand and provided for download</li>
           </ul>
+          <p class="text-gray-700 mb-4">
+            <strong>Important:</strong> Uploaded files are processed in server memory and are NOT permanently stored on our servers. For registered users, we only store metadata about imports (see section 2.3).
+          </p>
 
-          <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">2.3 Usage Information</h3>
+          <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">2.3 Import History Metadata (Registered Users Only)</h3>
+          <p class="text-gray-700 mb-4">
+            For users with accounts, we store limited metadata about your imports:
+          </p>
+          <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
+            <li>Table name (e.g., "customers", "products")</li>
+            <li>Number of rows processed</li>
+            <li>Timestamp of import</li>
+            <li>Database type (MySQL/PostgreSQL)</li>
+            <li>Status (success/failed)</li>
+          </ul>
+          <p class="text-gray-700 mb-4">
+            We do NOT store: the actual data content, SQL schema details, column mappings, or generated SQL statements permanently.
+          </p>
+
+          <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">2.4 Technical and Usage Information</h3>
           <p class="text-gray-700 mb-4">
             We automatically collect certain information when you use the Service:
           </p>
           <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
-            <li>Log data (IP address, browser type, operating system)</li>
-            <li>Usage patterns and feature interactions</li>
-            <li>Error logs and diagnostic information</li>
-            <li>Session information</li>
+            <li>Log data (IP address, browser type, operating system, timestamps)</li>
+            <li>API requests and response times (for rate limiting and performance monitoring)</li>
+            <li>Error logs and diagnostic information (to improve service reliability)</li>
+            <li>Session information and authentication tokens</li>
+            <li>File upload sizes and processing times</li>
           </ul>
+          <p class="text-gray-700 mb-4">
+            These logs do NOT include the content of your uploaded files or generated SQL.
+          </p>
         </section>
 
         <section class="mb-8">
           <h2 class="text-2xl font-semibold text-gray-900 mb-4">3. How We Use Your Information</h2>
           <p class="text-gray-700 mb-4">
-            We use the information we collect to:
+            We use the information we collect for the following purposes:
           </p>
           <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
-            <li>Provide, operate, and maintain the Service</li>
-            <li>Process your database imports and data mappings</li>
-            <li>Manage your account and provide customer support</li>
-            <li>Improve and optimize the Service</li>
-            <li>Detect and prevent technical issues, fraud, or abuse</li>
-            <li>Send you technical notices, updates, and security alerts</li>
-            <li>Respond to your comments, questions, and requests</li>
-            <li>Analyze usage patterns to enhance user experience</li>
+            <li><strong>Service Delivery:</strong> Process uploaded SQL schemas and data files to generate INSERT statements</li>
+            <li><strong>Schema Parsing:</strong> Extract table structures from SQL dump files (MySQL/MariaDB, PostgreSQL)</li>
+            <li><strong>Column Mapping:</strong> Apply Levenshtein distance algorithm for intelligent column matching</li>
+            <li><strong>Data Validation:</strong> Validate data against schema constraints (NOT NULL, types, lengths, ranges)</li>
+            <li><strong>Account Management:</strong> Manage user accounts and authentication (JWT tokens)</li>
+            <li><strong>Import History:</strong> Store metadata to allow registered users to track past imports</li>
+            <li><strong>Security:</strong> Apply rate limiting, detect abuse, and prevent malicious uploads</li>
+            <li><strong>Service Improvement:</strong> Analyze usage patterns to optimize parsing algorithms and user experience</li>
+            <li><strong>Support:</strong> Respond to support requests and troubleshoot issues</li>
+            <li><strong>Communication:</strong> Send important service updates and security alerts</li>
           </ul>
+          <p class="text-gray-700 mb-4">
+            <strong>We do NOT:</strong> Access your actual databases, store your sensitive data permanently, or share your data with third parties for marketing purposes.
+          </p>
         </section>
 
         <section class="mb-8">
           <h2 class="text-2xl font-semibold text-gray-900 mb-4">4. Data Storage and Security</h2>
+
+          <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">4.1 Security Measures</h3>
           <p class="text-gray-700 mb-4">
-            We implement appropriate technical and organizational security measures to protect your information:
+            We implement multiple layers of security to protect your information:
           </p>
           <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
-            <li>Encryption of data in transit using SSL/TLS</li>
-            <li>Secure authentication and password hashing</li>
-            <li>Regular security assessments and updates</li>
-            <li>Access controls and authorization mechanisms</li>
-            <li>Database connection credentials are encrypted and securely stored</li>
+            <li><strong>HTTPS/TLS Encryption:</strong> All data transmission is encrypted using industry-standard SSL/TLS</li>
+            <li><strong>Secure Authentication:</strong> JWT-based authentication with bcrypt password hashing</li>
+            <li><strong>SQL Injection Prevention:</strong> Type-aware SQL generation with comprehensive input validation and escaping</li>
+            <li><strong>Rate Limiting:</strong> Configurable per-IP rate limits to prevent abuse and DDoS attacks</li>
+            <li><strong>File Validation:</strong> Strict validation of file types, sizes (max 50MB), and content</li>
+            <li><strong>Memory Processing:</strong> Files processed in memory and discarded after SQL generation</li>
+            <li><strong>No Database Access:</strong> Zero-trust architecture - we never connect to or access your databases</li>
+            <li><strong>Structured Logging:</strong> Secure logging that excludes sensitive data content</li>
           </ul>
+
+          <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">4.2 Data Storage</h3>
           <p class="text-gray-700 mb-4">
-            However, no method of transmission over the Internet or electronic storage is 100% secure. While we strive to protect your personal information, we cannot guarantee its absolute security.
+            Our data storage practices:
+          </p>
+          <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
+            <li><strong>User Accounts:</strong> Stored securely in Supabase (PostgreSQL) with industry-standard encryption</li>
+            <li><strong>Import History Metadata:</strong> Stored only for registered users (table names, timestamps, row counts)</li>
+            <li><strong>Uploaded Files:</strong> NOT permanently stored - processed in memory and discarded</li>
+            <li><strong>Generated SQL:</strong> NOT stored on our servers - downloaded directly by you</li>
+          </ul>
+
+          <h3 class="text-xl font-semibold text-gray-800 mb-3 mt-4">4.3 Third-Party Infrastructure</h3>
+          <p class="text-gray-700 mb-4">
+            We use trusted third-party services for infrastructure:
+          </p>
+          <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
+            <li><strong>Supabase:</strong> Secure PostgreSQL database hosting for user accounts and metadata (SOC 2 Type II compliant)</li>
+            <li><strong>Hosting Provider:</strong> VPS infrastructure with Docker containerization</li>
+          </ul>
+
+          <p class="text-gray-700 mb-4">
+            However, no method of transmission over the Internet or electronic storage is 100% secure. While we implement industry best practices to protect your information, we cannot guarantee absolute security.
           </p>
         </section>
 
         <section class="mb-8">
           <h2 class="text-2xl font-semibold text-gray-900 mb-4">5. Data Retention</h2>
           <p class="text-gray-700 mb-4">
-            We retain your information for as long as necessary to:
+            Our data retention policies:
           </p>
           <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
-            <li>Provide you with the Service</li>
-            <li>Comply with legal obligations</li>
-            <li>Resolve disputes and enforce our agreements</li>
+            <li><strong>Uploaded Files:</strong> Deleted immediately after processing (not stored on disk)</li>
+            <li><strong>Generated SQL:</strong> Not stored - provided as immediate download only</li>
+            <li><strong>User Accounts:</strong> Retained for the lifetime of your account</li>
+            <li><strong>Import History Metadata:</strong> Retained until you delete your account or request deletion</li>
+            <li><strong>System Logs:</strong> Retained for 90 days for security and troubleshooting purposes</li>
+            <li><strong>Session Data:</strong> JWT tokens expire after 15 minutes (access) / 7 days (refresh)</li>
           </ul>
           <p class="text-gray-700 mb-4">
-            You may request deletion of your account and associated data at any time by contacting us.
+            <strong>Account Deletion:</strong> You may request deletion of your account and all associated data at any time. Upon deletion, all your personal data and import history will be permanently removed from our systems within 30 days.
           </p>
         </section>
 
         <section class="mb-8">
           <h2 class="text-2xl font-semibold text-gray-900 mb-4">6. Sharing of Information</h2>
           <p class="text-gray-700 mb-4">
-            We do not sell, trade, or rent your personal information to third parties. We may share your information only in the following circumstances:
+            <strong>We do NOT sell, trade, or rent your personal information or uploaded data to third parties.</strong>
+          </p>
+          <p class="text-gray-700 mb-4">
+            We may share limited information only in the following circumstances:
           </p>
           <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
-            <li><strong>Service Providers:</strong> With trusted third-party service providers who assist in operating the Service (e.g., hosting providers, analytics services)</li>
-            <li><strong>Legal Requirements:</strong> When required by law or to respond to legal process</li>
-            <li><strong>Protection of Rights:</strong> To protect our rights, privacy, safety, or property, and that of our users</li>
-            <li><strong>Business Transfers:</strong> In connection with a merger, acquisition, or sale of assets</li>
+            <li><strong>Infrastructure Providers:</strong> Supabase (database hosting) and VPS hosting provider - these services are bound by strict confidentiality agreements</li>
+            <li><strong>Legal Requirements:</strong> When required by law, subpoena, or to respond to legal process</li>
+            <li><strong>Protection of Rights:</strong> To protect our rights, security, or property, and that of our users (e.g., preventing fraud or abuse)</li>
+            <li><strong>Business Transfers:</strong> In the event of a merger, acquisition, or sale of assets (users will be notified)</li>
           </ul>
+          <p class="text-gray-700 mb-4">
+            <strong>Important:</strong> The actual content of your uploaded files (SQL schemas, data files) is never shared with third parties. Only metadata (if you're a registered user) is stored in our infrastructure.
+          </p>
         </section>
 
         <section class="mb-8">

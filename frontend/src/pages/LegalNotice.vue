@@ -11,44 +11,86 @@
         <section class="mb-8">
           <h2 class="text-2xl font-semibold text-gray-900 mb-4">1. Site Publisher</h2>
           <p class="text-gray-700 mb-4">
-            This website is published by SQL Importer.
+            This website is published by SQL Data Importer.
           </p>
           <div class="bg-gray-50 p-4 rounded-lg mb-4">
-            <p class="text-gray-700"><strong>Service Name:</strong> SQL Importer</p>
-            <p class="text-gray-700"><strong>Type:</strong> Database Import and Management Service</p>
+            <p class="text-gray-700"><strong>Service Name:</strong> SQL Data Importer</p>
+            <p class="text-gray-700"><strong>Type:</strong> Web-based SQL Data Import Tool</p>
+            <p class="text-gray-700"><strong>Description:</strong> Secure platform for importing data from Excel/CSV files into SQL databases (MySQL/MariaDB, PostgreSQL)</p>
+            <p class="text-gray-700 mt-2"><strong>Technology Stack:</strong></p>
+            <ul class="list-disc list-inside text-gray-700 ml-4">
+              <li>Backend: Go 1.21+</li>
+              <li>Frontend: Vue 3 + TypeScript + Vite + PrimeVue</li>
+              <li>Database: Supabase (PostgreSQL)</li>
+              <li>Hosting: Docker containerization on VPS</li>
+            </ul>
           </div>
           <p class="text-gray-700 mb-4">
-            <em>Note: Please update this section with your actual company information, including registered business name, address, registration number, and contact details.</em>
+            <em>Note: Please update this section with your actual company information, including registered business name, business address, company registration number (SIRET/SIREN for France, equivalent for other jurisdictions), and official contact details.</em>
           </p>
         </section>
 
         <section class="mb-8">
           <h2 class="text-2xl font-semibold text-gray-900 mb-4">2. Website Hosting</h2>
           <p class="text-gray-700 mb-4">
-            This website is hosted by a third-party hosting provider.
+            This website uses the following hosting infrastructure:
           </p>
+          <div class="bg-gray-50 p-4 rounded-lg mb-4">
+            <p class="text-gray-700"><strong>Web Application Hosting:</strong> VPS (Virtual Private Server) with Docker containerization</p>
+            <p class="text-gray-700"><strong>Database Hosting:</strong> Supabase (PostgreSQL managed database service)</p>
+            <p class="text-gray-700 mt-2">Supabase Inc.<br>
+            970 Toa Payoh North, #07-04<br>
+            Singapore 318992</p>
+            <p class="text-gray-700 mt-2">Supabase is SOC 2 Type II compliant and provides secure, managed PostgreSQL database services.</p>
+          </div>
           <p class="text-gray-700 mb-4">
-            <em>Note: Please add specific hosting provider information as required by applicable law in your jurisdiction.</em>
+            <em>Note: Please add your specific VPS hosting provider information (name, address, contact) as required by applicable law in your jurisdiction.</em>
           </p>
         </section>
 
         <section class="mb-8">
           <h2 class="text-2xl font-semibold text-gray-900 mb-4">3. Intellectual Property</h2>
           <p class="text-gray-700 mb-4">
-            All content on this website, including but not limited to text, graphics, logos, icons, images, audio clips, digital downloads, and software, is the property of SQL Importer or its content suppliers and is protected by international copyright laws.
+            All content on this website, including but not limited to:
+          </p>
+          <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
+            <li>Source code (Go backend, Vue.js frontend)</li>
+            <li>User interface design and components (PrimeVue, TailwindCSS)</li>
+            <li>SQL parsing and generation algorithms</li>
+            <li>Levenshtein distance matching implementation</li>
+            <li>Documentation, text, and graphics</li>
+            <li>Logos and branding elements</li>
+            <li>Database schema and architecture</li>
+          </ul>
+          <p class="text-gray-700 mb-4">
+            is the property of SQL Data Importer and is protected by international copyright laws.
           </p>
           <p class="text-gray-700 mb-4">
-            The compilation of all content on this site is the exclusive property of SQL Importer and is protected by international copyright laws.
+            <strong>Open Source Components:</strong> This service uses open-source libraries and frameworks (Go, Vue.js, PrimeVue, etc.) which retain their respective licenses. The service's proprietary code and implementation remain the exclusive property of SQL Data Importer.
           </p>
           <p class="text-gray-700 mb-4">
-            Any reproduction, distribution, modification, or use of the content without prior written permission is strictly prohibited.
+            <strong>Your Data:</strong> You retain all intellectual property rights to your uploaded files and data. The Service does not claim any ownership over your SQL schemas or data files.
           </p>
         </section>
 
         <section class="mb-8">
           <h2 class="text-2xl font-semibold text-gray-900 mb-4">4. Trademarks</h2>
           <p class="text-gray-700 mb-4">
-            "SQL Importer" and all related logos and service marks are trademarks of SQL Importer. All other trademarks, service marks, and trade names referenced in this site are the property of their respective owners.
+            "SQL Data Importer" and "SQL Importer" and all related logos and service marks are trademarks of SQL Data Importer.
+          </p>
+          <p class="text-gray-700 mb-4">
+            Third-party trademarks referenced on this site:
+          </p>
+          <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
+            <li>MySQL, MariaDB are trademarks of Oracle Corporation and MariaDB Foundation respectively</li>
+            <li>PostgreSQL is a trademark of the PostgreSQL Global Development Group</li>
+            <li>Vue.js, Vite are trademarks of their respective owners</li>
+            <li>Supabase is a trademark of Supabase Inc.</li>
+            <li>Go (Golang) is a trademark of Google LLC</li>
+            <li>PrimeVue is a trademark of PrimeTek Informatics</li>
+          </ul>
+          <p class="text-gray-700 mb-4">
+            All other trademarks, service marks, and trade names referenced are the property of their respective owners.
           </p>
         </section>
 

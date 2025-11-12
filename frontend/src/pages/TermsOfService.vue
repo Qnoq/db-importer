@@ -18,14 +18,19 @@
         <section class="mb-8">
           <h2 class="text-2xl font-semibold text-gray-900 mb-4">2. Description of Service</h2>
           <p class="text-gray-700 mb-4">
-            SQL Importer provides a web-based platform for importing, mapping, and managing database schemas and data. The Service allows users to:
+            SQL Data Importer is a secure web-based tool that helps you safely import data from Excel/CSV files into SQL databases. The Service provides the following features:
           </p>
           <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
-            <li>Upload database schemas</li>
-            <li>Upload and map data files</li>
-            <li>Configure database connections</li>
-            <li>Track import history</li>
+            <li><strong>SQL Schema Parsing:</strong> Upload SQL dump files (.sql) containing CREATE TABLE statements for MySQL/MariaDB or PostgreSQL</li>
+            <li><strong>Data File Upload:</strong> Upload Excel (.xlsx, .xls) or CSV files containing your data</li>
+            <li><strong>Intelligent Column Mapping:</strong> Automatic column matching using Levenshtein distance algorithm with manual override options</li>
+            <li><strong>Data Validation:</strong> Server-side validation against schema constraints (NOT NULL, data types, length, ranges)</li>
+            <li><strong>SQL Generation:</strong> Generate type-safe, injection-proof INSERT statements ready for execution</li>
+            <li><strong>Import History:</strong> Track your past imports and download generated SQL files (for registered users)</li>
           </ul>
+          <p class="text-gray-700 mb-4">
+            <strong>Important:</strong> The Service does NOT connect to your database directly. You download the generated SQL and execute it yourself in your own environment, ensuring full control and security.
+          </p>
         </section>
 
         <section class="mb-8">
@@ -44,7 +49,16 @@
         <section class="mb-8">
           <h2 class="text-2xl font-semibold text-gray-900 mb-4">4. User Data and Privacy</h2>
           <p class="text-gray-700 mb-4">
-            You retain all rights to your data. By using the Service, you grant us the right to store and process your data solely for the purpose of providing the Service. We are committed to protecting your privacy. Please review our <router-link to="/privacy-policy" class="text-blue-600 hover:text-blue-800 underline">Privacy Policy</router-link> for more information.
+            You retain all rights to your data. The Service processes your uploaded files (SQL schemas and data files) temporarily to generate SQL statements. Key privacy principles:
+          </p>
+          <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
+            <li><strong>No Database Access:</strong> We never access or connect to your actual databases</li>
+            <li><strong>Temporary Processing:</strong> Uploaded files are processed in memory and not permanently stored on our servers (except import history metadata for registered users)</li>
+            <li><strong>You Control Execution:</strong> Generated SQL is downloaded by you and executed in your own environment</li>
+            <li><strong>Account Data:</strong> For registered users, we store account information (email, name) and import history metadata (table names, row counts, timestamps) - not the actual data content</li>
+          </ul>
+          <p class="text-gray-700 mb-4">
+            For complete details on data handling, please review our <router-link to="/privacy-policy" class="text-blue-600 hover:text-blue-800 underline">Privacy Policy</router-link>.
           </p>
         </section>
 
@@ -55,11 +69,14 @@
           </p>
           <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
             <li>Use the Service for any illegal purpose or in violation of any laws</li>
-            <li>Upload malicious code, viruses, or any other harmful software</li>
+            <li>Upload malicious code, viruses, or any other harmful software in SQL or data files</li>
             <li>Attempt to gain unauthorized access to the Service or related systems</li>
-            <li>Interfere with or disrupt the Service or servers</li>
-            <li>Use the Service to transmit spam or unsolicited messages</li>
+            <li>Interfere with or disrupt the Service or servers, including circumventing rate limits</li>
+            <li>Upload excessively large files to overload the system (maximum file size limits apply)</li>
+            <li>Attempt to exploit the SQL generation feature to create malicious SQL code</li>
+            <li>Use the Service to process data you do not have legal rights to access or modify</li>
             <li>Impersonate any person or entity or misrepresent your affiliation</li>
+            <li>Reverse engineer or attempt to extract the source code of the Service</li>
           </ul>
         </section>
 
@@ -96,9 +113,19 @@
         </section>
 
         <section class="mb-8">
-          <h2 class="text-2xl font-semibold text-gray-900 mb-4">9. Data Backup and Loss</h2>
+          <h2 class="text-2xl font-semibold text-gray-900 mb-4">9. Data Backup and User Responsibility</h2>
           <p class="text-gray-700 mb-4">
-            While we take reasonable measures to protect your data, you are responsible for maintaining backups of your data. We are not liable for any data loss or corruption that may occur.
+            <strong>Critical responsibilities:</strong>
+          </p>
+          <ul class="list-disc list-inside text-gray-700 mb-4 ml-4">
+            <li><strong>Test Generated SQL:</strong> Always test generated SQL on a development/staging database before executing in production</li>
+            <li><strong>Backup Your Database:</strong> Create complete backups before running any import operations</li>
+            <li><strong>Review SQL Output:</strong> Carefully review the generated SQL statements before execution</li>
+            <li><strong>Save Downloaded Files:</strong> Once you download generated SQL, you are responsible for storing it securely</li>
+            <li><strong>Verify Data Accuracy:</strong> Ensure your source data (Excel/CSV) is accurate and complete</li>
+          </ul>
+          <p class="text-gray-700 mb-4">
+            We are not liable for any data loss, corruption, or errors that occur in your database as a result of executing generated SQL statements. The Service generates SQL based on the inputs you provide, but you are solely responsible for validating and executing it.
           </p>
         </section>
 
