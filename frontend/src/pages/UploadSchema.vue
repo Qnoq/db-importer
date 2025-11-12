@@ -1,11 +1,11 @@
 <template>
-  <div class="px-4 py-6">
+  <div class="page-container">
     <!-- Progress Stepper with Navigation -->
     <StepperNav />
 
     <Card>
       <template #title>
-        <h2 class="text-3xl font-bold">Upload SQL Schema</h2>
+        <h2 class="card-title">Upload SQL Schema</h2>
       </template>
 
       <template #subtitle>
@@ -14,39 +14,38 @@
 
       <template #content>
       <!-- Important: Single Table Note -->
-      <InlineMessage severity="info" class="mb-6 w-full">
-        <div class="flex-1">
-          <strong>💡 Pro Tip: Export Only Your Target Table</strong>
-          <p class="text-sm mb-2">
+      <Message severity="info" :closable="false" class="pro-tip-message">
+        <div class="tip-content">
+          <strong>Pro Tip: Export Only Your Target Table</strong>
+          <p class="tip-text">
             You only need the <strong>CREATE TABLE</strong> statement for the table you want to import data into.
             No need to upload your entire database dump!
           </p>
-          <div class="text-xs p-2 font-mono" style="background: var(--p-surface-50)">
+          <div class="code-example">
             <strong>Example export command:</strong><br/>
-            <code class="block mt-1">mysqldump -u user -p --no-data database_name table_name > table.sql</code>
-            <code class="block mt-1">pg_dump -U user --schema-only -t table_name database > table.sql</code>
+            <code class="code-block">mysqldump -u user -p --no-data database_name table_name &gt; table.sql</code>
+            <code class="code-block">pg_dump -U user --schema-only -t table_name database &gt; table.sql</code>
           </div>
         </div>
-      </InlineMessage>
+      </Message>
 
       <!-- Upload Area -->
-      <Panel header="SQL Schema File" class="mb-6">
+      <Panel header="SQL Schema File" class="upload-panel">
         <div
-          class="border-2 border-dashed rounded-xl p-8 text-center transition cursor-pointer"
-          style="border-color: var(--p-surface-border)"
+          class="upload-area"
           @click="fileInput?.click()"
           @dragover.prevent
           @drop.prevent="handleDrop"
         >
-          <div class="flex flex-col items-center">
-            <i class="pi pi-cloud-upload text-5xl mb-4" style="color: var(--p-primary-color)"></i>
-            <p class="text-lg font-medium mb-1">
+          <div class="upload-content">
+            <i class="pi pi-cloud-upload upload-icon"></i>
+            <p class="upload-title">
               Drop your SQL file here, or click to browse
             </p>
-            <p class="text-sm" style="color: var(--p-text-muted-color)">
+            <p class="upload-subtitle">
               Supports MySQL, MariaDB, and PostgreSQL dump files
             </p>
-            <p class="text-xs mt-2" style="color: var(--p-text-muted-color)">
+            <p class="upload-limit">
               A single table schema is typically &lt; 50KB
             </p>
           </div>
@@ -56,59 +55,58 @@
           accept=".sql"
           @change="handleFileUpload"
           ref="fileInput"
-          class="hidden"
+          class="hidden-input"
         />
       </Panel>
 
       <!-- Loading State -->
-      <div v-if="loading" class="flex flex-col items-center justify-center py-12">
-        <i class="pi pi-spin pi-spinner text-5xl mb-4" style="color: var(--p-primary-color)"></i>
-        <p class="font-medium">Parsing your SQL schema...</p>
-        <p class="text-sm mt-2" style="color: var(--p-text-muted-color)">This may take a few seconds</p>
+      <div v-if="loading" class="loading-state">
+        <i class="pi pi-spin pi-spinner loading-icon"></i>
+        <p class="loading-title">Parsing your SQL schema...</p>
+        <p class="loading-subtitle">This may take a few seconds</p>
       </div>
 
       <!-- Error State -->
-      <InlineMessage v-if="error" severity="error" class="mb-4 w-full">
+      <Message v-if="error" severity="error" :closable="false" class="error-message">
         <strong>Upload Failed</strong>
-        <p class="text-sm mt-1">{{ error }}</p>
-      </InlineMessage>
+        <p class="error-text">{{ error }}</p>
+      </Message>
 
       <!-- Single Table Auto-Select Modal -->
-      <div v-if="showSingleTableDialog" class="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50" @click="cancelSingleTableDialog">
-        <div class="rounded-xl shadow-2xl p-8 max-w-md mx-4 transform transition-all relative border" style="background: var(--p-surface-0); border-color: var(--p-surface-border)" @click.stop>
+      <div v-if="showSingleTableDialog" class="modal-overlay" @click="cancelSingleTableDialog">
+        <div class="modal-content" @click.stop>
           <!-- Close button -->
           <button
             @click="cancelSingleTableDialog"
-            class="absolute top-4 right-4 transition"
-            style="color: var(--p-text-muted-color)"
+            class="modal-close"
             aria-label="Close"
           >
-            <i class="pi pi-times text-xl"></i>
+            <i class="pi pi-times"></i>
           </button>
 
-          <div class="text-center">
+          <div class="modal-body">
             <!-- Success Icon -->
-            <div class="w-20 h-20 bg-neon-green-100 dark:bg-neon-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <i class="pi pi-check-circle text-neon-green-600 dark:text-neon-green-400 text-5xl"></i>
+            <div class="success-icon">
+              <i class="pi pi-check-circle"></i>
             </div>
 
             <!-- Title -->
-            <h3 class="text-2xl font-bold mb-3" style="color: var(--p-text-color)">
+            <h3 class="modal-title">
               Single Table Detected
             </h3>
 
             <!-- Message -->
-            <p class="mb-2" style="color: var(--p-text-color)">
-              We found only <strong class="text-neon-green-600 dark:text-neon-green-400">1 table</strong> in your schema:
+            <p class="modal-message">
+              We found only <strong class="highlight-text">1 table</strong> in your schema:
             </p>
 
             <!-- Table Name -->
-            <div class="bg-neon-green-50 dark:bg-neon-green-950/20 border border-neon-green-200 dark:border-neon-green-800 rounded-lg p-4 mb-6">
-              <div class="flex items-center justify-center gap-3">
-                <i class="pi pi-table text-neon-green-600 dark:text-neon-green-400 text-2xl"></i>
-                <div class="text-left">
-                  <p class="font-bold text-neon-green-900 dark:text-neon-green-300 text-lg">{{ store.tables[0]?.name }}</p>
-                  <p class="text-sm text-neon-green-700 dark:text-neon-green-400">
+            <div class="table-info-box">
+              <div class="table-info-content">
+                <i class="pi pi-table table-info-icon"></i>
+                <div class="table-info-details">
+                  <p class="table-info-name">{{ store.tables[0]?.name }}</p>
+                  <p class="table-info-columns">
                     {{ store.tables[0]?.fields.length }} column{{ store.tables[0]?.fields.length !== 1 ? 's' : '' }}
                   </p>
                 </div>
@@ -116,71 +114,69 @@
             </div>
 
             <!-- Explanation -->
-            <p class="text-sm mb-6" style="color: var(--p-text-muted-color)">
+            <p class="modal-explanation">
               Since there's only one table, we'll auto-select it and skip the table selection step.
             </p>
 
             <!-- Action Buttons -->
-            <div class="flex flex-col gap-3">
-              <button
+            <div class="modal-actions">
+              <Button
                 @click="continueToProceed"
-                class="w-full bg-neon-green-600 hover:bg-neon-green-700 dark:bg-neon-green-500 dark:hover:bg-neon-green-600 text-white font-semibold py-4 px-6 rounded-lg transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-              >
-                Continue to Upload Data
-                <i class="pi pi-arrow-right"></i>
-              </button>
-              <button
+                label="Continue to Upload Data"
+                icon="pi pi-arrow-right"
+                iconPos="right"
+                severity="success"
+                class="modal-button-primary"
+              />
+              <Button
                 @click="cancelSingleTableDialog"
-                class="w-full font-semibold py-3 px-6 rounded-lg transition flex items-center justify-center gap-2"
-                style="background: var(--p-surface-100); color: var(--p-text-color)"
-              >
-                <i class="pi pi-upload"></i>
-                Upload a Different File
-              </button>
+                label="Upload a Different File"
+                icon="pi pi-upload"
+                outlined
+                class="modal-button-secondary"
+              />
             </div>
           </div>
         </div>
       </div>
 
       <!-- Success State -->
-      <div v-if="store.hasSchema && !loading && !showSingleTableDialog" class="space-y-6">
+      <div v-if="store.hasSchema && !loading && !showSingleTableDialog" class="success-section">
         <!-- Success Banner -->
-        <div class="bg-neon-green-50 dark:bg-neon-green-950/20 border-l-4 border-neon-green-500 dark:border-neon-green-400 rounded-lg p-4 flex items-start">
-          <i class="pi pi-check-circle text-neon-green-500 dark:text-neon-green-400 text-xl mr-3 mt-0.5"></i>
-          <div class="flex-1">
-            <p class="font-medium text-neon-green-800 dark:text-neon-green-300">Schema parsed successfully!</p>
-            <p class="text-neon-green-700 dark:text-neon-green-400 text-sm mt-1">
+        <Message severity="success" :closable="false">
+          <div class="success-content">
+            <p class="success-title">Schema parsed successfully!</p>
+            <p class="success-text">
               Found {{ store.tables.length }} table{{ store.tables.length !== 1 ? 's' : '' }} in your database dump
             </p>
           </div>
-        </div>
+        </Message>
 
         <!-- Tables Preview -->
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-lg font-semibold" style="color: var(--p-text-color)">Detected Tables</h3>
-            <span class="px-3 py-1 bg-neon-green-100 dark:bg-neon-green-900/30 text-neon-green-800 dark:text-neon-green-300 rounded-full text-sm font-medium">
+        <div class="tables-preview">
+          <div class="preview-header">
+            <h3 class="preview-title">Detected Tables</h3>
+            <span class="preview-badge">
               {{ store.tables.length }} tables
             </span>
           </div>
 
-          <div class="bg-gradient-to-br from-gray-50 to-neon-green-50 dark:from-gray-800 dark:to-gray-900 rounded-lg p-4 max-h-96 overflow-y-auto border" style="border-color: var(--p-surface-border)">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div class="tables-grid-wrapper">
+            <div class="tables-grid">
               <div
                 v-for="table in store.tables"
                 :key="table.name"
-                class="rounded-lg p-3 border hover:border-neon-green-300 dark:hover:border-neon-green-500 hover:shadow-md transition"
-                style="background: var(--p-surface-0); border-color: var(--p-surface-border)"
+                class="table-card"
               >
-                <div class="flex items-center">
-                  <div class="w-8 h-8 bg-neon-green-100 dark:bg-neon-green-900/30 rounded-lg flex items-center justify-center mr-2">
-                    <i class="pi pi-table text-neon-green-600 dark:text-neon-green-400 text-sm"></i>
+                <div class="table-card-content">
+                  <div class="table-card-icon">
+                    <i class="pi pi-table"></i>
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <p class="font-medium truncate" style="color: var(--p-text-color)" :title="table.name">
+                  <div class="table-card-info">
+                    <p class="table-card-name" :title="table.name">
                       {{ table.name }}
                     </p>
-                    <p class="text-xs" style="color: var(--p-text-muted-color)">
+                    <p class="table-card-columns">
                       {{ table.fields.length }} column{{ table.fields.length !== 1 ? 's' : '' }}
                     </p>
                   </div>
@@ -191,21 +187,21 @@
         </div>
 
         <!-- Continue Button (only show for multiple tables) -->
-        <div v-if="store.tables.length > 1" class="flex items-center justify-between pt-6 border-t" style="border-color: var(--p-surface-border)">
-          <button
+        <div v-if="store.tables.length > 1" class="action-buttons">
+          <Button
             @click="fileInput?.click()"
-            class="text-neon-green-600 dark:text-neon-green-400 hover:text-neon-green-700 dark:hover:text-neon-green-300 font-medium flex items-center transition"
-          >
-            <i class="pi pi-refresh mr-2"></i>
-            Upload a different file
-          </button>
-          <button
+            label="Upload a different file"
+            icon="pi pi-refresh"
+            text
+            severity="success"
+          />
+          <Button
             @click="goToSelectTable"
-            class="bg-neon-green-600 hover:bg-neon-green-700 dark:bg-neon-green-500 dark:hover:bg-neon-green-600 text-white font-semibold py-3 px-8 rounded-lg transition shadow-md hover:shadow-lg flex items-center"
-          >
-            Continue to Table Selection
-            <i class="pi pi-arrow-right ml-2"></i>
-          </button>
+            label="Continue to Table Selection"
+            icon="pi pi-arrow-right"
+            iconPos="right"
+            severity="success"
+          />
         </div>
       </div>
       </template>
@@ -220,7 +216,8 @@ import { useMappingStore } from '../store/mappingStore'
 import StepperNav from '../components/StepperNav.vue'
 import Card from 'primevue/card'
 import Panel from 'primevue/panel'
-import InlineMessage from 'primevue/inlinemessage'
+import Button from 'primevue/button'
+import Message from 'primevue/message'
 
 const router = useRouter()
 const store = useMappingStore()
@@ -315,3 +312,381 @@ function goToSelectTable() {
   router.push('/select-table')
 }
 </script>
+
+<style scoped>
+.page-container {
+  padding: 1.5rem 1rem;
+}
+
+.card-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+}
+
+.pro-tip-message {
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.tip-content {
+  flex: 1;
+}
+
+.tip-text {
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.code-example {
+  font-size: 0.75rem;
+  padding: 0.5rem;
+  font-family: monospace;
+  background: var(--p-surface-50);
+}
+
+.code-block {
+  display: block;
+  margin-top: 0.25rem;
+}
+
+.upload-panel {
+  margin-bottom: 1.5rem;
+}
+
+.upload-area {
+  border: 2px dashed var(--p-surface-border);
+  border-radius: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.upload-area:hover {
+  border-color: var(--p-primary-color);
+}
+
+.upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.upload-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--p-primary-color);
+}
+
+.upload-title {
+  font-size: 1.125rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.upload-subtitle {
+  font-size: 0.875rem;
+  color: var(--p-text-muted-color);
+}
+
+.upload-limit {
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  color: var(--p-text-muted-color);
+}
+
+.hidden-input {
+  display: none;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+}
+
+.loading-icon {
+  font-size: 3rem;
+  color: var(--p-primary-color);
+  margin-bottom: 1rem;
+}
+
+.loading-title {
+  font-weight: 500;
+}
+
+.loading-subtitle {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  color: var(--p-text-muted-color);
+}
+
+.error-message {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.error-text {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  border-radius: 0.75rem;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  padding: 2rem;
+  max-width: 28rem;
+  margin: 0 1rem;
+  transform: scale(1);
+  transition: transform 0.2s;
+  position: relative;
+  border: 1px solid var(--p-surface-border);
+  background: var(--p-surface-0);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: var(--p-text-muted-color);
+  cursor: pointer;
+  font-size: 1.25rem;
+  padding: 0.25rem;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: var(--p-text-color);
+}
+
+.modal-body {
+  text-align: center;
+}
+
+.success-icon {
+  width: 5rem;
+  height: 5rem;
+  background: var(--p-green-100);
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  color: var(--p-green-600);
+  font-size: 3rem;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  color: var(--p-text-color);
+}
+
+.modal-message {
+  margin-bottom: 0.5rem;
+  color: var(--p-text-color);
+}
+
+.highlight-text {
+  color: var(--p-green-600);
+}
+
+.table-info-box {
+  background: var(--p-green-50);
+  border: 1px solid var(--p-green-200);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.table-info-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.table-info-icon {
+  color: var(--p-green-600);
+  font-size: 1.5rem;
+}
+
+.table-info-details {
+  text-align: left;
+}
+
+.table-info-name {
+  font-weight: 700;
+  color: var(--p-green-900);
+  font-size: 1.125rem;
+}
+
+.table-info-columns {
+  font-size: 0.875rem;
+  color: var(--p-green-700);
+}
+
+.modal-explanation {
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+  color: var(--p-text-muted-color);
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.modal-button-primary {
+  width: 100%;
+}
+
+.modal-button-secondary {
+  width: 100%;
+}
+
+.success-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.success-content {
+  flex: 1;
+}
+
+.success-title {
+  font-weight: 500;
+}
+
+.success-text {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.tables-preview {
+  margin-top: 1.5rem;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.preview-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--p-text-color);
+}
+
+.preview-badge {
+  padding: 0.25rem 0.75rem;
+  background: var(--p-green-100);
+  color: var(--p-green-800);
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.tables-grid-wrapper {
+  background: linear-gradient(to bottom right, var(--p-surface-50), var(--p-green-50));
+  border-radius: 0.5rem;
+  padding: 1rem;
+  max-height: 24rem;
+  overflow-y: auto;
+  border: 1px solid var(--p-surface-border);
+}
+
+.tables-grid {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .tables-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .tables-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.table-card {
+  background: var(--p-surface-0);
+  border: 1px solid var(--p-surface-border);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  transition: all 0.2s;
+}
+
+.table-card:hover {
+  border-color: var(--p-green-300);
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+}
+
+.table-card-content {
+  display: flex;
+  align-items: center;
+}
+
+.table-card-icon {
+  width: 2rem;
+  height: 2rem;
+  background: var(--p-green-100);
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  color: var(--p-green-600);
+  font-size: 0.875rem;
+}
+
+.table-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.table-card-name {
+  font-weight: 500;
+  color: var(--p-text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-card-columns {
+  font-size: 0.75rem;
+  color: var(--p-text-muted-color);
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--p-surface-border);
+}
+</style>
