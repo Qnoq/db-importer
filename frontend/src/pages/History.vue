@@ -388,25 +388,25 @@ const toast = useToast()
 // Table columns configuration
 const columns = [{
   key: 'tableName',
-  label: 'Table'
+  header: 'Table'
 }, {
   key: 'rowCount',
-  label: 'Rows'
+  header: 'Rows'
 }, {
   key: 'status',
-  label: 'Status'
+  header: 'Status'
 }, {
   key: 'errorCount',
-  label: 'Errors'
+  header: 'Errors'
 }, {
   key: 'warningCount',
-  label: 'Warnings'
+  header: 'Warnings'
 }, {
   key: 'createdAt',
-  label: 'Date'
+  header: 'Date'
 }, {
   key: 'actions',
-  label: 'Actions'
+  header: 'Actions'
 }]
 
 const filters = ref({
