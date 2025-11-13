@@ -1,334 +1,394 @@
 <template>
-  <div class="history-page">
-    <Toast />
-
+  <div class="p-6 max-w-[112rem] mx-auto">
     <!-- Page Header -->
-    <div class="page-header">
-      <h1>Import History</h1>
-      <p class="header-subtitle">View and manage your import history</p>
+    <div class="mb-6">
+      <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Import History</h1>
+      <p class="text-gray-600 dark:text-gray-400">View and manage your import history</p>
     </div>
 
     <!-- Stats Cards -->
-    <div v-if="importStore.stats" class="stats-grid">
-      <Card>
-        <template #content>
-          <div class="stat-card-content">
-            <div>
-              <p class="stat-label">Total Imports</p>
-              <p class="stat-value">{{ importStore.stats.totalImports }}</p>
-            </div>
-            <i class="pi pi-database stat-icon" style="color: var(--p-primary-color)"></i>
+    <div v-if="importStore.stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <!-- Total Imports -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Imports</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ importStore.stats.totalImports }}</p>
           </div>
-        </template>
-      </Card>
+          <div class="text-3xl">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+            </svg>
+          </div>
+        </div>
+      </div>
 
-      <Card>
-        <template #content>
-          <div class="stat-card-content">
-            <div>
-              <p class="stat-label">Total Rows</p>
-              <p class="stat-value">{{ formatNumber(importStore.stats.totalRows) }}</p>
-            </div>
-            <i class="pi pi-chart-line stat-icon" style="color: var(--p-green-500)"></i>
+      <!-- Total Rows -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Rows</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatNumber(importStore.stats.totalRows) }}</p>
           </div>
-        </template>
-      </Card>
+          <div class="text-3xl">
+            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+        </div>
+      </div>
 
-      <Card>
-        <template #content>
-          <div class="stat-card-content">
-            <div>
-              <p class="stat-label">Success Rate</p>
-              <p class="stat-value">{{ importStore.stats.successRate.toFixed(1) }}%</p>
-            </div>
-            <i class="pi pi-check-circle stat-icon" style="color: var(--p-green-600)"></i>
+      <!-- Success Rate -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Success Rate</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ importStore.stats.successRate.toFixed(1) }}%</p>
           </div>
-        </template>
-      </Card>
+          <div class="text-3xl">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+        </div>
+      </div>
 
-      <Card>
-        <template #content>
-          <div class="stat-card-content">
-            <div>
-              <p class="stat-label">Most Used Table</p>
-              <p class="stat-value-text">{{ importStore.stats.mostUsedTable || 'N/A' }}</p>
-            </div>
-            <i class="pi pi-table stat-icon" style="color: var(--p-purple-500)"></i>
+      <!-- Most Used Table -->
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between">
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Most Used Table</p>
+            <p class="text-lg font-bold text-gray-900 dark:text-white truncate">{{ importStore.stats.mostUsedTable || 'N/A' }}</p>
           </div>
-        </template>
-      </Card>
+          <div class="text-3xl ml-4">
+            <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Filters -->
-    <Card class="filters-card">
-      <template #content>
-        <div class="filters-wrapper">
-          <div class="filter-field">
-            <label class="filter-label">Table Name</label>
-            <InputText
-              v-model="filters.tableName"
-              placeholder="Filter by table name..."
-            />
-          </div>
-
-          <div class="filter-field-narrow">
-            <label class="filter-label">Status</label>
-            <Dropdown
-              v-model="filters.status"
-              :options="statusOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="All statuses"
-              showClear
-            />
-          </div>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700 mb-6">
+      <div class="flex flex-wrap gap-4">
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Table Name</label>
+          <UInput
+            v-model="filters.tableName"
+            placeholder="Filter by table name..."
+            size="md"
+          />
         </div>
-      </template>
-    </Card>
+
+        <div class="min-w-[150px]">
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
+          <USelect
+            v-model="filters.status"
+            :options="statusOptions"
+            placeholder="All statuses"
+            size="md"
+          />
+        </div>
+      </div>
+    </div>
 
     <!-- Import List -->
-    <Card>
-      <template #content>
-        <DataTable
-          :value="importStore.imports"
-          :loading="importStore.loading"
-          paginator
-          :rows="importStore.pageSize"
-          :totalRecords="importStore.total"
-          :lazy="true"
-          @page="onPage"
-          dataKey="id"
-          responsiveLayout="scroll"
-        >
-          <template #empty>
-            <div class="empty-state">
-              <i class="pi pi-inbox empty-icon"></i>
-              <p>No imports found</p>
-            </div>
-          </template>
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <UTable
+        :rows="importStore.imports"
+        :columns="columns"
+        :loading="importStore.loading"
+      >
+        <template #empty-state>
+          <div class="flex flex-col items-center justify-center py-8 text-gray-500 dark:text-gray-400">
+            <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+            <p>No imports found</p>
+          </div>
+        </template>
 
-          <Column field="tableName" header="Table" sortable>
-            <template #body="{ data }">
-              <span class="table-name">{{ data.tableName }}</span>
-            </template>
-          </Column>
+        <template #loading-state>
+          <div class="flex items-center justify-center py-8">
+            <svg class="animate-spin h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        </template>
 
-          <Column field="rowCount" header="Rows" sortable>
-            <template #body="{ data }">
-              {{ formatNumber(data.rowCount) }}
-            </template>
-          </Column>
+        <template #tableName-data="{ row }">
+          <span class="font-medium text-gray-900 dark:text-white">{{ row.tableName }}</span>
+        </template>
 
-          <Column field="status" header="Status" sortable>
-            <template #body="{ data }">
-              <Tag
-                :value="data.status"
-                :severity="getStatusSeverity(data.status)"
+        <template #rowCount-data="{ row }">
+          <span class="text-gray-700 dark:text-gray-300">{{ formatNumber(row.rowCount) }}</span>
+        </template>
+
+        <template #status-data="{ row }">
+          <UBadge
+            :label="row.status"
+            :color="getStatusColor(row.status)"
+            variant="subtle"
+          />
+        </template>
+
+        <template #errorCount-data="{ row }">
+          <span v-if="row.errorCount > 0" class="font-medium text-red-600 dark:text-red-400">
+            {{ row.errorCount }}
+          </span>
+          <span v-else class="text-gray-500 dark:text-gray-400">0</span>
+        </template>
+
+        <template #warningCount-data="{ row }">
+          <span v-if="row.warningCount > 0" class="font-medium text-amber-600 dark:text-amber-400">
+            {{ row.warningCount }}
+          </span>
+          <span v-else class="text-gray-500 dark:text-gray-400">0</span>
+        </template>
+
+        <template #createdAt-data="{ row }">
+          <span class="text-gray-700 dark:text-gray-300">{{ formatDate(row.createdAt) }}</span>
+        </template>
+
+        <template #actions-data="{ row }">
+          <div class="flex gap-2">
+            <UTooltip text="View Details">
+              <UButton
+                icon="i-heroicons-eye"
+                color="gray"
+                variant="ghost"
+                size="sm"
+                @click="viewDetails(row)"
               />
-            </template>
-          </Column>
+            </UTooltip>
+            <UTooltip text="Download SQL">
+              <UButton
+                icon="i-heroicons-arrow-down-tray"
+                color="gray"
+                variant="ghost"
+                size="sm"
+                :loading="downloadingId === row.id"
+                @click="downloadSQL(row)"
+              />
+            </UTooltip>
+            <UTooltip text="Delete">
+              <UButton
+                icon="i-heroicons-trash"
+                color="red"
+                variant="ghost"
+                size="sm"
+                @click="confirmDelete(row)"
+              />
+            </UTooltip>
+          </div>
+        </template>
+      </UTable>
 
-          <Column field="errorCount" header="Errors">
-            <template #body="{ data }">
-              <span v-if="data.errorCount > 0" class="error-count">
-                {{ data.errorCount }}
-              </span>
-              <span v-else style="color: var(--p-text-muted-color)">0</span>
-            </template>
-          </Column>
-
-          <Column field="warningCount" header="Warnings">
-            <template #body="{ data }">
-              <span v-if="data.warningCount > 0" class="warning-count">
-                {{ data.warningCount }}
-              </span>
-              <span v-else style="color: var(--p-text-muted-color)">0</span>
-            </template>
-          </Column>
-
-          <Column field="createdAt" header="Date" sortable>
-            <template #body="{ data }">
-              {{ formatDate(data.createdAt) }}
-            </template>
-          </Column>
-
-          <Column header="Actions" style="width: 200px">
-            <template #body="{ data }">
-              <div class="action-buttons">
-                <Button
-                  icon="pi pi-eye"
-                  text
-                  rounded
-                  severity="secondary"
-                  v-tooltip.top="'View Details'"
-                  @click="viewDetails(data)"
-                />
-                <Button
-                  icon="pi pi-download"
-                  text
-                  rounded
-                  severity="info"
-                  v-tooltip.top="'Download SQL'"
-                  @click="downloadSQL(data)"
-                  :loading="downloadingId === data.id"
-                />
-                <Button
-                  icon="pi pi-trash"
-                  text
-                  rounded
-                  severity="danger"
-                  v-tooltip.top="'Delete'"
-                  @click="confirmDelete(data)"
-                />
-              </div>
-            </template>
-          </Column>
-        </DataTable>
-      </template>
-    </Card>
-
-    <!-- Details Dialog -->
-    <Dialog
-      v-model:visible="detailsVisible"
-      :header="`Import Details - ${selectedImport?.tableName}`"
-      :style="{ width: '60rem' }"
-      :modal="true"
-    >
-      <div v-if="selectedImport" class="details-content">
-        <!-- Basic Info -->
-        <div class="details-grid">
-          <div class="detail-item">
-            <p class="detail-label">Table Name</p>
-            <p class="detail-value">{{ selectedImport.tableName }}</p>
-          </div>
-          <div class="detail-item">
-            <p class="detail-label">Status</p>
-            <Tag :value="selectedImport.status" :severity="getStatusSeverity(selectedImport.status)" />
-          </div>
-          <div class="detail-item">
-            <p class="detail-label">Row Count</p>
-            <p class="detail-value">{{ formatNumber(selectedImport.rowCount) }}</p>
-          </div>
-          <div class="detail-item">
-            <p class="detail-label">Errors / Warnings</p>
-            <p class="detail-value">{{ selectedImport.errorCount }} / {{ selectedImport.warningCount }}</p>
-          </div>
-          <div class="detail-item">
-            <p class="detail-label">Created At</p>
-            <p class="detail-value">{{ formatDate(selectedImport.createdAt) }}</p>
-          </div>
-          <div v-if="selectedImport.metadata.sourceFileName" class="detail-item">
-            <p class="detail-label">Source File</p>
-            <p class="detail-value-truncate" :title="selectedImport.metadata.sourceFileName">{{ selectedImport.metadata.sourceFileName }}</p>
-          </div>
+      <!-- Custom Pagination -->
+      <div v-if="importStore.total > 0" class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="text-sm text-gray-700 dark:text-gray-300">
+          Showing {{ ((currentPage - 1) * importStore.pageSize) + 1 }} to {{ Math.min(currentPage * importStore.pageSize, importStore.total) }} of {{ importStore.total }} results
         </div>
-
-        <!-- Column Mapping -->
-        <div v-if="selectedImport.metadata.mappingSummary && Object.keys(selectedImport.metadata.mappingSummary).length > 0" class="detail-section">
-          <p class="section-title">Column Mapping:</p>
-          <div class="mapping-box">
-            <div class="mapping-grid">
-              <div v-for="(dbCol, excelCol) in selectedImport.metadata.mappingSummary" :key="excelCol" class="mapping-item">
-                <span class="mapping-source">{{ excelCol }}</span>
-                <i class="pi pi-arrow-right mapping-arrow"></i>
-                <span class="mapping-target">{{ dbCol }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Transformations -->
-        <div v-if="selectedImport.metadata.transformations && selectedImport.metadata.transformations.length > 0" class="detail-section">
-          <p class="section-title">Transformations Applied:</p>
-          <div class="transformations-box">
-            <ul class="list-disc">
-              <li v-for="(transformation, idx) in selectedImport.metadata.transformations" :key="idx">
-                {{ transformation }}
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <!-- SQL Preview -->
-        <div v-if="selectedImportSQL" class="detail-section">
-          <div class="sql-header">
-            <p class="section-title">SQL Preview:</p>
-            <Button
-              label="Download Full SQL"
-              icon="pi pi-download"
-              size="small"
-              severity="secondary"
-              outlined
-              @click="downloadFullSQL"
+        <div class="flex gap-2">
+          <UButton
+            icon="i-heroicons-chevron-left"
+            color="gray"
+            variant="outline"
+            size="sm"
+            :disabled="currentPage === 1"
+            @click="goToPage(currentPage - 1)"
+          />
+          <div class="flex gap-1">
+            <UButton
+              v-for="page in visiblePages"
+              :key="page"
+              :label="page.toString()"
+              :color="currentPage === page ? 'green' : 'gray'"
+              :variant="currentPage === page ? 'solid' : 'outline'"
+              size="sm"
+              @click="goToPage(page)"
             />
           </div>
-          <div class="sql-preview">
-            <pre class="sql-code">{{ getSQLPreview(selectedImportSQL) }}</pre>
-          </div>
+          <UButton
+            icon="i-heroicons-chevron-right"
+            color="gray"
+            variant="outline"
+            size="sm"
+            :disabled="currentPage === totalPages"
+            @click="goToPage(currentPage + 1)"
+          />
         </div>
+      </div>
+    </div>
 
-        <!-- Errors -->
-        <div v-if="selectedImport.metadata.validationErrors?.length" class="detail-section">
-          <p class="section-title error-title">Errors:</p>
-          <div class="errors-box">
-            <ul class="list-disc">
-              <li v-for="(error, idx) in selectedImport.metadata.validationErrors" :key="idx">
-                {{ error }}
-              </li>
-            </ul>
+    <!-- Details Modal -->
+    <UModal v-model="detailsVisible" :ui="{ width: 'sm:max-w-4xl' }">
+      <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">
+          Import Details - {{ selectedImport?.tableName }}
+        </h3>
+
+        <div v-if="selectedImport" class="space-y-6">
+          <!-- Basic Info -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Table Name</p>
+              <p class="font-medium text-gray-900 dark:text-white">{{ selectedImport.tableName }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Status</p>
+              <UBadge
+                :label="selectedImport.status"
+                :color="getStatusColor(selectedImport.status)"
+                variant="subtle"
+              />
+            </div>
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Row Count</p>
+              <p class="font-medium text-gray-900 dark:text-white">{{ formatNumber(selectedImport.rowCount) }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Errors / Warnings</p>
+              <p class="font-medium text-gray-900 dark:text-white">{{ selectedImport.errorCount }} / {{ selectedImport.warningCount }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Created At</p>
+              <p class="font-medium text-gray-900 dark:text-white">{{ formatDate(selectedImport.createdAt) }}</p>
+            </div>
+            <div v-if="selectedImport.metadata.sourceFileName">
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Source File</p>
+              <p class="font-medium text-gray-900 dark:text-white truncate" :title="selectedImport.metadata.sourceFileName">
+                {{ selectedImport.metadata.sourceFileName }}
+              </p>
+            </div>
           </div>
-        </div>
 
-        <!-- Warnings -->
-        <div v-if="selectedImport.metadata.validationWarnings?.length" class="detail-section">
-          <p class="section-title warning-title">Warnings:</p>
-          <div class="warnings-box">
-            <ul class="list-disc">
-              <li v-for="(warning, idx) in selectedImport.metadata.validationWarnings" :key="idx">
-                {{ warning }}
-              </li>
-            </ul>
+          <!-- Column Mapping -->
+          <div v-if="selectedImport.metadata.mappingSummary && Object.keys(selectedImport.metadata.mappingSummary).length > 0" class="mt-6">
+            <p class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Column Mapping:</p>
+            <div class="bg-gray-50 dark:bg-gray-900 rounded-lg p-3 max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-700">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                <div v-for="(dbCol, excelCol) in selectedImport.metadata.mappingSummary" :key="excelCol" class="flex items-center gap-2">
+                  <span class="text-gray-600 dark:text-gray-400">{{ excelCol }}</span>
+                  <svg class="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                  <span class="font-medium text-gray-900 dark:text-white">{{ dbCol }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transformations -->
+          <div v-if="selectedImport.metadata.transformations && selectedImport.metadata.transformations.length > 0" class="mt-6">
+            <p class="text-sm font-semibold text-gray-900 dark:text-white mb-2">Transformations Applied:</p>
+            <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
+              <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                <li v-for="(transformation, idx) in selectedImport.metadata.transformations" :key="idx">
+                  {{ transformation }}
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- SQL Preview -->
+          <div v-if="selectedImportSQL" class="mt-6">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-sm font-semibold text-gray-900 dark:text-white">SQL Preview:</p>
+              <UButton
+                label="Download Full SQL"
+                icon="i-heroicons-arrow-down-tray"
+                size="xs"
+                color="gray"
+                variant="outline"
+                @click="downloadFullSQL"
+              />
+            </div>
+            <div class="bg-gray-900 dark:bg-black rounded-lg p-4 max-h-60 overflow-y-auto border border-gray-700">
+              <pre class="text-sm text-green-400 font-mono whitespace-pre-wrap">{{ getSQLPreview(selectedImportSQL) }}</pre>
+            </div>
+          </div>
+
+          <!-- Errors -->
+          <div v-if="selectedImport.metadata.validationErrors?.length" class="mt-6">
+            <p class="text-sm font-semibold text-red-600 dark:text-red-400 mb-2">Errors:</p>
+            <div class="bg-red-50 dark:bg-red-900/20 rounded-lg p-3 max-h-32 overflow-y-auto border border-red-200 dark:border-red-800">
+              <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                <li v-for="(error, idx) in selectedImport.metadata.validationErrors" :key="idx">
+                  {{ error }}
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Warnings -->
+          <div v-if="selectedImport.metadata.validationWarnings?.length" class="mt-6">
+            <p class="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-2">Warnings:</p>
+            <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-3 max-h-32 overflow-y-auto border border-amber-200 dark:border-amber-800">
+              <ul class="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 space-y-1">
+                <li v-for="(warning, idx) in selectedImport.metadata.validationWarnings" :key="idx">
+                  {{ warning }}
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
-    </Dialog>
+    </UModal>
 
-    <!-- Delete Confirmation -->
-    <Dialog
-      v-model:visible="deleteVisible"
-      header="Confirm Delete"
-      :modal="true"
-      :style="{ width: '30rem' }"
-    >
-      <div class="delete-content">
-        <i class="pi pi-exclamation-triangle delete-icon"></i>
-        <span>Are you sure you want to delete this import?</span>
+    <!-- Delete Confirmation Modal -->
+    <UModal v-model="deleteVisible" :ui="{ width: 'sm:max-w-md' }">
+      <div class="p-6">
+        <div class="flex items-start gap-4 mb-6">
+          <div class="flex-shrink-0">
+            <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Confirm Delete</h3>
+            <p class="text-gray-600 dark:text-gray-400">Are you sure you want to delete this import?</p>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3">
+          <UButton
+            label="Cancel"
+            color="gray"
+            variant="ghost"
+            @click="deleteVisible = false"
+          />
+          <UButton
+            label="Delete"
+            color="red"
+            :loading="importStore.loading"
+            @click="deleteImport"
+          />
+        </div>
       </div>
-
-      <template #footer>
-        <Button label="Cancel" text @click="deleteVisible = false" />
-        <Button label="Delete" severity="danger" @click="deleteImport" :loading="importStore.loading" />
-      </template>
-    </Dialog>
+    </UModal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useImportStore, type Import } from '../store/importStore'
-import { useToast } from 'primevue/usetoast'
-import Card from 'primevue/card'
-import Button from 'primevue/button'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Tag from 'primevue/tag'
-import InputText from 'primevue/inputtext'
-import Dropdown from 'primevue/dropdown'
-import Dialog from 'primevue/dialog'
-import Toast from 'primevue/toast'
 
 const importStore = useImportStore()
 const toast = useToast()
+
+// Table columns configuration
+const columns = [
+  { key: 'tableName', label: 'Table' },
+  { key: 'rowCount', label: 'Rows' },
+  { key: 'status', label: 'Status' },
+  { key: 'errorCount', label: 'Errors' },
+  { key: 'warningCount', label: 'Warnings' },
+  { key: 'createdAt', label: 'Date' },
+  { key: 'actions', label: 'Actions' }
+]
 
 const filters = ref({
   tableName: '',
@@ -336,6 +396,7 @@ const filters = ref({
 })
 
 const statusOptions = [
+  { label: 'All statuses', value: null },
   { label: 'Success', value: 'success' },
   { label: 'Warning', value: 'warning' },
   { label: 'Failed', value: 'failed' }
@@ -346,9 +407,64 @@ const selectedImportSQL = ref<string | null>(null)
 const detailsVisible = ref(false)
 const deleteVisible = ref(false)
 const downloadingId = ref<string | null>(null)
+const currentPage = ref(1)
 
 // Debounce timer for auto-filtering
 let filterDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
+// Pagination computed properties
+const totalPages = computed(() => {
+  return Math.ceil(importStore.total / importStore.pageSize)
+})
+
+const visiblePages = computed(() => {
+  const total = totalPages.value
+  const current = currentPage.value
+  const pages: number[] = []
+
+  if (total <= 7) {
+    // Show all pages if 7 or fewer
+    for (let i = 1; i <= total; i++) {
+      pages.push(i)
+    }
+  } else {
+    // Always show first page
+    pages.push(1)
+
+    if (current > 3) {
+      pages.push(-1) // Ellipsis placeholder
+    }
+
+    // Show current page and neighbors
+    const start = Math.max(2, current - 1)
+    const end = Math.min(total - 1, current + 1)
+
+    for (let i = start; i <= end; i++) {
+      pages.push(i)
+    }
+
+    if (current < total - 2) {
+      pages.push(-2) // Ellipsis placeholder
+    }
+
+    // Always show last page
+    pages.push(total)
+  }
+
+  return pages.filter(p => p > 0) // Remove ellipsis for now
+})
+
+const goToPage = async (page: number) => {
+  if (page < 1 || page > totalPages.value) return
+
+  currentPage.value = page
+  await importStore.listImports({
+    page,
+    pageSize: importStore.pageSize,
+    tableName: filters.value.tableName || undefined,
+    status: filters.value.status || undefined
+  })
+}
 
 onMounted(async () => {
   await importStore.getStats()
@@ -362,6 +478,7 @@ watch(filters, () => {
   }
 
   filterDebounceTimer = setTimeout(async () => {
+    currentPage.value = 1
     await importStore.listImports({
       page: 1,
       pageSize: importStore.pageSize,
@@ -370,15 +487,6 @@ watch(filters, () => {
     })
   }, 500)
 }, { deep: true })
-
-const onPage = async (event: any) => {
-  await importStore.listImports({
-    page: event.page + 1,
-    pageSize: event.rows,
-    tableName: filters.value.tableName || undefined,
-    status: filters.value.status || undefined
-  })
-}
 
 const viewDetails = async (imp: Import) => {
   selectedImport.value = imp
@@ -391,7 +499,11 @@ const viewDetails = async (imp: Import) => {
     selectedImportSQL.value = importWithSQL.generatedSql
   } catch (error) {
     console.error('Failed to load SQL:', error)
-    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Failed to load SQL preview', life: 3000 })
+    toast.add({
+      title: 'Warning',
+      description: 'Failed to load SQL preview',
+      color: 'amber'
+    })
   }
 }
 
@@ -408,7 +520,11 @@ const downloadFullSQL = () => {
 
   const filename = `${selectedImport.value.tableName}_${selectedImport.value.createdAt.replace(/[:.]/g, '-')}.sql`
   importStore.downloadSQL(selectedImportSQL.value, filename)
-  toast.add({ severity: 'success', summary: 'Success', detail: 'SQL downloaded successfully', life: 3000 })
+  toast.add({
+    title: 'Success',
+    description: 'SQL downloaded successfully',
+    color: 'green'
+  })
 }
 
 const downloadSQL = async (imp: Import) => {
@@ -417,9 +533,17 @@ const downloadSQL = async (imp: Import) => {
     const importWithSQL = await importStore.getImportWithSQL(imp.id)
     const filename = `${imp.tableName}_${imp.createdAt.replace(/[:.]/g, '-')}.sql`
     importStore.downloadSQL(importWithSQL.generatedSql, filename)
-    toast.add({ severity: 'success', summary: 'Success', detail: 'SQL downloaded successfully', life: 3000 })
+    toast.add({
+      title: 'Success',
+      description: 'SQL downloaded successfully',
+      color: 'green'
+    })
   } catch (error) {
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to download SQL', life: 3000 })
+    toast.add({
+      title: 'Error',
+      description: 'Failed to download SQL',
+      color: 'red'
+    })
   } finally {
     downloadingId.value = null
   }
@@ -436,10 +560,18 @@ const deleteImport = async () => {
   try {
     await importStore.deleteImport(selectedImport.value.id)
     await importStore.getStats() // Refresh stats
-    toast.add({ severity: 'success', summary: 'Success', detail: 'Import deleted successfully', life: 3000 })
+    toast.add({
+      title: 'Success',
+      description: 'Import deleted successfully',
+      color: 'green'
+    })
     deleteVisible.value = false
   } catch (error) {
-    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete import', life: 3000 })
+    toast.add({
+      title: 'Error',
+      description: 'Failed to delete import',
+      color: 'red'
+    })
   }
 }
 
@@ -452,306 +584,12 @@ const formatNumber = (num: number): string => {
   return num.toLocaleString()
 }
 
-const getStatusSeverity = (status: string): 'success' | 'warning' | 'danger' => {
+const getStatusColor = (status: string): string => {
   switch (status) {
-    case 'success': return 'success'
-    case 'warning': return 'warning'
-    case 'failed': return 'danger'
-    default: return 'warning'
+    case 'success': return 'green'
+    case 'warning': return 'amber'
+    case 'failed': return 'red'
+    default: return 'gray'
   }
 }
 </script>
-
-<style scoped>
-.history-page {
-  padding: 1.5rem;
-  max-width: 112rem;
-  margin: 0 auto;
-}
-
-.page-header {
-  margin-bottom: 1.5rem;
-}
-
-.page-header h1 {
-  font-size: 1.875rem;
-  font-weight: 700;
-  margin: 0 0 0.5rem 0;
-}
-
-.header-subtitle {
-  color: var(--p-text-muted-color);
-  margin: 0;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.stat-card-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-  margin: 0 0 0.25rem 0;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.stat-value-text {
-  font-size: 1.125rem;
-  font-weight: 700;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.stat-icon {
-  font-size: 1.875rem;
-}
-
-.filters-card {
-  margin-bottom: 1.5rem;
-}
-
-.filters-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.filter-field {
-  flex: 1;
-  min-width: 200px;
-}
-
-.filter-field-narrow {
-  min-width: 150px;
-}
-
-.filter-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 2rem 0;
-  color: var(--p-text-muted-color);
-}
-
-.empty-icon {
-  font-size: 2.25rem;
-  margin-bottom: 0.75rem;
-}
-
-.table-name {
-  font-weight: 500;
-}
-
-.error-count {
-  font-weight: 500;
-  color: var(--p-red-500);
-}
-
-.warning-count {
-  font-weight: 500;
-  color: var(--p-orange-500);
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.details-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.details-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-}
-
-.detail-item {
-  display: flex;
-  flex-direction: column;
-}
-
-.detail-label {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-  margin: 0 0 0.25rem 0;
-}
-
-.detail-value {
-  font-weight: 500;
-  margin: 0;
-}
-
-.detail-value-truncate {
-  font-weight: 500;
-  margin: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.detail-section {
-  margin-top: 1rem;
-}
-
-.section-title {
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
-  color: var(--p-text-color);
-}
-
-.error-title {
-  color: var(--p-red-600);
-}
-
-.warning-title {
-  color: var(--p-orange-600);
-}
-
-.mapping-box {
-  background: var(--p-surface-50);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  max-height: 10rem;
-  overflow-y: auto;
-}
-
-.mapping-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
-  font-size: 0.875rem;
-}
-
-.mapping-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.mapping-source {
-  color: var(--p-text-muted-color);
-}
-
-.mapping-arrow {
-  font-size: 0.75rem;
-  color: var(--p-text-muted-color);
-}
-
-.mapping-target {
-  font-weight: 500;
-  color: var(--p-text-color);
-}
-
-.transformations-box {
-  background: var(--p-blue-50);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-}
-
-.list-disc {
-  list-style-type: disc;
-  list-style-position: inside;
-  font-size: 0.875rem;
-  margin: 0;
-  padding-left: 0;
-}
-
-.list-disc li {
-  margin-bottom: 0.25rem;
-  color: var(--p-text-color);
-}
-
-.sql-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.sql-preview {
-  background: var(--p-surface-900);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  max-height: 15rem;
-  overflow-y: auto;
-}
-
-.sql-code {
-  font-size: 0.875rem;
-  color: var(--p-green-400);
-  white-space: pre-wrap;
-  font-family: monospace;
-  margin: 0;
-}
-
-.errors-box {
-  background: var(--p-red-50);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  max-height: 8rem;
-  overflow-y: auto;
-}
-
-.warnings-box {
-  background: var(--p-orange-50);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  max-height: 8rem;
-  overflow-y: auto;
-}
-
-.delete-content {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.delete-icon {
-  font-size: 1.875rem;
-  color: var(--p-orange-500);
-}
-
-:deep(.p-card) {
-  border-radius: 12px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-}
-
-:deep(.p-datatable) {
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-:deep(.p-inputtext) {
-  width: 100%;
-}
-
-:deep(.p-dropdown) {
-  width: 100%;
-}
-</style>

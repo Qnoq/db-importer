@@ -1,164 +1,163 @@
 <template>
-  <div class="register-page">
-    <Card class="register-card">
-      <template #title>
-        <div class="card-title">
-          <i class="pi pi-user-plus title-icon"></i>
-          <h2>Create Account</h2>
-          <p class="subtitle">
-            Sign up to save your history, templates, and unlimited imports
-          </p>
+  <div class="flex items-center justify-center min-h-[calc(100vh-200px)] bg-gray-50 dark:bg-gray-950">
+    <div class="w-full max-w-sm bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800 p-8">
+      <!-- Card Title -->
+      <div class="text-center mb-6">
+        <div class="text-4xl mb-3">👤</div>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Create Account</h2>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          Sign up to save your history, templates, and unlimited imports
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form @submit.prevent="handleRegister" class="space-y-4">
+        <!-- Error Message -->
+        <UAlert
+          v-if="authStore.error"
+          color="red"
+          variant="soft"
+          :title="authStore.error"
+          :close-button="null"
+        />
+
+        <!-- First Name Field -->
+        <div>
+          <label for="firstName" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            First Name <span class="text-gray-600 dark:text-gray-400">(Optional)</span>
+          </label>
+          <UInput
+            id="firstName"
+            v-model="firstName"
+            type="text"
+            placeholder="John"
+          />
         </div>
-      </template>
 
-      <template #content>
-        <form @submit.prevent="handleRegister" class="register-form">
-          <!-- Error Message -->
-          <Message v-if="authStore.error" severity="error" :closable="false">
-            {{ authStore.error }}
-          </Message>
-
-          <!-- First Name Field -->
-          <div class="field">
-            <label for="firstName" class="field-label">
-              First Name <span class="optional-text">(Optional)</span>
-            </label>
-            <InputText
-              id="firstName"
-              v-model="firstName"
-              type="text"
-              placeholder="John"
-            />
-          </div>
-
-          <!-- Last Name Field -->
-          <div class="field">
-            <label for="lastName" class="field-label">
-              Last Name <span class="optional-text">(Optional)</span>
-            </label>
-            <InputText
-              id="lastName"
-              v-model="lastName"
-              type="text"
-              placeholder="Doe"
-            />
-          </div>
-
-          <!-- Email Field -->
-          <div class="field">
-            <label for="email" class="field-label">
-              Email *
-            </label>
-            <InputText
-              id="email"
-              v-model="email"
-              type="email"
-              placeholder="your@email.com"
-              :class="{ 'p-invalid': emailError }"
-              required
-              autofocus
-            />
-            <small v-if="emailError" class="p-error">{{ emailError }}</small>
-          </div>
-
-          <!-- Password Field -->
-          <div class="field">
-            <label for="password" class="field-label">
-              Password *
-            </label>
-            <Password
-              id="password"
-              v-model="password"
-              placeholder="At least 8 characters"
-              :feedback="true"
-              toggleMask
-              :class="{ 'p-invalid': passwordError }"
-              inputClass="password-input"
-              required
-            >
-              <template #footer>
-                <Divider />
-                <p class="password-hint-title">Suggestions</p>
-                <ul class="password-hints">
-                  <li>At least 8 characters</li>
-                  <li>Mix of letters, numbers, and symbols</li>
-                </ul>
-              </template>
-            </Password>
-            <small v-if="passwordError" class="p-error">{{ passwordError }}</small>
-          </div>
-
-          <!-- Confirm Password Field -->
-          <div class="field">
-            <label for="confirmPassword" class="field-label">
-              Confirm Password *
-            </label>
-            <Password
-              id="confirmPassword"
-              v-model="confirmPassword"
-              placeholder="Confirm your password"
-              :feedback="false"
-              toggleMask
-              :class="{ 'p-invalid': confirmPasswordError }"
-              inputClass="password-input"
-              required
-            />
-            <small v-if="confirmPasswordError" class="p-error">{{ confirmPasswordError }}</small>
-          </div>
-
-          <!-- Terms and Conditions -->
-          <div class="terms-section">
-            <Checkbox v-model="acceptedTerms" inputId="terms" :binary="true" class="terms-checkbox" />
-            <label for="terms" class="terms-label">
-              I agree to the
-              <a href="#" class="terms-link">Terms of Service</a>
-              and
-              <a href="#" class="terms-link">Privacy Policy</a>
-            </label>
-          </div>
-          <small v-if="termsError" class="p-error terms-error">{{ termsError }}</small>
-
-          <!-- Submit Button -->
-          <Button
-            type="submit"
-            label="Create Account"
-            icon="pi pi-user-plus"
-            class="submit-button"
-            :loading="authStore.loading"
-            :disabled="authStore.loading"
+        <!-- Last Name Field -->
+        <div>
+          <label for="lastName" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            Last Name <span class="text-gray-600 dark:text-gray-400">(Optional)</span>
+          </label>
+          <UInput
+            id="lastName"
+            v-model="lastName"
+            type="text"
+            placeholder="Doe"
           />
+        </div>
 
-          <!-- Divider -->
-          <Divider align="center">
-            <span class="divider-text">OR</span>
-          </Divider>
-
-          <!-- Continue as Guest -->
-          <Button
-            label="Continue as Guest"
-            icon="pi pi-user"
-            class="guest-button"
-            severity="secondary"
-            outlined
-            @click="handleContinueAsGuest"
-            :disabled="authStore.loading"
+        <!-- Email Field -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            Email *
+          </label>
+          <UInput
+            id="email"
+            v-model="email"
+            type="email"
+            placeholder="your@email.com"
+            :class="{ 'border-red-500': emailError }"
+            required
+            autofocus
           />
+          <p v-if="emailError" class="text-red-500 text-sm mt-1">{{ emailError }}</p>
+        </div>
 
-          <!-- Login Link -->
-          <div class="login-link">
-            <span class="login-text">
-              Already have an account?
-            </span>
-            <router-link
-              to="/login"
-              class="login-link-text"
-            >
-              Sign In
-            </router-link>
+        <!-- Password Field -->
+        <div>
+          <label for="password" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            Password *
+          </label>
+          <UInput
+            id="password"
+            v-model="password"
+            type="password"
+            placeholder="At least 8 characters"
+            :class="{ 'border-red-500': passwordError }"
+            required
+          />
+          <p v-if="passwordError" class="text-red-500 text-sm mt-1">{{ passwordError }}</p>
+
+          <!-- Password Hints -->
+          <div class="bg-gray-50 dark:bg-gray-800 rounded p-3 mt-2">
+            <p class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">Suggestions</p>
+            <ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1 ml-3">
+              <li>• At least 8 characters</li>
+              <li>• Mix of letters, numbers, and symbols</li>
+            </ul>
           </div>
-        </form>
-      </template>
-    </Card>
+        </div>
+
+        <!-- Confirm Password Field -->
+        <div>
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-900 dark:text-gray-100 mb-2">
+            Confirm Password *
+          </label>
+          <UInput
+            id="confirmPassword"
+            v-model="confirmPassword"
+            type="password"
+            placeholder="Confirm your password"
+            :class="{ 'border-red-500': confirmPasswordError }"
+            required
+          />
+          <p v-if="confirmPasswordError" class="text-red-500 text-sm mt-1">{{ confirmPasswordError }}</p>
+        </div>
+
+        <!-- Terms and Conditions -->
+        <div class="flex items-start gap-2 pt-2">
+          <UCheckbox v-model="acceptedTerms" />
+          <label for="terms" class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+            I agree to the
+            <a href="#" class="text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400 hover:underline">Terms of Service</a>
+            and
+            <a href="#" class="text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400 hover:underline">Privacy Policy</a>
+          </label>
+        </div>
+        <p v-if="termsError" class="text-red-500 text-sm">{{ termsError }}</p>
+
+        <!-- Submit Button -->
+        <UButton
+          type="submit"
+          label="Create Account"
+          class="w-full"
+          color="green"
+          :loading="authStore.loading"
+          :disabled="authStore.loading"
+        />
+
+        <!-- Divider -->
+        <div class="relative flex items-center my-4">
+          <div class="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+          <span class="flex-shrink mx-4 text-sm text-gray-600 dark:text-gray-400">OR</span>
+          <div class="flex-grow border-t border-gray-300 dark:border-gray-700"></div>
+        </div>
+
+        <!-- Continue as Guest -->
+        <UButton
+          label="Continue as Guest"
+          variant="outline"
+          color="gray"
+          class="w-full"
+          @click="handleContinueAsGuest"
+          :disabled="authStore.loading"
+        />
+
+        <!-- Login Link -->
+        <div class="text-center pt-2">
+          <span class="text-sm text-gray-600 dark:text-gray-400">
+            Already have an account?
+          </span>
+          <router-link
+            to="/login"
+            class="text-sm font-medium text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400 hover:underline ml-1"
+          >
+            Sign In
+          </router-link>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -166,13 +165,6 @@
 import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../store/authStore'
-import Card from 'primevue/card'
-import InputText from 'primevue/inputtext'
-import Password from 'primevue/password'
-import Button from 'primevue/button'
-import Checkbox from 'primevue/checkbox'
-import Message from 'primevue/message'
-import Divider from 'primevue/divider'
 
 const router = useRouter()
 const route = useRoute()
@@ -258,167 +250,3 @@ const handleContinueAsGuest = () => {
   router.push(redirect)
 }
 </script>
-
-<style scoped>
-.register-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 200px);
-}
-
-.register-card {
-  width: 100%;
-  max-width: 28rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-}
-
-.card-title {
-  text-align: center;
-}
-
-.title-icon {
-  font-size: 2.25rem;
-  margin-bottom: 0.75rem;
-  color: var(--p-primary-color);
-}
-
-.card-title h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.subtitle {
-  font-size: 0.875rem;
-  margin: 0.5rem 0 0 0;
-  color: var(--p-text-muted-color);
-}
-
-.register-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-}
-
-.field-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.optional-text {
-  color: var(--p-text-muted-color);
-}
-
-.password-hint-title {
-  font-size: 0.75rem;
-  margin-top: 0.5rem;
-  color: var(--p-text-muted-color);
-}
-
-.password-hints {
-  font-size: 0.75rem;
-  margin: 0.25rem 0 0 1rem;
-  color: var(--p-text-muted-color);
-}
-
-.terms-section {
-  display: flex;
-  align-items: flex-start;
-}
-
-.terms-checkbox {
-  margin-top: 0.25rem;
-}
-
-.terms-label {
-  margin-left: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-}
-
-.terms-link {
-  color: var(--p-primary-color);
-  text-decoration: none;
-}
-
-.terms-link:hover {
-  text-decoration: underline;
-}
-
-.terms-error {
-  display: block;
-}
-
-.divider-text {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-}
-
-.login-link {
-  text-align: center;
-  margin-top: 1rem;
-}
-
-.login-text {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-}
-
-.login-link-text {
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-left: 0.25rem;
-  color: var(--p-primary-color);
-  text-decoration: none;
-}
-
-.login-link-text:hover {
-  text-decoration: underline;
-}
-
-:deep(.p-card) {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-:deep(.p-card-title) {
-  padding: 2rem 2rem 0;
-}
-
-:deep(.p-card-content) {
-  padding: 1.5rem 2rem 2rem;
-}
-
-:deep(.p-inputtext),
-:deep(.p-password input) {
-  width: 100%;
-  border-radius: 8px;
-  padding: 0.75rem;
-}
-
-:deep(.p-password) {
-  width: 100%;
-}
-
-:deep(.password-input) {
-  width: 100%;
-}
-
-:deep(.p-button) {
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-}
-
-:deep(.submit-button),
-:deep(.guest-button) {
-  width: 100%;
-}
-</style>

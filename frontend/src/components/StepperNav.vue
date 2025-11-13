@@ -1,30 +1,29 @@
 <template>
-  <div class="stepper-nav">
+  <div class="mb-8">
     <!-- Progress Stepper -->
-    <div class="stepper-container">
+    <div class="flex items-center justify-center gap-4">
       <div
         v-for="(step, index) in steps"
         :key="step.id"
-        class="step-wrapper"
+        class="flex items-center"
       >
         <!-- Step Circle -->
         <button
           @click="goToStep(step.id)"
           :disabled="!canNavigateTo(step.id)"
-          class="step-button"
-          :class="getStepButtonClass(step.id)"
+          class="flex items-center bg-transparent border-0 p-0 outline-none transition-opacity duration-200"
+          :class="canNavigateTo(step.id) ? 'cursor-pointer' : 'cursor-not-allowed'"
         >
           <div
-            class="step-circle"
-            :class="getStepClasses(step.id)"
-            :style="getStepCircleStyle(step.id)"
+            class="w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-200"
+            :class="getStepCircleClass(step.id)"
           >
-            <i v-if="isStepCompleted(step.id)" class="pi pi-check"></i>
+            <span v-if="isStepCompleted(step.id)" class="i-heroicons-check w-4 h-4" />
             <span v-else>{{ index + 1 }}</span>
           </div>
           <span
-            class="step-label"
-            :style="getStepTextColor(step.id)"
+            class="ml-3 text-sm font-medium transition-colors duration-200"
+            :class="getStepLabelClass(step.id)"
           >
             {{ step.label }}
           </span>
@@ -33,20 +32,20 @@
         <!-- Connector Line -->
         <div
           v-if="index < steps.length - 1"
-          class="step-connector"
-          :style="{ backgroundColor: isStepCompleted(step.id) ? 'var(--p-green-500)' : 'var(--p-surface-300)' }"
+          class="w-16 h-0.5 mx-4 transition-colors duration-200"
+          :class="isStepCompleted(step.id) ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-600'"
         ></div>
       </div>
     </div>
 
     <!-- Action Buttons -->
-    <div class="action-buttons">
+    <div class="mt-6 flex items-center justify-between">
       <button
         v-if="canGoBack"
         @click="goBack"
-        class="back-button"
+        class="font-medium flex items-center bg-transparent border-0 px-4 py-2 text-gray-500 dark:text-gray-400 cursor-pointer transition-colors duration-200 hover:text-gray-900 dark:hover:text-white group"
       >
-        <i class="pi pi-arrow-left back-icon"></i>
+        <span class="i-heroicons-arrow-left w-4 h-4 mr-2 transition-transform duration-200 group-hover:-translate-x-1" />
         Previous Step
       </button>
       <div v-else></div>
@@ -54,33 +53,45 @@
       <button
         v-if="canReset"
         @click="showResetDialog = true"
-        class="reset-button"
+        class="font-medium flex items-center bg-transparent border-0 px-4 py-2 text-red-500 dark:text-red-400 cursor-pointer transition-colors duration-200 hover:text-red-600 dark:hover:text-red-500"
       >
-        <i class="pi pi-refresh reset-icon"></i>
+        <span class="i-heroicons-arrow-path w-4 h-4 mr-2" />
         Start Over
       </button>
     </div>
 
     <!-- Reset Confirmation Dialog -->
-    <Dialog
-      v-model:visible="showResetDialog"
-      header="Confirm Reset"
-      :modal="true"
-      :style="{ width: '30rem' }"
-    >
-      <div class="dialog-content">
-        <i class="pi pi-exclamation-triangle warning-icon"></i>
-        <div>
-          <p class="dialog-message">Are you sure you want to start over?</p>
-          <p class="dialog-submessage">This will clear all your current data and mappings.</p>
-        </div>
-      </div>
+    <UModal v-model="showResetDialog">
+      <UCard>
+        <template #header>
+          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Confirm Reset</h3>
+        </template>
 
-      <template #footer>
-        <Button label="Cancel" text @click="showResetDialog = false" />
-        <Button label="Start Over" severity="danger" @click="confirmReset" />
-      </template>
-    </Dialog>
+        <div class="flex items-start gap-3">
+          <span class="i-heroicons-exclamation-triangle w-8 h-8 text-orange-500 dark:text-orange-400 flex-shrink-0" />
+          <div>
+            <p class="text-gray-900 dark:text-white mb-2">Are you sure you want to start over?</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">This will clear all your current data and mappings.</p>
+          </div>
+        </div>
+
+        <template #footer>
+          <div class="flex justify-end gap-2">
+            <UButton
+              label="Cancel"
+              variant="ghost"
+              color="gray"
+              @click="showResetDialog = false"
+            />
+            <UButton
+              label="Start Over"
+              color="red"
+              @click="confirmReset"
+            />
+          </div>
+        </template>
+      </UCard>
+    </UModal>
   </div>
 </template>
 
@@ -88,8 +99,6 @@
 import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useMappingStore } from '../store/mappingStore'
-import Dialog from 'primevue/dialog'
-import Button from 'primevue/button'
 
 const router = useRouter()
 const route = useRoute()
@@ -118,41 +127,25 @@ const canReset = computed(() => {
   return store.hasSchema || store.hasData
 })
 
-function getStepButtonClass(stepId: string) {
-  return canNavigateTo(stepId) ? 'step-button-enabled' : 'step-button-disabled'
-}
-
-function getStepClasses(stepId: string) {
+function getStepCircleClass(stepId: string) {
   if (currentStep.value === stepId) {
-    return 'step-circle-active'
+    return 'bg-green-600 text-white shadow-lg scale-110'
   } else if (isStepCompleted(stepId)) {
-    return 'step-circle-completed'
+    return 'bg-green-600 text-white shadow-md'
   } else if (canNavigateTo(stepId)) {
-    return 'step-circle-available'
+    return 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 hover:opacity-80'
   } else {
-    return 'step-circle-disabled'
+    return 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 opacity-50'
   }
 }
 
-function getStepTextColor(stepId: string) {
+function getStepLabelClass(stepId: string) {
   if (currentStep.value === stepId) {
-    return { color: 'var(--p-primary-color)' }
+    return 'text-green-600 dark:text-green-400'
   } else if (isStepCompleted(stepId)) {
-    return { color: 'var(--p-green-500)' }
+    return 'text-green-600 dark:text-green-400'
   } else {
-    return { color: 'var(--p-text-muted-color)' }
-  }
-}
-
-function getStepCircleStyle(stepId: string) {
-  if (currentStep.value === stepId) {
-    return { backgroundColor: 'var(--p-primary-color)' }
-  } else if (isStepCompleted(stepId)) {
-    return { backgroundColor: 'var(--p-green-500)' }
-  } else if (canNavigateTo(stepId)) {
-    return { backgroundColor: 'var(--p-surface-200)', color: 'var(--p-text-muted-color)' }
-  } else {
-    return { backgroundColor: 'var(--p-surface-200)', color: 'var(--p-text-muted-color)' }
+    return 'text-gray-500 dark:text-gray-400'
   }
 }
 
@@ -219,168 +212,3 @@ function confirmReset() {
   showResetDialog.value = false
 }
 </script>
-
-<style scoped>
-.stepper-nav {
-  margin-bottom: 2rem;
-}
-
-.stepper-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.step-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-.step-button {
-  display: flex;
-  align-items: center;
-  background: none;
-  border: none;
-  padding: 0;
-  outline: none;
-  transition: opacity 0.2s;
-}
-
-.step-button:focus {
-  outline: none;
-}
-
-.step-button-enabled {
-  cursor: pointer;
-}
-
-.step-button-disabled {
-  cursor: not-allowed;
-}
-
-.step-button-available:hover .step-circle {
-  opacity: 0.8;
-}
-
-.step-circle {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  transition: all 0.2s;
-}
-
-.step-circle-active {
-  color: white;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  transform: scale(1.1);
-}
-
-.step-circle-completed {
-  color: white;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.step-circle-available:hover {
-  opacity: 0.8;
-}
-
-.step-circle-disabled {
-  opacity: 0.5;
-}
-
-.step-circle i {
-  font-size: 0.875rem;
-}
-
-.step-label {
-  margin-left: 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.step-connector {
-  width: 4rem;
-  height: 0.125rem;
-  margin: 0 1rem;
-  transition: background-color 0.2s;
-}
-
-.action-buttons {
-  margin-top: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.back-button {
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  background: none;
-  border: none;
-  padding: 0.5rem 1rem;
-  color: var(--p-text-muted-color);
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.back-button:hover {
-  color: var(--p-text-color);
-}
-
-.back-icon {
-  margin-right: 0.5rem;
-  transition: transform 0.2s;
-}
-
-.back-button:hover .back-icon {
-  transform: translateX(-0.25rem);
-}
-
-.reset-button {
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  background: none;
-  border: none;
-  padding: 0.5rem 1rem;
-  color: var(--p-red-500);
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.reset-button:hover {
-  color: var(--p-red-600);
-}
-
-.reset-icon {
-  margin-right: 0.5rem;
-}
-
-.dialog-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.warning-icon {
-  font-size: 1.875rem;
-  color: var(--p-orange-500);
-}
-
-.dialog-message {
-  margin: 0 0 0.5rem 0;
-}
-
-.dialog-submessage {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-  margin: 0;
-}
-</style>
