@@ -167,7 +167,7 @@
                   <label class="field-label">Excel Column</label>
                   <Dropdown
                     :modelValue="getMappedExcelColumn(field.name)"
-                    @update:modelValue="(value) => onFieldMappingChange(field.name, value)"
+                    @update:modelValue="(value: string) => onFieldMappingChange(field.name, value)"
                     :options="getExcelColumnOptions()"
                     optionLabel="label"
                     optionValue="value"
@@ -338,7 +338,7 @@
 
     <!-- Transform Preview Dialog -->
     <Dialog
-      v-model:visible="transformPreviewColumn"
+      v-model:visible="showTransformPreview"
       :header="`Transformation Preview: ${transformPreviewColumn}`"
       :style="{ width: '50rem' }"
       :modal="true"
@@ -357,7 +357,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(preview, idx) in getTransformPreview(transformPreviewColumn)" :key="idx">
+            <tr v-for="(preview, idx) in getTransformPreview(transformPreviewColumn!)" :key="idx">
               <td>{{ preview.original }}</td>
               <td class="transformed-value">{{ preview.transformed }}</td>
             </tr>
@@ -366,7 +366,7 @@
       </div>
 
       <template #footer>
-        <Button label="Close" @click="transformPreviewColumn = null" />
+        <Button label="Close" @click="showTransformPreview = false; transformPreviewColumn = null" />
       </template>
     </Dialog>
 
@@ -427,6 +427,7 @@ const serverValidationErrors = ref<string[]>([])
 const showPreview = ref(false)
 const showClearDialog = ref(false)
 const transformPreviewColumn = ref<string | null>(null)
+const showTransformPreview = ref(false)
 const autoMappingStats = ref<{
   total: number
   mapped: number
@@ -737,6 +738,7 @@ function getTransformationOptions(field: Field) {
  */
 function showTransformPreviewForField(fieldName: string) {
   transformPreviewColumn.value = fieldName
+  showTransformPreview.value = true
 }
 
 /**
