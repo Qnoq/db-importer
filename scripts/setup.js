@@ -70,6 +70,11 @@ function setupAirConfig() {
 
   const airConfigPath = join(rootDir, 'backend', '.air.toml');
 
+  // Détecter l'OS pour ajuster les extensions
+  const isWindows = process.platform === 'win32';
+  const binExt = isWindows ? '.exe' : '';
+  const binPath = `./tmp/main${binExt}`;
+
   if (!existsSync(airConfigPath)) {
     const airConfig = `root = "."
 testdata_dir = "testdata"
@@ -77,8 +82,8 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = []
-  bin = "./tmp/main"
-  cmd = "go build -o ./tmp/main ."
+  bin = "${binPath}"
+  cmd = "go build -o ${binPath} ./cmd/server"
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata"]
   exclude_file = []
@@ -118,7 +123,7 @@ tmp_dir = "tmp"
 `;
 
     writeFileSync(airConfigPath, airConfig, 'utf8');
-    log('✅ Configuration Air créée', colors.green);
+    log(`✅ Configuration Air créée (${isWindows ? 'Windows' : 'Unix'})`, colors.green);
   } else {
     log('✅ Configuration Air existe déjà', colors.green);
   }
