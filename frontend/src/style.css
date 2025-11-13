@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "@nuxt/ui";
 
 /* Variables globales personnalisées */
 :root {
@@ -21,6 +20,11 @@
   :root.dark body {
     background-color: rgb(3, 7, 18);
     color: rgb(243, 244, 246);
+  }
+
+  /* Add cursor-pointer to all buttons - missing from Nuxt UI default theme */
+  button:not(:disabled):not([aria-disabled="true"]) {
+    cursor: pointer;
   }
 }
 

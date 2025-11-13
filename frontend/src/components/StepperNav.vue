@@ -61,36 +61,33 @@
     </div>
 
     <!-- Reset Confirmation Dialog -->
-    <UModal v-model="showResetDialog">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Confirm Reset</h3>
-        </template>
-
+    <UModal
+      v-model:open="showResetDialog"
+      title="Confirm Reset"
+      description="This will clear all your current data and mappings."
+    >
+      <template #body>
         <div class="flex items-start gap-3">
           <span class="i-heroicons-exclamation-triangle w-8 h-8 text-orange-500 dark:text-orange-400 flex-shrink-0" />
-          <div>
-            <p class="text-gray-900 dark:text-white mb-2">Are you sure you want to start over?</p>
-            <p class="text-sm text-gray-500 dark:text-gray-400">This will clear all your current data and mappings.</p>
-          </div>
+          <p class="text-gray-900 dark:text-white">Are you sure you want to start over?</p>
         </div>
+      </template>
 
-        <template #footer>
-          <div class="flex justify-end gap-2">
-            <UButton
-              label="Cancel"
-              variant="ghost"
-              color="gray"
-              @click="showResetDialog = false"
-            />
-            <UButton
-              label="Start Over"
-              color="red"
-              @click="confirmReset"
-            />
-          </div>
-        </template>
-      </UCard>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <UButton
+            label="Cancel"
+            variant="ghost"
+            color="gray"
+            @click="showResetDialog = false"
+          />
+          <UButton
+            label="Start Over"
+            color="red"
+            @click="confirmReset"
+          />
+        </div>
+      </template>
     </UModal>
   </div>
 </template>

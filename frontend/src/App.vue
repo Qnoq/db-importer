@@ -1,9 +1,7 @@
 <template>
   <UApp>
     <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-      <UNotifications />
-
-    <!-- Header -->
+      <!-- Header -->
     <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <div class="app-container">
         <div class="flex justify-between items-center h-[var(--app-header-height)] gap-8">
@@ -145,17 +143,31 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useColorMode } from '@vueuse/core'
 import { useAuthStore } from './store/authStore'
 import { useMappingStore } from './store/mappingStore'
-import { useTheme } from './composables/useTheme'
 import { APP_VERSION } from './version'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const mappingStore = useMappingStore()
-const { isDark, toggleTheme } = useTheme()
 const appVersion = APP_VERSION
+
+const colorMode = useColorMode()
+
+const isDark = computed({
+  get() {
+    return colorMode.value === 'dark'
+  },
+  set(_isDark: boolean) {
+    colorMode.value = _isDark ? 'dark' : 'light'
+  }
+})
+
+const toggleTheme = () => {
+  isDark.value = !isDark.value
+}
 
 const currentRoute = computed(() => route.path)
 

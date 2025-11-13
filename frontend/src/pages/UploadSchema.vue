@@ -32,19 +32,14 @@
         </UAlert>
 
         <!-- Upload Area -->
-        <details class="group rounded-lg border border-slate-200 dark:border-slate-700">
-          <summary class="flex cursor-pointer select-none items-center justify-between bg-slate-50 px-6 py-4 dark:bg-slate-800">
+        <div class="rounded-lg border border-slate-200 dark:border-slate-700">
+          <div class="flex items-center justify-between bg-slate-50 px-6 py-4 dark:bg-slate-800">
             <span class="font-semibold text-slate-900 dark:text-white">SQL Schema File</span>
-            <span class="transition-transform group-open:rotate-180">
-              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-            </span>
-          </summary>
+          </div>
 
           <div class="px-6 py-6">
             <div
-              class="flex flex-col items-center gap-4 rounded-lg border-2 border-dashed border-slate-300 p-8 text-center transition-colors hover:border-green-600 dark:border-slate-600"
+              class="flex flex-col items-center gap-4 rounded-lg border-2 border-dashed border-slate-300 p-8 text-center transition-colors hover:border-green-600 dark:border-slate-600 cursor-pointer"
               @click="fileInput?.click()"
               @dragover.prevent
               @drop.prevent="handleDrop"
@@ -68,7 +63,7 @@
               class="hidden"
             />
           </div>
-        </details>
+        </div>
 
         <!-- Loading State -->
         <div v-if="loading" class="flex flex-col items-center justify-center gap-4 py-12">
@@ -154,77 +149,62 @@
     </div>
 
     <!-- Single Table Auto-Select Modal -->
-    <Teleport to="body" v-if="showSingleTableDialog">
-      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50" @click="cancelSingleTableDialog">
-        <div class="relative mx-4 w-full max-w-sm rounded-lg border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900" @click.stop>
-          <!-- Close button -->
-          <button
-            @click="cancelSingleTableDialog"
-            class="absolute right-4 top-4 rounded p-1 text-slate-500 transition-colors hover:text-slate-900 dark:hover:text-white"
-            aria-label="Close"
-          >
-            ✕
-          </button>
-
-          <div class="space-y-4 px-6 py-6 text-center">
-            <!-- Success Icon -->
-            <div class="flex justify-center">
-              <div class="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-4xl dark:bg-green-900">
-                ✓
-              </div>
+    <UModal
+      v-model:open="showSingleTableDialog"
+      title="Single Table Detected"
+      description="We'll auto-select it and skip the table selection step."
+      :ui="{ content: 'sm:max-w-sm' }"
+    >
+      <template #body>
+        <div class="space-y-4 text-center">
+          <!-- Success Icon -->
+          <div class="flex justify-center">
+            <div class="flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-4xl dark:bg-green-900">
+              ✓
             </div>
+          </div>
 
-            <!-- Title -->
-            <h3 class="text-2xl font-bold text-slate-900 dark:text-white">
-              Single Table Detected
-            </h3>
+          <!-- Message -->
+          <p class="text-slate-700 dark:text-slate-300">
+            We found only <strong class="text-green-600">1 table</strong> in your schema:
+          </p>
 
-            <!-- Message -->
-            <p class="text-slate-700 dark:text-slate-300">
-              We found only <strong class="text-green-600">1 table</strong> in your schema:
-            </p>
-
-            <!-- Table Name -->
-            <div class="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950">
-              <div class="flex items-center justify-center gap-3">
-                <div class="text-2xl">📊</div>
-                <div class="text-left">
-                  <p class="font-bold text-green-900 dark:text-green-100">{{ store.tables[0]?.name }}</p>
-                  <p class="text-sm text-green-700 dark:text-green-300">
-                    {{ store.tables[0]?.fields.length }} column{{ store.tables[0]?.fields.length !== 1 ? 's' : '' }}
-                  </p>
-                </div>
+          <!-- Table Name -->
+          <div class="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-950">
+            <div class="flex items-center justify-center gap-3">
+              <div class="text-2xl">📊</div>
+              <div class="text-left">
+                <p class="font-bold text-green-900 dark:text-green-100">{{ store.tables[0]?.name }}</p>
+                <p class="text-sm text-green-700 dark:text-green-300">
+                  {{ store.tables[0]?.fields.length }} column{{ store.tables[0]?.fields.length !== 1 ? 's' : '' }}
+                </p>
               </div>
-            </div>
-
-            <!-- Explanation -->
-            <p class="text-sm text-slate-600 dark:text-slate-400">
-              Since there's only one table, we'll auto-select it and skip the table selection step.
-            </p>
-
-            <!-- Action Buttons -->
-            <div class="space-y-3 pt-4">
-              <UButton
-                @click="continueToProceed"
-                color="green"
-                block
-                icon="i-heroicons-arrow-right"
-              >
-                Continue to Upload Data
-              </UButton>
-              <UButton
-                @click="cancelSingleTableDialog"
-                color="slate"
-                variant="outline"
-                block
-              >
-                Upload a Different File
-              </UButton>
             </div>
           </div>
         </div>
-      </div>
-    </Teleport>
+      </template>
+
+      <template #footer>
+        <div class="flex flex-col gap-3">
+          <UButton
+            @click="continueToProceed"
+            color="green"
+            block
+            icon="i-heroicons-arrow-right"
+          >
+            Continue to Upload Data
+          </UButton>
+          <UButton
+            @click="cancelSingleTableDialog"
+            color="gray"
+            variant="outline"
+            block
+          >
+            Upload a Different File
+          </UButton>
+        </div>
+      </template>
+    </UModal>
   </div>
 </template>
 

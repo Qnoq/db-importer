@@ -163,8 +163,7 @@
                   <USelect
                     :model-value="getMappedExcelColumn(field.name)"
                     @update:model-value="(value: string) => onFieldMappingChange(field.name, value)"
-                    :options="getExcelColumnOptions()"
-                    option-attribute="label"
+                    :items="getExcelColumnOptions()"
                     placeholder="-- Skip this field --"
                   />
                   <p v-if="getMappedExcelColumn(field.name)" class="sample-value text-xs text-gray-600 dark:text-gray-400 mt-1">
@@ -178,8 +177,7 @@
                   <USelect
                     v-model="fieldTransformations[field.name]"
                     @update:model-value="() => onTransformationChange(field.name)"
-                    :options="getTransformationOptions(field)"
-                    option-attribute="label"
+                    :items="getTransformationOptions(field)"
                     :disabled="!getMappedExcelColumn(field.name)"
                   />
                 </div>
@@ -212,25 +210,31 @@
         <!-- Validation Errors -->
         <UAlert v-if="validationErrors.length > 0" icon="i-heroicons-exclamation-triangle" color="amber" variant="soft" class="mb-4">
           <template #title>Mapping Warnings</template>
-          <ul class="list-disc list-inside text-sm space-y-1">
-            <li v-for="(err, index) in validationErrors" :key="index">{{ err }}</li>
-          </ul>
+          <template #description>
+            <ul class="list-disc list-inside text-sm space-y-1">
+              <li v-for="(err, index) in validationErrors" :key="index">{{ err }}</li>
+            </ul>
+          </template>
         </UAlert>
 
         <!-- Transformation Warnings -->
         <UAlert v-if="transformationWarnings.length > 0" icon="i-heroicons-exclamation-triangle" color="amber" variant="soft" class="mb-4">
           <template #title>Date Transformation Warning</template>
-          <ul class="list-disc list-inside text-sm space-y-1">
-            <li v-for="(warning, index) in transformationWarnings" :key="index">{{ warning }}</li>
-          </ul>
+          <template #description>
+            <ul class="list-disc list-inside text-sm space-y-1">
+              <li v-for="(warning, index) in transformationWarnings" :key="index">{{ warning }}</li>
+            </ul>
+          </template>
         </UAlert>
 
         <!-- Server Validation Errors -->
         <UAlert v-if="serverValidationErrors.length > 0" icon="i-heroicons-x-circle" color="red" variant="soft" class="mb-4">
           <template #title>Data Validation Errors</template>
-          <ul class="list-disc list-inside text-sm space-y-1 max-h-60 overflow-y-auto">
-            <li v-for="(err, index) in serverValidationErrors" :key="index">{{ err }}</li>
-          </ul>
+          <template #description>
+            <ul class="list-disc list-inside text-sm space-y-1 max-h-60 overflow-y-auto">
+              <li v-for="(err, index) in serverValidationErrors" :key="index">{{ err }}</li>
+            </ul>
+          </template>
         </UAlert>
 
         <!-- Data Preview with Highlighting -->
@@ -328,14 +332,15 @@
     </div>
 
     <!-- Transform Preview Modal -->
-    <UModal v-model="showTransformPreview" :ui="{ width: 'w-full sm:max-w-2xl' }">
-      <div class="p-6">
-        <div class="mb-6">
-          <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Transformation Preview: {{ transformPreviewColumn }}</h2>
-          <div v-if="transformPreviewColumn" class="dialog-content space-y-3">
-            <p><strong>Transformation:</strong> {{ transformations[fieldTransformations[transformPreviewColumn]]?.label }}</p>
-            <p class="text-sm text-gray-600 dark:text-gray-400">{{ transformations[fieldTransformations[transformPreviewColumn]]?.description }}</p>
-          </div>
+    <UModal
+      v-model:open="showTransformPreview"
+      :title="`Transformation Preview: ${transformPreviewColumn || ''}`"
+      :description="transformPreviewColumn ? transformations[fieldTransformations[transformPreviewColumn]]?.description : ''"
+      :ui="{ content: 'sm:max-w-2xl' }"
+    >
+      <template #body>
+        <div v-if="transformPreviewColumn" class="mb-6">
+          <p class="text-gray-900 dark:text-white"><strong>Transformation:</strong> {{ transformations[fieldTransformations[transformPreviewColumn]]?.label }}</p>
         </div>
 
         <div class="preview-dialog-table overflow-x-auto">
@@ -354,28 +359,32 @@
             </tbody>
           </table>
         </div>
+      </template>
 
-        <div class="mt-6 flex justify-end gap-2">
+      <template #footer>
+        <div class="flex justify-end">
           <UButton @click="showTransformPreview = false; transformPreviewColumn = null" color="gray">
             Close
           </UButton>
         </div>
-      </div>
+      </template>
     </UModal>
 
     <!-- Clear Mappings Confirmation Modal -->
-    <UModal v-model="showClearDialog" :ui="{ width: 'w-full sm:max-w-md' }">
-      <div class="p-6">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Confirm Clear All</h2>
-
-        <div class="confirm-dialog-content flex gap-4 mb-6">
+    <UModal
+      v-model:open="showClearDialog"
+      title="Confirm Clear All"
+      description="This will remove all mappings and transformations."
+      :ui="{ content: 'sm:max-w-md' }"
+    >
+      <template #body>
+        <div class="flex gap-4">
           <span class="text-3xl flex-shrink-0">⚠️</span>
-          <div>
-            <p class="text-gray-900 dark:text-white mb-2">Are you sure you want to clear all column mappings?</p>
-            <p class="text-sm text-gray-600 dark:text-gray-400">This will remove all mappings and transformations.</p>
-          </div>
+          <p class="text-gray-900 dark:text-white pt-1">Are you sure you want to clear all column mappings?</p>
         </div>
+      </template>
 
+      <template #footer>
         <div class="flex justify-end gap-2">
           <UButton @click="showClearDialog = false" color="gray" variant="soft">
             Cancel
@@ -384,7 +393,7 @@
             Clear All
           </UButton>
         </div>
-      </div>
+      </template>
     </UModal>
   </div>
 </template>
@@ -604,13 +613,13 @@ function confirmClearMappings() {
 /**
  * Get which Excel column is mapped to a database field
  */
-function getMappedExcelColumn(fieldName: string): string | null {
+function getMappedExcelColumn(fieldName: string): string {
   for (const [excelCol, dbField] of Object.entries(localMapping.value)) {
     if (dbField === fieldName) {
       return excelCol
     }
   }
-  return null
+  return ''
 }
 
 /**

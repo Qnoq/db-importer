@@ -224,11 +224,13 @@
     </div>
 
     <!-- Details Modal -->
-    <UModal v-model="detailsVisible" :ui="{ width: 'sm:max-w-4xl' }">
-      <div class="p-6">
-        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-6">
-          Import Details - {{ selectedImport?.tableName }}
-        </h3>
+    <UModal
+      v-model:open="detailsVisible"
+      :title="`Import Details - ${selectedImport?.tableName || ''}`"
+      description="View detailed information about this import"
+      :ui="{ content: 'sm:max-w-4xl' }"
+    >
+      <template #body>
 
         <div v-if="selectedImport" class="space-y-6">
           <!-- Basic Info -->
@@ -335,24 +337,28 @@
             </div>
           </div>
         </div>
-      </div>
+      </template>
     </UModal>
 
     <!-- Delete Confirmation Modal -->
-    <UModal v-model="deleteVisible" :ui="{ width: 'sm:max-w-md' }">
-      <div class="p-6">
-        <div class="flex items-start gap-4 mb-6">
+    <UModal
+      v-model:open="deleteVisible"
+      title="Confirm Delete"
+      description="Are you sure you want to delete this import?"
+      :ui="{ content: 'sm:max-w-md' }"
+    >
+      <template #body>
+        <div class="flex items-start gap-4">
           <div class="flex-shrink-0">
             <svg class="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Confirm Delete</h3>
-            <p class="text-gray-600 dark:text-gray-400">Are you sure you want to delete this import?</p>
-          </div>
+          <p class="text-gray-600 dark:text-gray-400 pt-2">This action cannot be undone.</p>
         </div>
+      </template>
 
+      <template #footer>
         <div class="flex justify-end gap-3">
           <UButton
             label="Cancel"
@@ -367,7 +373,7 @@
             @click="deleteImport"
           />
         </div>
-      </div>
+      </template>
     </UModal>
   </div>
 </template>
@@ -381,13 +387,13 @@ const toast = useToast()
 
 // Table columns configuration
 const columns = [
-  { key: 'tableName', label: 'Table' },
-  { key: 'rowCount', label: 'Rows' },
-  { key: 'status', label: 'Status' },
-  { key: 'errorCount', label: 'Errors' },
-  { key: 'warningCount', label: 'Warnings' },
-  { key: 'createdAt', label: 'Date' },
-  { key: 'actions', label: 'Actions' }
+  { accessorKey: 'tableName', header: 'Table' },
+  { accessorKey: 'rowCount', header: 'Rows' },
+  { accessorKey: 'status', header: 'Status' },
+  { accessorKey: 'errorCount', header: 'Errors' },
+  { accessorKey: 'warningCount', header: 'Warnings' },
+  { accessorKey: 'createdAt', header: 'Date' },
+  { accessorKey: 'actions', header: 'Actions' }
 ]
 
 const filters = ref({
