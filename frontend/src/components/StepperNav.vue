@@ -4,6 +4,7 @@
     <UStepper
       :items="stepItems"
       :model-value="currentStepIndex"
+      @update:model-value="onStepClick"
       color="success"
       orientation="horizontal"
       linear
@@ -186,6 +187,14 @@ function goBack() {
   if (currentStepIndex.value > 0) {
     const previousStep = steps[currentStepIndex.value - 1]
     router.push(previousStep.path)
+  }
+}
+
+function onStepClick(newIndex: number) {
+  // Check if the step can be navigated to
+  const targetStep = steps[newIndex]
+  if (targetStep && canNavigateTo(targetStep.id)) {
+    router.push(targetStep.path)
   }
 }
 
