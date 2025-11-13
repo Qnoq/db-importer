@@ -49,18 +49,15 @@ function setupEnvFiles() {
   }
 
   // Copier .env.local dans backend/.env et frontend/.env
+  // Toujours copier pour s'assurer que les configs sont sync
   const backendEnvPath = join(rootDir, 'backend', '.env');
   const frontendEnvPath = join(rootDir, 'frontend', '.env');
 
-  if (!existsSync(backendEnvPath)) {
-    copyFileSync(envLocalPath, backendEnvPath);
-    log('✅ backend/.env créé', colors.green);
-  }
+  copyFileSync(envLocalPath, backendEnvPath);
+  log('✅ backend/.env synchronisé', colors.green);
 
-  if (!existsSync(frontendEnvPath)) {
-    copyFileSync(envLocalPath, frontendEnvPath);
-    log('✅ frontend/.env créé', colors.green);
-  }
+  copyFileSync(envLocalPath, frontendEnvPath);
+  log('✅ frontend/.env synchronisé', colors.green);
 
   return true;
 }
