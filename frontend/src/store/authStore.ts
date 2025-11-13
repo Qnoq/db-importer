@@ -241,7 +241,7 @@ export const useAuthStore = defineStore('auth', {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            refresh_token: this.tokens.refreshToken
+            refreshToken: this.tokens.refreshToken
           })
         })
 
@@ -281,7 +281,7 @@ export const useAuthStore = defineStore('auth', {
               Authorization: `Bearer ${this.tokens.accessToken}`
             },
             body: JSON.stringify({
-              refresh_token: this.tokens.refreshToken
+              refreshToken: this.tokens.refreshToken
             })
           })
         } catch (error) {

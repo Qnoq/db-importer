@@ -171,7 +171,7 @@
                   :key="page"
                   @click="currentPage = page"
                   :label="String(page)"
-                  :color="page === currentPage ? 'green' : 'slate'"
+                  :color="page === currentPage ? 'success' : 'neutral'"
                   :variant="page === currentPage ? 'soft' : 'outline'"
                   size="sm"
                 />

@@ -570,7 +570,7 @@ const downloadSQL = async (imp: Import) => {
     toast.add({
       title: 'Success',
       description: 'SQL downloaded successfully',
-      color: 'green'
+      color: 'success'
     })
   } catch (error) {
     toast.add({
