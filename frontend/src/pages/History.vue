@@ -387,13 +387,13 @@ const toast = useToast()
 
 // Table columns configuration
 const columns = [
-  { accessorKey: 'tableName', header: 'Table' },
-  { accessorKey: 'rowCount', header: 'Rows' },
-  { accessorKey: 'status', header: 'Status' },
-  { accessorKey: 'errorCount', header: 'Errors' },
-  { accessorKey: 'warningCount', header: 'Warnings' },
-  { accessorKey: 'createdAt', header: 'Date' },
-  { accessorKey: 'actions', header: 'Actions' }
+  { key: 'tableName', label: 'Table' },
+  { key: 'rowCount', label: 'Rows' },
+  { key: 'status', label: 'Status' },
+  { key: 'errorCount', label: 'Errors' },
+  { key: 'warningCount', label: 'Warnings' },
+  { key: 'createdAt', label: 'Date' },
+  { key: 'actions', label: 'Actions' }
 ]
 
 const filters = ref({
