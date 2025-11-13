@@ -16,7 +16,7 @@
                 label="New Import"
                 :icon="currentRoute === '/' ? 'i-heroicons-plus-circle' : undefined"
                 :variant="currentRoute === '/' ? 'solid' : 'ghost'"
-                :color="currentRoute === '/' ? 'green' : 'gray'"
+                :color="currentRoute === '/' ? 'success' : 'neutral'"
                 @click="handleNewImport"
                 size="sm"
               >
@@ -28,7 +28,7 @@
                 label="History"
                 :icon="currentRoute === '/history' ? 'i-heroicons-clock' : undefined"
                 :variant="currentRoute === '/history' ? 'solid' : 'ghost'"
-                :color="currentRoute === '/history' ? 'green' : 'gray'"
+                :color="currentRoute === '/history' ? 'success' : 'neutral'"
                 @click="() => router.push('/history')"
                 size="sm"
               >
@@ -46,7 +46,7 @@
               <UButton
                 :icon="isDark ? 'i-heroicons-sun' : 'i-heroicons-moon'"
                 variant="ghost"
-                color="gray"
+                color="neutral"
                 @click="toggleTheme"
                 square
               />
@@ -70,7 +70,7 @@
                 <UButton
                   icon="i-heroicons-arrow-right-on-rectangle"
                   variant="ghost"
-                  color="red"
+                  color="error"
                   @click="handleLogout"
                   square
                 />
@@ -83,14 +83,14 @@
                 label="Sign In"
                 icon="i-heroicons-arrow-left-on-rectangle"
                 variant="ghost"
-                color="gray"
+                color="neutral"
                 @click="() => router.push('/login')"
                 class="hidden md:inline-flex"
               />
               <UButton
                 label="Sign Up"
                 icon="i-heroicons-user-plus"
-                color="green"
+                color="success"
                 @click="() => router.push('/register')"
               />
             </div>

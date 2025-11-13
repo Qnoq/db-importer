@@ -157,7 +157,7 @@
             <UTooltip text="View Details">
               <UButton
                 icon="i-heroicons-eye"
-                color="gray"
+                color="neutral"
                 variant="ghost"
                 size="sm"
                 @click="viewDetails(row)"
@@ -166,7 +166,7 @@
             <UTooltip text="Download SQL">
               <UButton
                 icon="i-heroicons-arrow-down-tray"
-                color="gray"
+                color="neutral"
                 variant="ghost"
                 size="sm"
                 :loading="downloadingId === row.id"
@@ -176,7 +176,7 @@
             <UTooltip text="Delete">
               <UButton
                 icon="i-heroicons-trash"
-                color="red"
+                color="error"
                 variant="ghost"
                 size="sm"
                 @click="confirmDelete(row)"
@@ -194,7 +194,7 @@
         <div class="flex gap-2">
           <UButton
             icon="i-heroicons-chevron-left"
-            color="gray"
+            color="neutral"
             variant="outline"
             size="sm"
             :disabled="currentPage === 1"
@@ -205,7 +205,7 @@
               v-for="page in visiblePages"
               :key="page"
               :label="page.toString()"
-              :color="currentPage === page ? 'green' : 'gray'"
+              :color="currentPage === page ? 'success' : 'neutral'"
               :variant="currentPage === page ? 'solid' : 'outline'"
               size="sm"
               @click="goToPage(page)"
@@ -213,7 +213,7 @@
           </div>
           <UButton
             icon="i-heroicons-chevron-right"
-            color="gray"
+            color="neutral"
             variant="outline"
             size="sm"
             :disabled="currentPage === totalPages"
@@ -303,7 +303,7 @@
                 label="Download Full SQL"
                 icon="i-heroicons-arrow-down-tray"
                 size="xs"
-                color="gray"
+                color="neutral"
                 variant="outline"
                 @click="downloadFullSQL"
               />
@@ -362,13 +362,13 @@
         <div class="flex justify-end gap-3">
           <UButton
             label="Cancel"
-            color="gray"
+            color="neutral"
             variant="ghost"
             @click="deleteVisible = false"
           />
           <UButton
             label="Delete"
-            color="red"
+            color="error"
             :loading="importStore.loading"
             @click="deleteImport"
           />
@@ -508,7 +508,7 @@ const viewDetails = async (imp: Import) => {
     toast.add({
       title: 'Warning',
       description: 'Failed to load SQL preview',
-      color: 'amber'
+      color: 'warning'
     })
   }
 }
@@ -529,7 +529,7 @@ const downloadFullSQL = () => {
   toast.add({
     title: 'Success',
     description: 'SQL downloaded successfully',
-    color: 'green'
+    color: 'success'
   })
 }
 
@@ -548,7 +548,7 @@ const downloadSQL = async (imp: Import) => {
     toast.add({
       title: 'Error',
       description: 'Failed to download SQL',
-      color: 'red'
+      color: 'error'
     })
   } finally {
     downloadingId.value = null
@@ -569,14 +569,14 @@ const deleteImport = async () => {
     toast.add({
       title: 'Success',
       description: 'Import deleted successfully',
-      color: 'green'
+      color: 'success'
     })
     deleteVisible.value = false
   } catch (error) {
     toast.add({
       title: 'Error',
       description: 'Failed to delete import',
-      color: 'red'
+      color: 'error'
     })
   }
 }
@@ -592,10 +592,10 @@ const formatNumber = (num: number): string => {
 
 const getStatusColor = (status: string): string => {
   switch (status) {
-    case 'success': return 'green'
-    case 'warning': return 'amber'
-    case 'failed': return 'red'
-    default: return 'gray'
+    case 'success': return 'success'
+    case 'warning': return 'warning'
+    case 'failed': return 'error'
+    default: return 'neutral'
   }
 }
 </script>

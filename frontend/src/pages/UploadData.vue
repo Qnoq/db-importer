@@ -12,7 +12,7 @@
       <div class="space-y-6 px-6 py-6">
         <UAlert
           v-if="!store.hasSelectedTable"
-          color="amber"
+          color="warning"
           variant="subtle"
           title="No table selected"
           description="Please select a table first before uploading data."
@@ -22,7 +22,7 @@
         <template v-else>
           <!-- Selected Table Info -->
           <UAlert
-            color="blue"
+            color="info"
             variant="subtle"
             title="Target table selected"
             :closable="false"
@@ -34,7 +34,7 @@
 
           <!-- Pro Tip: Column Naming -->
           <UAlert
-            color="green"
+            color="success"
             variant="subtle"
             :closable="false"
           >
@@ -96,7 +96,7 @@
           <!-- Error State -->
           <UAlert
             v-if="error"
-            color="red"
+            color="error"
             variant="subtle"
             :closable="false"
           >
@@ -108,7 +108,7 @@
           <div v-if="store.hasExcelData && !loading" class="space-y-6">
             <!-- Success Banner -->
             <UAlert
-              color="green"
+              color="success"
               variant="subtle"
               :closable="false"
             >
@@ -164,14 +164,14 @@
             <div class="flex items-center justify-between border-t border-slate-200 pt-6 dark:border-slate-700">
               <UButton
                 @click="fileInput?.click()"
-                color="green"
+                color="success"
                 variant="ghost"
               >
                 ↻ Upload a different file
               </UButton>
               <UButton
                 @click="goToMapping"
-                color="green"
+                color="success"
                 icon="i-heroicons-arrow-right"
               >
                 Continue to Column Mapping

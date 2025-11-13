@@ -12,7 +12,7 @@
       <div class="space-y-6 px-6 py-6">
         <UAlert
           v-if="!store.hasSchema"
-          color="amber"
+          color="warning"
           variant="subtle"
           title="No schema loaded"
           description="Please upload a SQL file first."
@@ -23,7 +23,7 @@
               <p class="text-sm">Please upload a SQL file first.</p>
               <UButton
                 @click="router.push('/')"
-                color="slate"
+                color="neutral"
                 variant="outline"
                 size="sm"
               >
@@ -93,7 +93,7 @@
             <p class="text-sm text-slate-600 dark:text-slate-400">Try adjusting your search query</p>
             <UButton
               @click="searchQuery = ''"
-              color="slate"
+              color="neutral"
               variant="ghost"
               class="mt-4"
             >
@@ -160,7 +160,7 @@
               <UButton
                 @click="currentPage--"
                 :disabled="currentPage === 1"
-                color="slate"
+                color="neutral"
                 variant="outline"
                 size="sm"
                 icon="i-heroicons-chevron-left"
@@ -179,7 +179,7 @@
               <UButton
                 @click="currentPage++"
                 :disabled="currentPage === totalPages"
-                color="slate"
+                color="neutral"
                 variant="outline"
                 size="sm"
                 icon="i-heroicons-chevron-right"
@@ -188,7 +188,7 @@
           </div>
 
           <!-- Continue Button -->
-          <UAlert v-if="selectedTableName" color="green" variant="subtle" :closable="false" class="mt-8">
+          <UAlert v-if="selectedTableName" color="success" variant="subtle" :closable="false" class="mt-8">
             <template #title>
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">
@@ -197,7 +197,7 @@
                 </div>
                 <UButton
                   @click="goToUploadData"
-                  color="green"
+                  color="success"
                   size="sm"
                   icon="i-heroicons-arrow-right"
                 >

@@ -13,7 +13,7 @@
       <div class="space-y-6 px-6 py-6">
         <!-- Important: Single Table Note -->
         <UAlert
-          color="blue"
+          color="info"
           variant="subtle"
           title="Pro Tip: Export Only Your Target Table"
           description="You only need the CREATE TABLE statement for the table you want to import data into. No need to upload your entire database dump!"
@@ -75,7 +75,7 @@
         <!-- Error State -->
         <UAlert
           v-if="error"
-          color="red"
+          color="error"
           variant="subtle"
           :closable="false"
         >
@@ -87,7 +87,7 @@
         <div v-if="store.hasSchema && !loading && !showSingleTableDialog" class="space-y-6">
           <!-- Success Banner -->
           <UAlert
-            color="green"
+            color="success"
             variant="subtle"
             :closable="false"
           >
@@ -131,14 +131,14 @@
           <div v-if="store.tables.length > 1" class="flex items-center justify-between border-t border-slate-200 pt-6 dark:border-slate-700">
             <UButton
               @click="fileInput?.click()"
-              color="green"
+              color="success"
               variant="ghost"
             >
               ↻ Upload a different file
             </UButton>
             <UButton
               @click="goToSelectTable"
-              color="green"
+              color="success"
               icon="i-heroicons-arrow-right"
             >
               Continue to Table Selection
@@ -188,7 +188,7 @@
         <div class="flex flex-col gap-3">
           <UButton
             @click="continueToProceed"
-            color="green"
+            color="success"
             block
             icon="i-heroicons-arrow-right"
           >
@@ -196,7 +196,7 @@
           </UButton>
           <UButton
             @click="cancelSingleTableDialog"
-            color="gray"
+            color="neutral"
             variant="outline"
             block
           >

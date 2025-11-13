@@ -90,3 +90,32 @@
 .slide-leave-to {
   transform: translateX(100%);
 }
+
+/* Fix pour les dropdowns de select */
+[role="listbox"] {
+  z-index: 50 !important;
+}
+
+/* Fix pour les modals */
+[role="dialog"] {
+  z-index: 100 !important;
+}
+
+/* Force la largeur complète pour les inputs/selects Nuxt UI */
+.u-input,
+.u-select {
+  width: 100% !important;
+}
+
+/* Fix pour les options de select */
+[role="option"] {
+  cursor: pointer !important;
+}
+
+[role="option"]:hover {
+  background-color: rgb(243 244 246);
+}
+
+.dark [role="option"]:hover {
+  background-color: rgb(55 65 81);
+}

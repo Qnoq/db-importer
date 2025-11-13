@@ -15,9 +15,10 @@
         <!-- Session Expired Message -->
         <UAlert
           v-if="sessionExpiredMessage"
-          color="yellow"
+          color="warning"
           variant="soft"
-          :title="sessionExpiredMessage"
+          title="Session Expired"
+          :description="sessionExpiredMessage"
           :close-button="{ icon: 'i-heroicons-x-mark-20-solid', color: 'gray', variant: 'ghost', padded: false }"
           @close="sessionExpiredMessage = ''"
         />
@@ -25,10 +26,10 @@
         <!-- Error Message -->
         <UAlert
           v-if="authStore.error"
-          color="red"
+          color="error"
           variant="soft"
-          :title="authStore.error"
-          :close-button="null"
+          title="Error"
+          :description="authStore.error"
         />
 
         <!-- Email Field -->
@@ -41,7 +42,9 @@
             v-model="email"
             type="email"
             placeholder="your@email.com"
-            :class="{ 'border-red-500': emailError }"
+            class="w-full"
+            :ui="{ base: 'w-full' }"
+            :error="!!emailError"
             required
             autofocus
           />
@@ -58,7 +61,9 @@
             v-model="password"
             type="password"
             placeholder="Enter your password"
-            :class="{ 'border-red-500': passwordError }"
+            class="w-full"
+            :ui="{ base: 'w-full' }"
+            :error="!!passwordError"
             required
           />
           <p v-if="passwordError" class="text-red-500 text-sm mt-1">{{ passwordError }}</p>
@@ -66,21 +71,24 @@
 
         <!-- Remember Me -->
         <div class="flex items-center gap-2">
-          <UCheckbox v-model="rememberMe" />
-          <label for="remember" class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
-            Remember me (7 days)
-          </label>
+          <UCheckbox 
+            v-model="rememberMe" 
+            label="Remember me"
+          />
         </div>
 
         <!-- Submit Button -->
         <UButton
           type="submit"
-          label="Sign In"
+          color="success"
+          variant="solid"
+          size="md"
           class="w-full"
-          color="green"
           :loading="authStore.loading"
           :disabled="authStore.loading"
-        />
+        >
+          Sign In
+        </UButton>
 
         <!-- Divider -->
         <div class="relative flex items-center my-4">
@@ -91,13 +99,15 @@
 
         <!-- Continue as Guest -->
         <UButton
-          label="Continue as Guest"
           variant="outline"
-          color="gray"
+          color="neutral"
+          size="md"
           class="w-full"
           @click="handleContinueAsGuest"
           :disabled="authStore.loading"
-        />
+        >
+          Continue as Guest
+        </UButton>
 
         <!-- Register Link -->
         <div class="text-center pt-2">
@@ -132,9 +142,9 @@ const emailError = ref('')
 const passwordError = ref('')
 const sessionExpiredMessage = ref('')
 
-// Check if redirected due to session expiration
 onMounted(() => {
-  if (route.query.reason === 'session_expired') {
+  // Check for session expired message
+  if (route.query.sessionExpired === 'true') {
     sessionExpiredMessage.value = 'Your session has expired. Please sign in again.'
   }
 })
@@ -142,50 +152,42 @@ onMounted(() => {
 const validateForm = (): boolean => {
   emailError.value = ''
   passwordError.value = ''
-
+  
+  let isValid = true
+  
   if (!email.value) {
     emailError.value = 'Email is required'
-    return false
+    isValid = false
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+    emailError.value = 'Please enter a valid email'
+    isValid = false
   }
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-    emailError.value = 'Invalid email format'
-    return false
-  }
-
+  
   if (!password.value) {
     passwordError.value = 'Password is required'
-    return false
-  }
-
-  if (password.value.length < 8) {
+    isValid = false
+  } else if (password.value.length < 8) {
     passwordError.value = 'Password must be at least 8 characters'
-    return false
+    isValid = false
   }
-
-  return true
+  
+  return isValid
 }
 
 const handleLogin = async () => {
-  if (!validateForm()) {
-    return
-  }
-
-  try {
-    await authStore.login(email.value, password.value, rememberMe.value)
-
-    // Redirect to the page they were trying to access, or home
-    const redirect = route.query.redirect as string || '/'
-    router.push(redirect)
-  } catch (error: any) {
-    console.error('Login failed:', error)
-    // Error is already stored in authStore.error
+  if (!validateForm()) return
+  
+  await authStore.login(email.value, password.value)
+  
+  if (!authStore.error) {
+    const redirectTo = route.query.redirect as string || '/'
+    router.push(redirectTo)
   }
 }
 
 const handleContinueAsGuest = () => {
   authStore.continueAsGuest()
-  const redirect = route.query.redirect as string || '/'
-  router.push(redirect)
+  const redirectTo = route.query.redirect as string || '/'
+  router.push(redirectTo)
 }
 </script>

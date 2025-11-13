@@ -15,10 +15,10 @@
         <!-- Error Message -->
         <UAlert
           v-if="authStore.error"
-          color="red"
+          color="error"
           variant="soft"
-          :title="authStore.error"
-          :close-button="null"
+          title="Error"
+          :description="authStore.error"
         />
 
         <!-- First Name Field -->
@@ -31,6 +31,8 @@
             v-model="firstName"
             type="text"
             placeholder="John"
+            class="w-full"
+            :ui="{ base: 'w-full' }"
           />
         </div>
 
@@ -44,6 +46,8 @@
             v-model="lastName"
             type="text"
             placeholder="Doe"
+            class="w-full"
+            :ui="{ base: 'w-full' }"
           />
         </div>
 
@@ -57,7 +61,9 @@
             v-model="email"
             type="email"
             placeholder="your@email.com"
-            :class="{ 'border-red-500': emailError }"
+            class="w-full"
+            :ui="{ base: 'w-full' }"
+            :error="!!emailError"
             required
             autofocus
           />
@@ -74,7 +80,9 @@
             v-model="password"
             type="password"
             placeholder="At least 8 characters"
-            :class="{ 'border-red-500': passwordError }"
+            class="w-full"
+            :ui="{ base: 'w-full' }"
+            :error="!!passwordError"
             required
           />
           <p v-if="passwordError" class="text-red-500 text-sm mt-1">{{ passwordError }}</p>
@@ -99,7 +107,9 @@
             v-model="confirmPassword"
             type="password"
             placeholder="Confirm your password"
-            :class="{ 'border-red-500': confirmPasswordError }"
+            class="w-full"
+            :ui="{ base: 'w-full' }"
+            :error="!!confirmPasswordError"
             required
           />
           <p v-if="confirmPasswordError" class="text-red-500 text-sm mt-1">{{ confirmPasswordError }}</p>
@@ -107,7 +117,10 @@
 
         <!-- Terms and Conditions -->
         <div class="flex items-start gap-2 pt-2">
-          <UCheckbox v-model="acceptedTerms" />
+          <UCheckbox 
+            v-model="acceptedTerms"
+            :ui="{ base: 'mt-1' }"
+          />
           <label for="terms" class="text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
             I agree to the
             <a href="#" class="text-green-600 hover:text-green-700 dark:text-green-500 dark:hover:text-green-400 hover:underline">Terms of Service</a>
@@ -120,12 +133,15 @@
         <!-- Submit Button -->
         <UButton
           type="submit"
-          label="Create Account"
+          color="success"
+          variant="solid"
+          size="md"
           class="w-full"
-          color="green"
           :loading="authStore.loading"
           :disabled="authStore.loading"
-        />
+        >
+          Create Account
+        </UButton>
 
         <!-- Divider -->
         <div class="relative flex items-center my-4">
@@ -136,13 +152,15 @@
 
         <!-- Continue as Guest -->
         <UButton
-          label="Continue as Guest"
           variant="outline"
-          color="gray"
+          color="neutral"
+          size="md"
           class="w-full"
           @click="handleContinueAsGuest"
           :disabled="authStore.loading"
-        />
+        >
+          Continue as Guest
+        </UButton>
 
         <!-- Login Link -->
         <div class="text-center pt-2">
@@ -194,7 +212,7 @@ const validateForm = (): boolean => {
     emailError.value = 'Email is required'
     isValid = false
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-    emailError.value = 'Invalid email format'
+    emailError.value = 'Please enter a valid email'
     isValid = false
   }
 
@@ -206,10 +224,7 @@ const validateForm = (): boolean => {
     isValid = false
   }
 
-  if (!confirmPassword.value) {
-    confirmPasswordError.value = 'Please confirm your password'
-    isValid = false
-  } else if (password.value !== confirmPassword.value) {
+  if (confirmPassword.value !== password.value) {
     confirmPasswordError.value = 'Passwords do not match'
     isValid = false
   }
@@ -223,30 +238,24 @@ const validateForm = (): boolean => {
 }
 
 const handleRegister = async () => {
-  if (!validateForm()) {
-    return
-  }
+  if (!validateForm()) return
 
-  try {
-    await authStore.register(
-      email.value,
-      password.value,
-      firstName.value || undefined,
-      lastName.value || undefined
-    )
+  await authStore.register(
+    email.value,
+    password.value,
+    firstName.value,
+    lastName.value
+  )
 
-    // Redirect to the page they were trying to access, or home
-    const redirect = route.query.redirect as string || '/'
-    router.push(redirect)
-  } catch (error: any) {
-    console.error('Registration failed:', error)
-    // Error is already stored in authStore.error
+  if (!authStore.error) {
+    const redirectTo = route.query.redirect as string || '/'
+    router.push(redirectTo)
   }
 }
 
 const handleContinueAsGuest = () => {
   authStore.continueAsGuest()
-  const redirect = route.query.redirect as string || '/'
-  router.push(redirect)
+  const redirectTo = route.query.redirect as string || '/'
+  router.push(redirectTo)
 }
 </script>

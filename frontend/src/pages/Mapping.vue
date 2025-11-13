@@ -14,14 +14,16 @@
         </div>
       </div>
 
-      <UAlert v-if="!store.hasExcelData || !store.hasSelectedTable" icon="i-heroicons-exclamation-triangle" color="amber" variant="soft" class="mb-4">
+      <UAlert v-if="!store.hasExcelData || !store.hasSelectedTable" icon="i-heroicons-exclamation-triangle" color="warning" variant="soft" class="mb-4">
         <template #title>Missing data</template>
-        <div class="flex flex-col gap-2">
-          <p>Please complete previous steps.</p>
-          <UButton @click="router.push('/')" variant="soft" color="amber" size="sm">
-            ← Start over
-          </UButton>
-        </div>
+        <template #description>
+          <div class="flex flex-col gap-2">
+            <p>Please complete previous steps.</p>
+            <UButton @click="router.push('/')" variant="soft" color="warning" size="sm">
+              ← Start over
+            </UButton>
+          </div>
+        </template>
       </UAlert>
 
       <div v-else>
@@ -29,60 +31,64 @@
         <UAlert
           v-if="autoMappingStats"
           :icon="autoMappingStats.mapped > autoMappingStats.total / 2 ? 'i-heroicons-check-circle' : 'i-heroicons-exclamation-triangle'"
-          :color="autoMappingStats.mapped > autoMappingStats.total / 2 ? 'green' : 'amber'"
+          :color="autoMappingStats.mapped > autoMappingStats.total / 2 ? 'success' : 'warning'"
           variant="soft"
           class="mb-4"
         >
           <template #title>
             {{ autoMappingStats.mapped > autoMappingStats.total / 2 ? 'Auto-mapping successful!' : 'Limited auto-mapping' }}
           </template>
-          <div class="space-y-3">
-            <p class="text-sm">
-              The system automatically mapped <strong>{{ autoMappingStats.mapped }} of {{ autoMappingStats.total }} columns</strong>
-              by comparing your Excel column names with database field names.
-            </p>
-
-            <!-- Low match warning -->
-            <div v-if="autoMappingStats.mapped < autoMappingStats.total / 2" class="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
-              <p class="font-semibold text-sm mb-1">💡 Tip: Improve auto-mapping</p>
+          <template #description>
+            <div class="space-y-3">
               <p class="text-sm">
-                Only <strong>{{ Math.round((autoMappingStats.mapped / autoMappingStats.total) * 100) }}%</strong> of columns were auto-mapped.
-                For better results, <strong>rename your Excel headers to match database field names</strong>
-                (e.g., <code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs">{{ store.selectedTable?.fields[0]?.name }}</code>,
-                <code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs">{{ store.selectedTable?.fields[1]?.name }}</code>).
+                The system automatically mapped <strong>{{ autoMappingStats.mapped }} of {{ autoMappingStats.total }} columns</strong>
+                by comparing your Excel column names with database field names.
+              </p>
+
+              <!-- Low match warning -->
+              <div v-if="autoMappingStats.mapped < autoMappingStats.total / 2" class="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
+                <p class="font-semibold text-sm mb-1">💡 Tip: Improve auto-mapping</p>
+                <p class="text-sm">
+                  Only <strong>{{ Math.round((autoMappingStats.mapped / autoMappingStats.total) * 100) }}%</strong> of columns were auto-mapped.
+                  For better results, <strong>rename your Excel headers to match database field names</strong>
+                  (e.g., <code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs">{{ store.selectedTable?.fields[0]?.name }}</code>,
+                  <code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs">{{ store.selectedTable?.fields[1]?.name }}</code>).
+                </p>
+              </div>
+
+              <p class="text-sm">
+                Review the mappings below and adjust if needed.
+                <template v-if="getAutoIncrementFieldNames().length > 0">
+                  ID fields (<strong>{{ getAutoIncrementFieldNames().join(', ') }}</strong>)
+                  were automatically skipped as they are auto-incremented.
+                </template>
               </p>
             </div>
-
-            <p class="text-sm">
-              Review the mappings below and adjust if needed.
-              <template v-if="getAutoIncrementFieldNames().length > 0">
-                ID fields (<strong>{{ getAutoIncrementFieldNames().join(', ') }}</strong>)
-                were automatically skipped as they are auto-incremented.
-              </template>
-            </p>
-          </div>
+          </template>
         </UAlert>
 
         <!-- Info Banner -->
         <UAlert icon="i-heroicons-information-circle" color="blue" variant="soft" class="mb-4">
           <template #title>Mapping Information</template>
-          <div class="space-y-2">
-            <p class="text-sm">
-              Target table: <strong>{{ store.selectedTable?.name }}</strong> |
-              Data rows: <strong>{{ store.excelData.length }}</strong>
-            </p>
-            <div v-if="validationStats" class="flex gap-4 text-sm">
-              <span class="text-green-600 dark:text-green-400 font-medium">
-                ✓ {{ validationStats.validRowCount }} valid
-              </span>
-              <span v-if="validationStats.warningCount > 0" class="text-amber-600 dark:text-amber-400 font-medium">
-                ⚠ {{ validationStats.warningCount }} warnings
-              </span>
-              <span v-if="validationStats.errorCount > 0" class="text-red-600 dark:text-red-400 font-medium">
-                ✕ {{ validationStats.errorCount }} errors
-              </span>
+          <template #description>
+            <div class="space-y-2">
+              <p class="text-sm">
+                Target table: <strong>{{ store.selectedTable?.name }}</strong> |
+                Data rows: <strong>{{ store.excelData.length }}</strong>
+              </p>
+              <div v-if="validationStats" class="flex gap-4 text-sm">
+                <span class="text-green-600 dark:text-green-400 font-medium">
+                  ✓ {{ validationStats.validRowCount }} valid
+                </span>
+                <span v-if="validationStats.warningCount > 0" class="text-amber-600 dark:text-amber-400 font-medium">
+                  ⚠ {{ validationStats.warningCount }} warnings
+                </span>
+                <span v-if="validationStats.errorCount > 0" class="text-red-600 dark:text-red-400 font-medium">
+                  ✕ {{ validationStats.errorCount }} errors
+                </span>
+              </div>
             </div>
-          </div>
+          </template>
         </UAlert>
 
         <!-- Column Mapping -->
@@ -92,7 +98,7 @@
             <div class="action-buttons flex gap-2">
               <UButton
                 @click="autoMap"
-                color="blue"
+                color="info"
                 variant="soft"
                 size="sm"
               >
@@ -100,7 +106,7 @@
               </UButton>
               <UButton
                 @click="showClearDialog = true"
-                color="gray"
+                color="neutral"
                 variant="soft"
                 size="sm"
               >
@@ -161,10 +167,11 @@
                 <div class="excel-column flex flex-col gap-2">
                   <label class="field-label text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Excel Column</label>
                   <USelect
-                    :model-value="getMappedExcelColumn(field.name)"
-                    @update:model-value="(value: string) => onFieldMappingChange(field.name, value)"
+                    v-model="fieldToExcelMapping[field.name]"
+                    @update:modelValue="(value) => onFieldMappingChange(field.name, value)"
                     :items="getExcelColumnOptions()"
                     placeholder="-- Skip this field --"
+                    class="w-full"
                   />
                   <p v-if="getMappedExcelColumn(field.name)" class="sample-value text-xs text-gray-600 dark:text-gray-400 mt-1">
                     Sample: {{ getSampleValue(getMappedExcelColumn(field.name)!) }}
@@ -176,9 +183,10 @@
                   <label class="field-label text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Transformation</label>
                   <USelect
                     v-model="fieldTransformations[field.name]"
-                    @update:model-value="() => onTransformationChange(field.name)"
                     :items="getTransformationOptions(field)"
                     :disabled="!getMappedExcelColumn(field.name)"
+                    placeholder="None"
+                    class="w-full"
                   />
                 </div>
 
@@ -187,7 +195,7 @@
                   <UTooltip v-if="fieldTransformations[field.name] && fieldTransformations[field.name] !== 'none' && getMappedExcelColumn(field.name)" text="Preview transformation">
                     <UButton
                       @click="showTransformPreviewForField(field.name)"
-                      color="gray"
+                      color="neutral"
                       variant="ghost"
                       size="sm"
                       icon="i-heroicons-eye"
@@ -208,7 +216,7 @@
         </div>
 
         <!-- Validation Errors -->
-        <UAlert v-if="validationErrors.length > 0" icon="i-heroicons-exclamation-triangle" color="amber" variant="soft" class="mb-4">
+        <UAlert v-if="validationErrors.length > 0" icon="i-heroicons-exclamation-triangle" color="warning" variant="soft" class="mb-4">
           <template #title>Mapping Warnings</template>
           <template #description>
             <ul class="list-disc list-inside text-sm space-y-1">
@@ -218,7 +226,7 @@
         </UAlert>
 
         <!-- Transformation Warnings -->
-        <UAlert v-if="transformationWarnings.length > 0" icon="i-heroicons-exclamation-triangle" color="amber" variant="soft" class="mb-4">
+        <UAlert v-if="transformationWarnings.length > 0" icon="i-heroicons-exclamation-triangle" color="warning" variant="soft" class="mb-4">
           <template #title>Date Transformation Warning</template>
           <template #description>
             <ul class="list-disc list-inside text-sm space-y-1">
@@ -228,7 +236,7 @@
         </UAlert>
 
         <!-- Server Validation Errors -->
-        <UAlert v-if="serverValidationErrors.length > 0" icon="i-heroicons-x-circle" color="red" variant="soft" class="mb-4">
+        <UAlert v-if="serverValidationErrors.length > 0" icon="i-heroicons-x-circle" color="error" variant="soft" class="mb-4">
           <template #title>Data Validation Errors</template>
           <template #description>
             <ul class="list-disc list-inside text-sm space-y-1 max-h-60 overflow-y-auto">
@@ -243,7 +251,7 @@
             <h3 class="section-title text-lg font-semibold text-gray-900 dark:text-white">Data Preview with Validation</h3>
             <UButton
               @click="showPreview = !showPreview"
-              color="gray"
+              color="neutral"
               variant="ghost"
               size="sm"
               icon="i-heroicons-x-mark"
@@ -298,7 +306,7 @@
           <UButton
             @click="generateSQL"
             :disabled="loading || !canGenerate"
-            color="green"
+            color="success"
             size="lg"
             icon="i-heroicons-arrow-down-tray"
           >
@@ -307,11 +315,11 @@
 
           <UButton
             @click="showPreview = !showPreview"
-            color="gray"
+            color="neutral"
             size="lg"
             icon="i-heroicons-eye"
           >
-            {{ showPreview ? '👁️ Hide' : '👁️ Show' }} Preview
+            {{ showPreview ? 'Hide' : 'Show' }} Preview
           </UButton>
         </div>
 
@@ -324,9 +332,11 @@
         </div>
 
         <!-- Error Display -->
-        <UAlert v-if="error" icon="i-heroicons-x-circle" color="red" variant="soft" class="mb-4">
+        <UAlert v-if="error" icon="i-heroicons-x-circle" color="error" variant="soft" class="mb-4">
           <template #title>Error</template>
-          {{ error }}
+          <template #description>
+            {{ error }}
+          </template>
         </UAlert>
       </div>
     </div>
@@ -363,7 +373,7 @@
 
       <template #footer>
         <div class="flex justify-end">
-          <UButton @click="showTransformPreview = false; transformPreviewColumn = null" color="gray">
+          <UButton @click="showTransformPreview = false; transformPreviewColumn = null" color="neutral">
             Close
           </UButton>
         </div>
@@ -386,10 +396,10 @@
 
       <template #footer>
         <div class="flex justify-end gap-2">
-          <UButton @click="showClearDialog = false" color="gray" variant="soft">
+          <UButton @click="showClearDialog = false" color="neutral" variant="soft">
             Cancel
           </UButton>
-          <UButton @click="confirmClearMappings" color="red">
+          <UButton @click="confirmClearMappings" color="error">
             Clear All
           </UButton>
         </div>
@@ -399,7 +409,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import StepperNav from '../components/StepperNav.vue'
 import { useMappingStore, Field, type CellValue } from '../store/mappingStore'
@@ -415,6 +425,8 @@ const importStore = useImportStore()
 
 // Mapping state (Excel column → DB field)
 const localMapping = ref<Record<string, string>>({})
+// Field to Excel column mapping (DB field → Excel column) - for v-model binding
+const fieldToExcelMapping = ref<Record<string, string | null>>({})
 // Field transformations (DB field → transformation type)
 const fieldTransformations = ref<Record<string, TransformationType>>({})
 const previousFieldTransformations = ref<Record<string, TransformationType>>({}) // Store previous transformations when skipping
@@ -448,6 +460,11 @@ onMounted(() => {
   autoMap()
   validateData()
 })
+
+// Watch fieldTransformations for changes and trigger validation
+watch(fieldTransformations, () => {
+  validateData()
+}, { deep: true })
 
 /**
  * Levenshtein distance algorithm for better string matching
@@ -583,6 +600,9 @@ function autoMap() {
   localMapping.value = mapping
   fieldTransformations.value = transformsToApply
 
+  // Update fieldToExcelMapping for v-model binding
+  syncFieldToExcelMapping()
+
   // Store auto-mapping statistics for display
   autoMappingStats.value = {
     total: store.excelHeaders.length,
@@ -601,11 +621,38 @@ function updateMapping() {
 }
 
 /**
+ * Sync fieldToExcelMapping from localMapping
+ * Converts Excel column → DB field to DB field → Excel column
+ */
+function syncFieldToExcelMapping() {
+  const newMapping: Record<string, string | null> = {}
+
+  // Convert localMapping (Excel → DB) to fieldToExcelMapping (DB → Excel)
+  for (const [excelCol, dbField] of Object.entries(localMapping.value)) {
+    if (typeof dbField === 'string') {
+      newMapping[dbField] = excelCol
+    }
+  }
+
+  // Initialize all fields with null if not mapped
+  if (store.selectedTable) {
+    for (const field of store.selectedTable.fields) {
+      if (!newMapping[field.name]) {
+        newMapping[field.name] = null
+      }
+    }
+  }
+
+  fieldToExcelMapping.value = newMapping
+}
+
+/**
  * Clear all mappings
  */
 function confirmClearMappings() {
   localMapping.value = {}
   fieldTransformations.value = {}
+  syncFieldToExcelMapping()
   updateMapping()
   showClearDialog.value = false
 }
@@ -613,13 +660,13 @@ function confirmClearMappings() {
 /**
  * Get which Excel column is mapped to a database field
  */
-function getMappedExcelColumn(fieldName: string): string {
+function getMappedExcelColumn(fieldName: string): string | null {
   for (const [excelCol, dbField] of Object.entries(localMapping.value)) {
     if (dbField === fieldName) {
       return excelCol
     }
   }
-  return ''
+  return null
 }
 
 /**
@@ -710,7 +757,7 @@ function toggleSkipField(fieldName: string) {
  */
 function getExcelColumnOptions() {
   return [
-    { label: '-- Skip this field --', value: '' },
+    { label: '-- Skip this field --', value: null },
     ...store.excelHeaders.map(header => ({ label: header, value: header }))
   ]
 }
@@ -758,6 +805,7 @@ function getSampleValue(header: string): string {
  * Handle mapping change
  */
 function onMappingChange() {
+  syncFieldToExcelMapping()
   updateMapping()
   validateData()
 }
