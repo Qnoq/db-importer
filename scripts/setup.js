@@ -8,6 +8,7 @@
 import { existsSync, readFileSync, writeFileSync, copyFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -49,18 +50,15 @@ function setupEnvFiles() {
   }
 
   // Copier .env.local dans backend/.env et frontend/.env
+  // Toujours copier pour s'assurer que les configs sont sync
   const backendEnvPath = join(rootDir, 'backend', '.env');
   const frontendEnvPath = join(rootDir, 'frontend', '.env');
 
-  if (!existsSync(backendEnvPath)) {
-    copyFileSync(envLocalPath, backendEnvPath);
-    log('✅ backend/.env créé', colors.green);
-  }
+  copyFileSync(envLocalPath, backendEnvPath);
+  log('✅ backend/.env synchronisé', colors.green);
 
-  if (!existsSync(frontendEnvPath)) {
-    copyFileSync(envLocalPath, frontendEnvPath);
-    log('✅ frontend/.env créé', colors.green);
-  }
+  copyFileSync(envLocalPath, frontendEnvPath);
+  log('✅ frontend/.env synchronisé', colors.green);
 
   return true;
 }
@@ -143,9 +141,50 @@ function checkDependencies() {
     allGood = false;
   }
 
-  // Vérifier Go (via process.env ou en essayant d'exécuter)
-  log('⚠️  Assure-toi que Go est installé: https://go.dev/doc/install', colors.yellow);
-  log('⚠️  Assure-toi que Air est installé: go install github.com/air-verse/air@latest', colors.yellow);
+  // Vérifier Go
+  try {
+    const goVersion = execSync('go version', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] }).trim();
+    log(`✅ ${goVersion}`, colors.green);
+  } catch (e) {
+    log('❌ Go non trouvé', colors.red);
+    log('   Installe Go depuis https://go.dev/doc/install', colors.yellow);
+    allGood = false;
+    return allGood;
+  }
+
+  // Vérifier et installer Air si nécessaire
+  try {
+    execSync('air -v', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+    log('✅ Air est installé', colors.green);
+  } catch (e) {
+    log('⚠️  Air non trouvé, installation en cours...', colors.yellow);
+    try {
+      // Installer Air
+      execSync('go install github.com/air-verse/air@latest', {
+        encoding: 'utf8',
+        stdio: 'inherit'
+      });
+
+      // Vérifier que GOPATH/bin est accessible
+      try {
+        execSync('air -v', { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] });
+        log('✅ Air installé avec succès', colors.green);
+      } catch (checkError) {
+        // Air installé mais pas dans le PATH
+        const gopath = execSync('go env GOPATH', { encoding: 'utf8' }).trim();
+        log('⚠️  Air installé mais pas dans le PATH', colors.yellow);
+        log(`   Ajoute ceci à ton ~/.zshrc ou ~/.bashrc:`, colors.yellow);
+        log(`   export PATH="$PATH:${gopath}/bin"`, colors.yellow);
+        log('', colors.reset);
+        log('   Puis recharge: source ~/.zshrc', colors.yellow);
+        allGood = false;
+      }
+    } catch (installError) {
+      log('❌ Échec de l\'installation d\'Air', colors.red);
+      log('   Essaie manuellement: go install github.com/air-verse/air@latest', colors.yellow);
+      allGood = false;
+    }
+  }
 
   return allGood;
 }

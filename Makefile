@@ -1,5 +1,10 @@
 # Makefile pour DB Importer
 # Usage: make <command>
+#
+# Note: Ce Makefile utilise une approche hybride pour compatibilité cross-platform:
+#   - Windows: utilise npm/Node.js (car bash n'est pas natif)
+#   - macOS/Linux: utilise bash (plus rapide, meilleure gestion des processus)
+#   Les commandes restent identiques (make dev, make stop, etc.)
 
 .PHONY: help dev stop install clean logs logs-backend logs-frontend
 .PHONY: setup sync update test test-coverage test-watch
@@ -103,11 +108,21 @@ update:
 
 # Lancer en mode dev
 dev:
+ifeq ($(OS),Windows_NT)
 	@npm run dev
+else
+	@chmod +x dev.sh
+	@./dev.sh
+endif
 
 # Arrêter les serveurs
 stop:
+ifeq ($(OS),Windows_NT)
 	@npm run stop
+else
+	@chmod +x stop.sh
+	@./stop.sh
+endif
 
 # Nettoyer les fichiers temporaires
 clean:
