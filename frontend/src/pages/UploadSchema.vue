@@ -226,7 +226,7 @@ const loading = ref(false)
 const error = ref('')
 const showSingleTableDialog = ref(false)
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 async function processFile(file: File) {
   if (!file) return

@@ -117,7 +117,7 @@ function saveToStorage(state: AuthState, rememberMe: boolean = false): void {
   }
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => {

@@ -34,7 +34,7 @@ type Config struct {
 // LoadConfig loads configuration from environment variables
 func LoadConfig() *Config {
 	return &Config{
-		Port:              getEnv("PORT", "8080"),
+		Port:              getEnv("PORT", "3000"),
 		AllowedOrigins:    parseOrigins(getEnv("ALLOWED_ORIGINS", "*")),
 		MaxUploadSize:     parseInt64(getEnv("MAX_UPLOAD_SIZE", "52428800")), // 50MB default
 		EnableDebugLog:    parseBool(getEnv("DEBUG_LOG", "false")),

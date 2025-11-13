@@ -89,7 +89,7 @@ func Load() (*Config, error) {
 	}
 
 	cfg := &Config{
-		Port:        getEnv("PORT", "8080"),
+		Port:        getEnv("PORT", "3000"),
 		Environment: env,
 		Version:     getEnv("APP_VERSION", "1.0.0"),
 
