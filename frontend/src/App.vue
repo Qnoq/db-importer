@@ -1,6 +1,7 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
-    <UNotifications />
+  <UApp>
+    <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      <UNotifications />
 
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
@@ -137,7 +138,8 @@
         </div>
       </div>
     </footer>
-  </div>
+    </div>
+  </UApp>
 </template>
 
 <script setup lang="ts">
