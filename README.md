@@ -61,10 +61,12 @@ A secure, production-ready web application for importing data from Excel/CSV fil
 ## Quick Start
 
 ### Prerequisites
-- Docker & Docker Compose
-- (Optional) Go 1.21+ and Node.js 20+ for local development
+- **Docker & Docker Compose** (for containerized development)
+- **OR** Go 1.21+ and Node.js 18+ (for native development)
 
-### Development Mode
+> 🪟 **Windows Users**: Check [WINDOWS.md](WINDOWS.md) for detailed Windows setup guide!
+
+### Development Mode (Docker)
 
 1. Clone the repository
    ```bash
@@ -80,6 +82,64 @@ A secure, production-ready web application for importing data from Excel/CSV fil
 3. Access the application
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:8080
+
+### Development Mode (Native - Windows/macOS/Linux)
+
+This is the **recommended approach** for active development, with full hot-reload support:
+
+1. Clone and setup
+   ```bash
+   git clone <your-repo-url>
+   cd db-importer
+
+   # Run setup (creates .env.local)
+   npm run setup
+
+   # Install all dependencies
+   npm run install:all
+   ```
+
+2. Configure your environment
+   ```bash
+   # Edit .env.local with your configuration
+   # (Created automatically by setup script)
+   ```
+
+3. Start development servers
+   ```bash
+   # Option 1: Using npm (works everywhere)
+   npm run dev
+
+   # Option 2: Using make (requires make installed)
+   make dev
+   ```
+
+4. Access the application
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:3000
+
+5. Stop servers when done
+   ```bash
+   npm run stop
+   # or
+   make stop
+   ```
+
+**Available Commands:**
+```bash
+npm run dev              # Start both backend and frontend
+npm run stop             # Stop all servers
+npm test                 # Run all tests
+npm run build            # Build for production
+npm run install:all      # Install/update all dependencies
+
+# Or use make:
+make dev                 # Start development
+make stop                # Stop servers
+make test                # Run tests
+make build               # Build production
+make install             # Install dependencies
+```
 
 ### Production Mode
 

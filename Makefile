@@ -68,44 +68,22 @@ help:
 
 # Configuration initiale (première fois)
 setup:
-	@echo "🚀 Configuration initiale du projet..."
-	@echo ""
-	@if [ ! -f .env.local ]; then \
-		echo "📝 Création de .env.local depuis .env.example..."; \
-		cp .env.example .env.local; \
-		echo "⚠️  IMPORTANT: Édite .env.local avec tes vrais secrets:"; \
-		echo "   - DATABASE_URL (Supabase)"; \
-		echo "   - JWT_ACCESS_SECRET et JWT_REFRESH_SECRET"; \
-		echo "   - SUPABASE_URL et SUPABASE_ANON_KEY"; \
-		echo ""; \
-	else \
-		echo "✅ .env.local existe déjà"; \
-	fi
-	@echo "📦 Installation des dépendances..."
-	@$(MAKE) install
-	@echo ""
-	@echo "✅ Setup terminé !"
+	@npm install
+	@npm run setup
 	@echo ""
 	@echo "Prochaines étapes:"
 	@echo "  1. Édite .env.local avec tes secrets"
-	@echo "  2. Lance: make dev"
+	@echo "  2. Installe toutes les dépendances: make install"
+	@echo "  3. Lance: make dev"
 	@echo ""
 
 # Installer les dépendances
 install:
-	@echo "📦 Installation des dépendances..."
-	@echo "   → Backend (Go)..."
-	@cd $(BACKEND_DIR) && go mod download
-	@echo "   → Frontend (npm)..."
-	@cd $(FRONTEND_DIR) && npm install
-	@echo "✅ Dépendances installées"
+	@npm run install:all
 
 # Synchroniser les dépendances (après git pull)
 sync:
-	@echo "🔄 Synchronisation des dépendances..."
-	@cd $(BACKEND_DIR) && go mod download && go mod tidy
-	@cd $(FRONTEND_DIR) && npm install
-	@echo "✅ Dépendances synchronisées"
+	@npm run install:all
 
 # Git pull + sync automatique
 update:
@@ -125,13 +103,11 @@ update:
 
 # Lancer en mode dev
 dev:
-	@chmod +x dev.sh
-	@./dev.sh
+	@npm run dev
 
 # Arrêter les serveurs
 stop:
-	@chmod +x stop.sh
-	@./stop.sh
+	@npm run stop
 
 # Nettoyer les fichiers temporaires
 clean:
@@ -149,25 +125,15 @@ clean:
 
 # Lancer tous les tests (backend + frontend)
 test:
-	@echo "🧪 Lancement de tous les tests..."
-	@echo ""
-	@echo "📦 Tests Backend (Go)..."
-	@cd $(BACKEND_DIR) && go test $(GO_PACKAGES) -v
-	@echo ""
-	@echo "📦 Tests Frontend (Vitest)..."
-	@cd $(FRONTEND_DIR) && npm run test:run
-	@echo ""
-	@echo "✅ Tous les tests terminés !"
+	@npm run test
 
 # Tests backend uniquement
 test-backend:
-	@echo "🧪 Tests backend..."
-	@cd $(BACKEND_DIR) && go test $(GO_PACKAGES) -v
+	@npm run test:backend
 
 # Tests frontend uniquement
 test-frontend:
-	@echo "🧪 Tests frontend..."
-	@cd $(FRONTEND_DIR) && npm run test:run
+	@npm run test:frontend
 
 # Tests avec couverture de code (backend)
 test-coverage:
@@ -230,20 +196,16 @@ lint-frontend:
 #=============================================================================
 
 # Build production (backend + frontend)
-build: build-backend build-frontend
-	@echo "✅ Build complet terminé"
+build:
+	@npm run build
 
 # Build backend
 build-backend:
-	@echo "🏗️  Build backend..."
-	@cd $(BACKEND_DIR) && go build -o ../bin/server ./cmd/server
-	@echo "✅ Backend build: bin/server"
+	@npm run build:backend
 
 # Build frontend
 build-frontend:
-	@echo "🏗️  Build frontend..."
-	@cd $(FRONTEND_DIR) && npm run build
-	@echo "✅ Frontend build: frontend/dist"
+	@npm run build:frontend
 
 #=============================================================================
 # 📋 Logs
