@@ -386,43 +386,28 @@ const importStore = useImportStore()
 const toast = useToast()
 
 // Table columns configuration
-const columns = [
-  {
-    id: 'tableName',
-    key: 'tableName',
-    label: 'Table'
-  },
-  {
-    id: 'rowCount',
-    key: 'rowCount',
-    label: 'Rows'
-  },
-  {
-    id: 'status',
-    key: 'status',
-    label: 'Status'
-  },
-  {
-    id: 'errorCount',
-    key: 'errorCount',
-    label: 'Errors'
-  },
-  {
-    id: 'warningCount',
-    key: 'warningCount',
-    label: 'Warnings'
-  },
-  {
-    id: 'createdAt',
-    key: 'createdAt',
-    label: 'Date'
-  },
-  {
-    id: 'actions',
-    key: 'actions',
-    label: 'Actions'
-  }
-]
+const columns = [{
+  key: 'tableName',
+  label: 'Table'
+}, {
+  key: 'rowCount',
+  label: 'Rows'
+}, {
+  key: 'status',
+  label: 'Status'
+}, {
+  key: 'errorCount',
+  label: 'Errors'
+}, {
+  key: 'warningCount',
+  label: 'Warnings'
+}, {
+  key: 'createdAt',
+  label: 'Date'
+}, {
+  key: 'actions',
+  label: 'Actions'
+}]
 
 const filters = ref({
   tableName: '',
@@ -503,6 +488,8 @@ const goToPage = async (page: number) => {
 onMounted(async () => {
   await importStore.getStats()
   await importStore.listImports({ page: 1, pageSize: 20 })
+  console.log('Imports loaded:', importStore.imports)
+  console.log('Columns config:', columns)
 })
 
 // Auto-filter with debounce when filters change
