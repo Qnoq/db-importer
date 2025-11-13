@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Variables globales personnalisées */
 :root {
   --app-header-height: 5rem;
@@ -6,47 +10,57 @@
   --app-gap: 1rem;
 }
 
-/* Reset de base */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@layer base {
+  body {
+    background-color: rgb(249, 250, 251);
+    color: rgb(17, 24, 39);
+    transition-property: background-color, color;
+    transition-duration: 300ms;
+  }
+
+  :root.dark body {
+    background-color: rgb(3, 7, 18);
+    color: rgb(243, 244, 246);
+  }
 }
 
-body {
-  font-family: var(--p-font-family);
-  background-color: var(--p-surface-ground);
-  color: var(--p-text-color);
-  transition: background-color 0.3s, color 0.3s;
-}
+@layer components {
+  /* Container principal */
+  .app-container {
+    width: 100%;
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 
-/* Container principal */
-.app-container {
-  width: 100%;
-  max-width: var(--app-max-width);
-  margin: 0 auto;
-  padding: 0 var(--app-padding);
-}
+  /* Carte personnalisée */
+  .app-card {
+    background-color: white;
+    border: 1px solid rgb(229, 231, 235);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition-property: box-shadow;
+    transition-duration: 300ms;
+  }
 
-/* Carte personnalisée utilisant les variables PrimeVue */
-.app-card {
-  background: var(--p-surface-0);
-  border: 1px solid var(--p-surface-border);
-  border-radius: var(--p-border-radius);
-  padding: var(--p-card-body-padding);
-  box-shadow: var(--p-shadow-2);
-  transition: all 0.3s;
-}
+  .dark .app-card {
+    background-color: rgb(17, 24, 39);
+    border-color: rgb(31, 41, 55);
+  }
 
-.app-card:hover {
-  box-shadow: var(--p-shadow-4);
-}
+  .app-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  }
 
-/* Grille responsive */
-.app-grid {
-  display: grid;
-  gap: var(--app-gap);
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  /* Grille responsive */
+  .app-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
 }
 
 /* Animations globales */

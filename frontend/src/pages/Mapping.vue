@@ -1,217 +1,207 @@
 <template>
-  <div class="mapping-page">
+  <div class="mapping-page px-4 py-6 sm:px-8">
     <!-- Progress Stepper with Navigation -->
     <StepperNav />
 
-    <Card class="main-card">
-      <template #content>
+    <div class="main-card bg-white dark:bg-gray-950 rounded-lg border border-gray-200 dark:border-gray-800 shadow-md p-6">
       <!-- Header -->
-      <div class="page-header">
+      <div class="page-header mb-6 flex justify-between items-center">
         <div>
-          <h2 class="page-title">Map Columns</h2>
-          <p class="page-subtitle">
+          <h2 class="page-title text-3xl font-bold mb-2 text-gray-900 dark:text-white">Map Columns</h2>
+          <p class="page-subtitle text-gray-600 dark:text-gray-400">
             Match your Excel/CSV columns to database fields and apply transformations
           </p>
         </div>
       </div>
 
-      <Message v-if="!store.hasExcelData || !store.hasSelectedTable" severity="warn">
-        <p>Missing data. Please complete previous steps.</p>
-        <button @click="router.push('/')" class="restart-button">
-          <i class="pi pi-arrow-left mr-2"></i>
-          Start over
-        </button>
-      </Message>
+      <UAlert v-if="!store.hasExcelData || !store.hasSelectedTable" icon="i-heroicons-exclamation-triangle" color="amber" variant="soft" class="mb-4">
+        <template #title>Missing data</template>
+        <div class="flex flex-col gap-2">
+          <p>Please complete previous steps.</p>
+          <UButton @click="router.push('/')" variant="soft" color="amber" size="sm">
+            ← Start over
+          </UButton>
+        </div>
+      </UAlert>
 
       <div v-else>
         <!-- Auto-mapping Success Banner -->
-        <Message
+        <UAlert
           v-if="autoMappingStats"
-          :severity="autoMappingStats.mapped > autoMappingStats.total / 2 ? 'success' : 'warn'"
-          class="auto-mapping-banner"
+          :icon="autoMappingStats.mapped > autoMappingStats.total / 2 ? 'i-heroicons-check-circle' : 'i-heroicons-exclamation-triangle'"
+          :color="autoMappingStats.mapped > autoMappingStats.total / 2 ? 'green' : 'amber'"
+          variant="soft"
+          class="mb-4"
         >
-          <div class="banner-content">
-            <div class="banner-icon">
-              <i
-                class="banner-icon-large"
-                :class="autoMappingStats.mapped > autoMappingStats.total / 2 ? 'pi pi-check-circle' : 'pi pi-exclamation-triangle'"
-              ></i>
-            </div>
-            <div class="banner-text">
-              <h3 class="banner-title">
-                <template v-if="autoMappingStats.mapped > autoMappingStats.total / 2">
-                  Auto-mapping successful!
-                </template>
-                <template v-else>
-                  Limited auto-mapping
-                </template>
-              </h3>
-              <p class="banner-description">
-                The system automatically mapped <strong>{{ autoMappingStats.mapped }} of {{ autoMappingStats.total }} columns</strong>
-                by comparing your Excel column names with database field names.
-              </p>
+          <template #title>
+            {{ autoMappingStats.mapped > autoMappingStats.total / 2 ? 'Auto-mapping successful!' : 'Limited auto-mapping' }}
+          </template>
+          <div class="space-y-3">
+            <p class="text-sm">
+              The system automatically mapped <strong>{{ autoMappingStats.mapped }} of {{ autoMappingStats.total }} columns</strong>
+              by comparing your Excel column names with database field names.
+            </p>
 
-              <!-- Low match warning -->
-              <div v-if="autoMappingStats.mapped < autoMappingStats.total / 2" class="low-match-warning">
-                <p class="warning-title">💡 Tip: Improve auto-mapping</p>
-                <p class="warning-text">
-                  Only <strong>{{ Math.round((autoMappingStats.mapped / autoMappingStats.total) * 100) }}%</strong> of columns were auto-mapped.
-                  For better results, <strong>rename your Excel headers to match database field names</strong>
-                  (e.g., <code class="code-example">{{ store.selectedTable?.fields[0]?.name }}</code>,
-                  <code class="code-example">{{ store.selectedTable?.fields[1]?.name }}</code>).
-                </p>
-              </div>
-
-              <p class="banner-footer">
-                <i class="pi pi-info-circle mr-1"></i>
-                Review the mappings below and adjust if needed.
-                <template v-if="getAutoIncrementFieldNames().length > 0">
-                  ID fields (<strong>{{ getAutoIncrementFieldNames().join(', ') }}</strong>)
-                  were automatically skipped as they are auto-incremented.
-                </template>
+            <!-- Low match warning -->
+            <div v-if="autoMappingStats.mapped < autoMappingStats.total / 2" class="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-md p-3">
+              <p class="font-semibold text-sm mb-1">💡 Tip: Improve auto-mapping</p>
+              <p class="text-sm">
+                Only <strong>{{ Math.round((autoMappingStats.mapped / autoMappingStats.total) * 100) }}%</strong> of columns were auto-mapped.
+                For better results, <strong>rename your Excel headers to match database field names</strong>
+                (e.g., <code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs">{{ store.selectedTable?.fields[0]?.name }}</code>,
+                <code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded text-xs">{{ store.selectedTable?.fields[1]?.name }}</code>).
               </p>
             </div>
+
+            <p class="text-sm">
+              Review the mappings below and adjust if needed.
+              <template v-if="getAutoIncrementFieldNames().length > 0">
+                ID fields (<strong>{{ getAutoIncrementFieldNames().join(', ') }}</strong>)
+                were automatically skipped as they are auto-incremented.
+              </template>
+            </p>
           </div>
-        </Message>
+        </UAlert>
 
         <!-- Info Banner -->
-        <Message severity="info" class="info-banner">
-          <div class="info-content">
-            <p>
-              <i class="pi pi-info-circle mr-2"></i>
+        <UAlert icon="i-heroicons-information-circle" color="blue" variant="soft" class="mb-4">
+          <template #title>Mapping Information</template>
+          <div class="space-y-2">
+            <p class="text-sm">
               Target table: <strong>{{ store.selectedTable?.name }}</strong> |
               Data rows: <strong>{{ store.excelData.length }}</strong>
             </p>
+            <div v-if="validationStats" class="flex gap-4 text-sm">
+              <span class="text-green-600 dark:text-green-400 font-medium">
+                ✓ {{ validationStats.validRowCount }} valid
+              </span>
+              <span v-if="validationStats.warningCount > 0" class="text-amber-600 dark:text-amber-400 font-medium">
+                ⚠ {{ validationStats.warningCount }} warnings
+              </span>
+              <span v-if="validationStats.errorCount > 0" class="text-red-600 dark:text-red-400 font-medium">
+                ✕ {{ validationStats.errorCount }} errors
+              </span>
+            </div>
           </div>
-          <div v-if="validationStats" class="validation-stats">
-            <span class="stat-success">
-              <i class="pi pi-check-circle"></i> {{ validationStats.validRowCount }} valid
-            </span>
-            <span v-if="validationStats.warningCount > 0" class="stat-warning">
-              <i class="pi pi-exclamation-triangle"></i> {{ validationStats.warningCount }} warnings
-            </span>
-            <span v-if="validationStats.errorCount > 0" class="stat-error">
-              <i class="pi pi-times-circle"></i> {{ validationStats.errorCount }} errors
-            </span>
-          </div>
-        </Message>
+        </UAlert>
 
         <!-- Column Mapping -->
-        <div class="mapping-section">
-          <div class="section-header">
-            <h3 class="section-title">Column Mapping</h3>
-            <div class="action-buttons">
-              <Button
-                label="Auto-map Columns"
-                icon="pi pi-bolt"
+        <div class="mapping-section mb-6">
+          <div class="section-header flex justify-between items-center mb-4">
+            <h3 class="section-title text-lg font-semibold text-gray-900 dark:text-white">Column Mapping</h3>
+            <div class="action-buttons flex gap-2">
+              <UButton
                 @click="autoMap"
-                severity="info"
-              />
-              <Button
-                label="Clear All"
-                icon="pi pi-times"
+                color="blue"
+                variant="soft"
+                size="sm"
+              >
+                ⚡ Auto-map Columns
+              </UButton>
+              <UButton
                 @click="showClearDialog = true"
-                severity="secondary"
-              />
+                color="gray"
+                variant="soft"
+                size="sm"
+              >
+                ✕ Clear All
+              </UButton>
             </div>
           </div>
 
-          <div class="mapping-list">
+          <div class="mapping-list space-y-3">
             <div
               v-for="(field, index) in store.selectedTable?.fields"
               :key="index"
-              class="mapping-card"
+              class="mapping-card border-2 rounded-lg p-4 transition-all"
               :class="{
-                'mapped': getMappedExcelColumn(field.name) && !hasYearWarning(field.name),
-                'warning': getMappedExcelColumn(field.name) && hasYearWarning(field.name),
-                'unmapped': !getMappedExcelColumn(field.name)
+                'border-green-300 bg-green-50 dark:bg-green-950 dark:border-green-800': getMappedExcelColumn(field.name) && !hasYearWarning(field.name),
+                'border-amber-400 bg-amber-50 dark:bg-amber-950 dark:border-amber-800': getMappedExcelColumn(field.name) && hasYearWarning(field.name),
+                'border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-700': !getMappedExcelColumn(field.name)
               }"
             >
-              <div class="mapping-grid">
+              <div class="mapping-grid grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
                 <!-- DB Field (Target) -->
-                <div class="field-column">
-                  <label class="field-label">Database Field</label>
-                  <div class="field-content">
-                    <div class="field-icon">
-                      <i class="pi pi-database"></i>
+                <div class="field-column flex flex-col gap-2">
+                  <label class="field-label text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Database Field</label>
+                  <div class="field-content flex items-center gap-2">
+                    <div class="field-icon flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded flex items-center justify-center text-purple-600 dark:text-purple-300">
+                      🗄️
                     </div>
-                    <div class="field-info">
-                      <div class="field-name-row">
-                        <p class="field-name" :title="field.name">
+                    <div class="field-info flex-1 min-w-0">
+                      <div class="field-name-row flex items-center gap-2">
+                        <p class="field-name font-semibold truncate text-gray-900 dark:text-white" :title="field.name">
                           {{ field.name }}{{ field.nullable ? '' : ' *' }}
                         </p>
-                        <span v-if="isAutoIncrementField(field)" class="badge badge-success">AUTO</span>
-                        <span v-if="hasYearWarning(field.name)" class="badge badge-warning">
-                          <i class="pi pi-exclamation-triangle"></i> YEAR
+                        <span v-if="isAutoIncrementField(field)" class="badge badge-success text-xs font-medium rounded-full px-2 py-0.5 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 whitespace-nowrap">AUTO</span>
+                        <span v-if="hasYearWarning(field.name)" class="badge badge-warning text-xs font-medium rounded-full px-2 py-0.5 bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300 whitespace-nowrap flex items-center gap-1">
+                          ⚠️ YEAR
                         </span>
                       </div>
-                      <p class="field-type">{{ field.type }}</p>
+                      <p class="field-type text-xs text-gray-600 dark:text-gray-400">{{ field.type }}</p>
                     </div>
                   </div>
                 </div>
 
                 <!-- Arrow -->
-                <div class="arrow-column">
-                  <i
-                    class="pi pi-arrow-left mapping-arrow"
+                <div class="arrow-column flex justify-center">
+                  <span
+                    class="text-2xl"
                     :class="{
-                      'arrow-mapped': getMappedExcelColumn(field.name) && !hasYearWarning(field.name),
-                      'arrow-warning': getMappedExcelColumn(field.name) && hasYearWarning(field.name),
-                      'arrow-unmapped': !getMappedExcelColumn(field.name)
+                      'text-green-600': getMappedExcelColumn(field.name) && !hasYearWarning(field.name),
+                      'text-amber-500': getMappedExcelColumn(field.name) && hasYearWarning(field.name),
+                      'text-gray-300': !getMappedExcelColumn(field.name)
                     }"
-                  ></i>
+                  >
+                    ←
+                  </span>
                 </div>
 
                 <!-- Excel Column (Source) -->
-                <div class="excel-column">
-                  <label class="field-label">Excel Column</label>
-                  <Dropdown
-                    :modelValue="getMappedExcelColumn(field.name)"
-                    @update:modelValue="(value: string) => onFieldMappingChange(field.name, value)"
+                <div class="excel-column flex flex-col gap-2">
+                  <label class="field-label text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Excel Column</label>
+                  <USelect
+                    :model-value="getMappedExcelColumn(field.name)"
+                    @update:model-value="(value: string) => onFieldMappingChange(field.name, value)"
                     :options="getExcelColumnOptions()"
-                    optionLabel="label"
-                    optionValue="value"
+                    option-attribute="label"
                     placeholder="-- Skip this field --"
-                    class="w-full"
                   />
-                  <p v-if="getMappedExcelColumn(field.name)" class="sample-value">
+                  <p v-if="getMappedExcelColumn(field.name)" class="sample-value text-xs text-gray-600 dark:text-gray-400 mt-1">
                     Sample: {{ getSampleValue(getMappedExcelColumn(field.name)!) }}
                   </p>
                 </div>
 
                 <!-- Transformation -->
-                <div class="transform-column">
-                  <label class="field-label">Transformation</label>
-                  <Dropdown
+                <div class="transform-column flex flex-col gap-2">
+                  <label class="field-label text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Transformation</label>
+                  <USelect
                     v-model="fieldTransformations[field.name]"
-                    @update:modelValue="() => onTransformationChange(field.name)"
+                    @update:model-value="() => onTransformationChange(field.name)"
                     :options="getTransformationOptions(field)"
-                    optionLabel="label"
-                    optionValue="value"
+                    option-attribute="label"
                     :disabled="!getMappedExcelColumn(field.name)"
-                    class="w-full"
                   />
                 </div>
 
                 <!-- Actions -->
-                <div class="actions-column">
-                  <Button
-                    v-if="fieldTransformations[field.name] && fieldTransformations[field.name] !== 'none' && getMappedExcelColumn(field.name)"
-                    @click="showTransformPreviewForField(field.name)"
-                    icon="pi pi-eye"
-                    text
-                    rounded
-                    severity="secondary"
-                    v-tooltip.top="'Preview transformation'"
-                  />
-                  <div class="skip-checkbox">
-                    <Checkbox
-                      :modelValue="!getMappedExcelColumn(field.name)"
-                      @update:modelValue="() => toggleSkipField(field.name)"
-                      :binary="true"
-                      :inputId="`skip-${field.name}`"
+                <div class="actions-column flex gap-2 justify-end items-center">
+                  <UTooltip v-if="fieldTransformations[field.name] && fieldTransformations[field.name] !== 'none' && getMappedExcelColumn(field.name)" text="Preview transformation">
+                    <UButton
+                      @click="showTransformPreviewForField(field.name)"
+                      color="gray"
+                      variant="ghost"
+                      size="sm"
+                      icon="i-heroicons-eye"
                     />
-                    <label :for="`skip-${field.name}`" class="skip-label">Skip</label>
+                  </UTooltip>
+                  <div class="skip-checkbox flex items-center gap-2 cursor-pointer p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <UCheckbox
+                      :model-value="!getMappedExcelColumn(field.name)"
+                      @update:model-value="() => toggleSkipField(field.name)"
+                      :input-id="`skip-${field.name}`"
+                    />
+                    <label :for="`skip-${field.name}`" class="skip-label text-xs font-medium whitespace-nowrap text-gray-600 dark:text-gray-400">Skip</label>
                   </div>
                 </div>
               </div>
@@ -220,84 +210,77 @@
         </div>
 
         <!-- Validation Errors -->
-        <Message v-if="validationErrors.length > 0" severity="warn" class="validation-message">
-          <h3>
-            <i class="pi pi-exclamation-triangle mr-2"></i>
-            Mapping Warnings
-          </h3>
-          <ul class="error-list">
+        <UAlert v-if="validationErrors.length > 0" icon="i-heroicons-exclamation-triangle" color="amber" variant="soft" class="mb-4">
+          <template #title>Mapping Warnings</template>
+          <ul class="list-disc list-inside text-sm space-y-1">
             <li v-for="(err, index) in validationErrors" :key="index">{{ err }}</li>
           </ul>
-        </Message>
+        </UAlert>
 
         <!-- Transformation Warnings -->
-        <Message v-if="transformationWarnings.length > 0" severity="warn" class="validation-message">
-          <h3>
-            <i class="pi pi-exclamation-triangle mr-2"></i>
-            Date Transformation Warning
-          </h3>
-          <ul class="error-list">
+        <UAlert v-if="transformationWarnings.length > 0" icon="i-heroicons-exclamation-triangle" color="amber" variant="soft" class="mb-4">
+          <template #title>Date Transformation Warning</template>
+          <ul class="list-disc list-inside text-sm space-y-1">
             <li v-for="(warning, index) in transformationWarnings" :key="index">{{ warning }}</li>
           </ul>
-        </Message>
+        </UAlert>
 
         <!-- Server Validation Errors -->
-        <Message v-if="serverValidationErrors.length > 0" severity="error" class="validation-message">
-          <h3>
-            <i class="pi pi-times-circle mr-2"></i>
-            Data Validation Errors
-          </h3>
-          <ul class="error-list scrollable">
+        <UAlert v-if="serverValidationErrors.length > 0" icon="i-heroicons-x-circle" color="red" variant="soft" class="mb-4">
+          <template #title>Data Validation Errors</template>
+          <ul class="list-disc list-inside text-sm space-y-1 max-h-60 overflow-y-auto">
             <li v-for="(err, index) in serverValidationErrors" :key="index">{{ err }}</li>
           </ul>
-        </Message>
+        </UAlert>
 
         <!-- Data Preview with Highlighting -->
-        <div v-if="showPreview" class="preview-section">
-          <div class="preview-header">
-            <h3 class="section-title">Data Preview with Validation</h3>
-            <Button
+        <div v-if="showPreview" class="preview-section mb-6 border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-900">
+          <div class="preview-header flex justify-between items-center mb-4">
+            <h3 class="section-title text-lg font-semibold text-gray-900 dark:text-white">Data Preview with Validation</h3>
+            <UButton
               @click="showPreview = !showPreview"
-              icon="pi pi-times"
-              text
-              rounded
-              severity="secondary"
+              color="gray"
+              variant="ghost"
+              size="sm"
+              icon="i-heroicons-x-mark"
             />
           </div>
 
-          <div class="preview-table-wrapper">
-            <table class="preview-table">
-              <thead>
+          <div class="preview-table-wrapper overflow-x-auto max-h-96 overflow-y-auto">
+            <table class="min-w-full border-collapse">
+              <thead class="sticky top-0 bg-gray-100 dark:bg-gray-800 z-10">
                 <tr>
-                  <th class="row-number-header">#</th>
+                  <th class="row-number-header px-3 py-2 text-left text-xs font-semibold uppercase text-gray-900 dark:text-white">#</th>
                   <th
                     v-for="(header, idx) in store.excelHeaders"
                     :key="idx"
-                    class="column-header"
+                    class="column-header px-3 py-2 text-left text-xs font-semibold uppercase text-gray-900 dark:text-white"
                   >
                     {{ header }}
-                    <div v-if="localMapping[header]" class="mapped-field">
+                    <div v-if="localMapping[header]" class="mapped-field text-xs font-normal text-green-600 dark:text-green-400">
                       → {{ localMapping[header] }}
                     </div>
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                <tr v-for="(row, rowIdx) in previewData" :key="rowIdx">
-                  <td class="row-number">{{ rowIdx + 1 }}</td>
+              <tbody class="bg-white dark:bg-gray-950">
+                <tr v-for="(row, rowIdx) in previewData" :key="rowIdx" class="border-t border-gray-200 dark:border-gray-700">
+                  <td class="row-number px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900">{{ rowIdx + 1 }}</td>
                   <td
                     v-for="(cell, cellIdx) in row"
                     :key="cellIdx"
-                    class="data-cell"
+                    class="data-cell px-3 py-2 text-sm text-gray-900 dark:text-white"
                     :class="getCellValidationClass(rowIdx, cellIdx)"
                     :title="getCellValidationMessage(rowIdx, cellIdx)"
                   >
-                    <div class="cell-content">
+                    <div class="cell-content flex items-center gap-2">
                       <span>{{ formatCellValue(cell) }}</span>
-                      <i
+                      <span
                         v-if="getCellValidationIcon(rowIdx, cellIdx)"
-                        :class="`pi ${getCellValidationIcon(rowIdx, cellIdx)}`"
-                      ></i>
+                        class="text-lg"
+                      >
+                        {{ getCellValidationIcon(rowIdx, cellIdx) === 'pi-check-circle' ? '✓' : getCellValidationIcon(rowIdx, cellIdx) === 'pi-exclamation-triangle' ? '⚠' : '✕' }}
+                      </span>
                     </div>
                   </td>
                 </tr>
@@ -307,89 +290,102 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="bottom-actions">
-          <Button
-            label="Generate & Download SQL"
-            icon="pi pi-download"
+        <div class="bottom-actions flex flex-wrap gap-4 mb-6">
+          <UButton
             @click="generateSQL"
             :disabled="loading || !canGenerate"
-            severity="success"
-            size="large"
-          />
+            color="green"
+            size="lg"
+            icon="i-heroicons-arrow-down-tray"
+          >
+            Generate & Download SQL
+          </UButton>
 
-          <Button
-            :label="showPreview ? 'Hide' : 'Show' + ' Preview'"
-            icon="pi pi-eye"
+          <UButton
             @click="showPreview = !showPreview"
-            severity="secondary"
-          />
+            color="gray"
+            size="lg"
+            icon="i-heroicons-eye"
+          >
+            {{ showPreview ? '👁️ Hide' : '👁️ Show' }} Preview
+          </UButton>
         </div>
 
         <!-- Loading Indicator -->
-        <div v-if="loading" class="loading-container">
-          <i class="pi pi-spin pi-spinner loading-spinner"></i>
+        <div v-if="loading" class="loading-container flex items-center justify-center p-8">
+          <div class="flex flex-col items-center gap-4">
+            <div class="animate-spin text-4xl">⏳</div>
+            <p class="text-gray-600 dark:text-gray-400">Generating SQL...</p>
+          </div>
         </div>
 
         <!-- Error Display -->
-        <Message v-if="error" severity="error">{{ error }}</Message>
+        <UAlert v-if="error" icon="i-heroicons-x-circle" color="red" variant="soft" class="mb-4">
+          <template #title>Error</template>
+          {{ error }}
+        </UAlert>
       </div>
-      </template>
-    </Card>
+    </div>
 
-    <!-- Transform Preview Dialog -->
-    <Dialog
-      v-model:visible="showTransformPreview"
-      :header="`Transformation Preview: ${transformPreviewColumn}`"
-      :style="{ width: '50rem' }"
-      :modal="true"
-    >
-      <div v-if="transformPreviewColumn" class="dialog-content">
-        <p><strong>Transformation:</strong> {{ transformations[fieldTransformations[transformPreviewColumn]]?.label }}</p>
-        <p class="dialog-description">{{ transformations[fieldTransformations[transformPreviewColumn]]?.description }}</p>
-      </div>
+    <!-- Transform Preview Modal -->
+    <UModal v-model="showTransformPreview" :ui="{ width: 'w-full sm:max-w-2xl' }">
+      <div class="p-6">
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Transformation Preview: {{ transformPreviewColumn }}</h2>
+          <div v-if="transformPreviewColumn" class="dialog-content space-y-3">
+            <p><strong>Transformation:</strong> {{ transformations[fieldTransformations[transformPreviewColumn]]?.label }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ transformations[fieldTransformations[transformPreviewColumn]]?.description }}</p>
+          </div>
+        </div>
 
-      <div class="preview-dialog-table">
-        <table class="dialog-table">
-          <thead>
-            <tr>
-              <th>Original</th>
-              <th>Transformed</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(preview, idx) in getTransformPreview(transformPreviewColumn!)" :key="idx">
-              <td>{{ preview.original }}</td>
-              <td class="transformed-value">{{ preview.transformed }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <div class="preview-dialog-table overflow-x-auto">
+          <table class="min-w-full border-collapse border border-gray-200 dark:border-gray-700">
+            <thead class="bg-gray-100 dark:bg-gray-800">
+              <tr>
+                <th class="px-4 py-2 text-left font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700">Original</th>
+                <th class="px-4 py-2 text-left font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700">Transformed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(preview, idx) in getTransformPreview(transformPreviewColumn!)" :key="idx" class="border-t border-gray-200 dark:border-gray-700">
+                <td class="px-4 py-2 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700">{{ preview.original }}</td>
+                <td class="px-4 py-2 text-gray-900 dark:text-white font-semibold text-green-600 dark:text-green-400 border border-gray-200 dark:border-gray-700">{{ preview.transformed }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <template #footer>
-        <Button label="Close" @click="showTransformPreview = false; transformPreviewColumn = null" />
-      </template>
-    </Dialog>
-
-    <!-- Clear Mappings Confirmation Dialog -->
-    <Dialog
-      v-model:visible="showClearDialog"
-      header="Confirm Clear All"
-      :modal="true"
-      :style="{ width: '30rem' }"
-    >
-      <div class="confirm-dialog-content">
-        <i class="pi pi-exclamation-triangle dialog-warning-icon"></i>
-        <div>
-          <p>Are you sure you want to clear all column mappings?</p>
-          <p class="dialog-subtitle">This will remove all mappings and transformations.</p>
+        <div class="mt-6 flex justify-end gap-2">
+          <UButton @click="showTransformPreview = false; transformPreviewColumn = null" color="gray">
+            Close
+          </UButton>
         </div>
       </div>
+    </UModal>
 
-      <template #footer>
-        <Button label="Cancel" text @click="showClearDialog = false" />
-        <Button label="Clear All" severity="danger" @click="confirmClearMappings" />
-      </template>
-    </Dialog>
+    <!-- Clear Mappings Confirmation Modal -->
+    <UModal v-model="showClearDialog" :ui="{ width: 'w-full sm:max-w-md' }">
+      <div class="p-6">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Confirm Clear All</h2>
+
+        <div class="confirm-dialog-content flex gap-4 mb-6">
+          <span class="text-3xl flex-shrink-0">⚠️</span>
+          <div>
+            <p class="text-gray-900 dark:text-white mb-2">Are you sure you want to clear all column mappings?</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">This will remove all mappings and transformations.</p>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <UButton @click="showClearDialog = false" color="gray" variant="soft">
+            Cancel
+          </UButton>
+          <UButton @click="confirmClearMappings" color="red">
+            Clear All
+          </UButton>
+        </div>
+      </div>
+    </UModal>
   </div>
 </template>
 
@@ -402,12 +398,6 @@ import { useAuthStore } from '../store/authStore'
 import { useImportStore } from '../store/importStore'
 import { transformations, applyTransformation, suggestTransformations, hasYearOnlyValues, type TransformationType } from '../utils/transformations'
 import { validateDataset, getCellClass, getValidationIcon, type ValidationResult } from '../utils/dataValidation'
-import Dialog from 'primevue/dialog'
-import Button from 'primevue/button'
-import Dropdown from 'primevue/dropdown'
-import Checkbox from 'primevue/checkbox'
-import Card from 'primevue/card'
-import Message from 'primevue/message'
 
 const router = useRouter()
 const store = useMappingStore()
@@ -1145,504 +1135,3 @@ async function generateSQL() {
   }
 }
 </script>
-
-<style scoped>
-.mapping-page {
-  padding: 1.5rem 1rem;
-}
-
-.main-card {
-  box-shadow: var(--p-shadow-4);
-}
-
-.page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.page-title {
-  font-size: 1.875rem;
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-  color: var(--p-text-color);
-}
-
-.page-subtitle {
-  margin-top: 0.25rem;
-  color: var(--p-text-muted-color);
-}
-
-.restart-button {
-  margin-top: 0.75rem;
-  font-weight: 600;
-  color: var(--p-primary-color);
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.auto-mapping-banner {
-  margin-bottom: 1rem;
-}
-
-.banner-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.banner-icon {
-  flex-shrink: 0;
-}
-
-.banner-icon-large {
-  font-size: 1.5rem;
-}
-
-.banner-text {
-  flex: 1;
-}
-
-.banner-title {
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.banner-description {
-  font-size: 0.875rem;
-}
-
-.low-match-warning {
-  margin-top: 0.75rem;
-  background: rgba(255, 235, 156, 0.3);
-  border-radius: var(--p-border-radius);
-  padding: 0.75rem;
-}
-
-.warning-title {
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.25rem;
-}
-
-.warning-text {
-  font-size: 0.875rem;
-}
-
-.code-example {
-  background: white;
-  padding: 0.125rem 0.25rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-}
-
-.banner-footer {
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
-}
-
-.info-banner {
-  margin-bottom: 1rem;
-}
-
-.info-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex: 1;
-}
-
-.validation-stats {
-  display: flex;
-  gap: 1rem;
-  font-size: 0.875rem;
-}
-
-.stat-success {
-  color: var(--p-green-700);
-}
-
-.stat-warning {
-  color: var(--p-orange-600);
-}
-
-.stat-error {
-  color: var(--p-red-700);
-}
-
-.mapping-section {
-  margin-bottom: 1.5rem;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.section-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--p-text-color);
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.mapping-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.mapping-card {
-  border: 2px solid var(--p-surface-border);
-  border-radius: var(--p-border-radius);
-  padding: 1rem;
-  background: var(--p-surface-card);
-  transition: all 0.2s;
-}
-
-.mapping-card.mapped {
-  border-color: var(--p-green-300);
-  background: rgba(34, 197, 94, 0.05);
-}
-
-.mapping-card.warning {
-  border-color: var(--p-orange-400);
-  background: rgba(251, 146, 60, 0.05);
-}
-
-.mapping-card.unmapped {
-  border-color: var(--p-surface-border);
-}
-
-.mapping-grid {
-  display: grid;
-  grid-template-columns: 1fr auto 2fr 2fr auto;
-  gap: 1rem;
-  align-items: center;
-}
-
-@media (max-width: 768px) {
-  .mapping-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.field-column,
-.excel-column,
-.transform-column {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.field-label {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--p-text-muted-color);
-  margin-bottom: 0.25rem;
-}
-
-.field-content {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.field-icon {
-  flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
-  background: rgba(168, 85, 247, 0.1);
-  border-radius: var(--p-border-radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--p-purple-600);
-}
-
-.field-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.field-name-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.field-name {
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--p-text-color);
-}
-
-.badge {
-  padding: 0.125rem 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border-radius: 9999px;
-  white-space: nowrap;
-}
-
-.badge-success {
-  background: var(--p-green-100);
-  color: var(--p-green-700);
-}
-
-.badge-warning {
-  background: var(--p-orange-100);
-  color: var(--p-orange-700);
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.field-type {
-  font-size: 0.75rem;
-  color: var(--p-text-muted-color);
-}
-
-.arrow-column {
-  display: flex;
-  justify-content: center;
-}
-
-.mapping-arrow {
-  font-size: 1.5rem;
-}
-
-.arrow-mapped {
-  color: var(--p-green-600);
-}
-
-.arrow-warning {
-  color: var(--p-orange-500);
-}
-
-.arrow-unmapped {
-  color: var(--p-surface-300);
-}
-
-.sample-value {
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
-  color: var(--p-text-muted-color);
-}
-
-.actions-column {
-  display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.skip-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: var(--p-border-radius);
-  transition: background-color 0.2s;
-}
-
-.skip-checkbox:hover {
-  background-color: var(--p-surface-100);
-}
-
-.skip-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  white-space: nowrap;
-  color: var(--p-text-muted-color);
-}
-
-.validation-message {
-  margin-bottom: 1rem;
-}
-
-.error-list {
-  list-style: disc;
-  list-style-position: inside;
-  font-size: 0.875rem;
-  margin-top: 0.5rem;
-}
-
-.error-list.scrollable {
-  max-height: 15rem;
-  overflow-y: auto;
-}
-
-.preview-section {
-  margin-bottom: 1.5rem;
-  border-radius: var(--p-border-radius);
-  padding: 1rem;
-  border: 1px solid var(--p-surface-border);
-  background: var(--p-surface-50);
-}
-
-.preview-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-
-.preview-table-wrapper {
-  overflow-x: auto;
-  max-height: 24rem;
-  overflow-y: auto;
-}
-
-.preview-table {
-  min-width: 100%;
-  border-collapse: collapse;
-}
-
-.preview-table thead {
-  position: sticky;
-  top: 0;
-  background: var(--p-surface-100);
-  z-index: 10;
-}
-
-.row-number-header,
-.column-header {
-  padding: 0.75rem;
-  text-align: left;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: var(--p-text-color);
-}
-
-.mapped-field {
-  font-size: 0.75rem;
-  font-weight: normal;
-  color: var(--p-primary-color);
-}
-
-.preview-table tbody {
-  background: var(--p-surface-0);
-}
-
-.preview-table tbody tr {
-  border-top: 1px solid var(--p-surface-border);
-}
-
-.row-number {
-  padding: 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--p-text-muted-color);
-  background: var(--p-surface-0);
-}
-
-.data-cell {
-  padding: 0.75rem;
-  font-size: 0.875rem;
-  color: var(--p-text-color);
-}
-
-.cell-content {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.bottom-actions {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.loading-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.loading-spinner {
-  font-size: 2.5rem;
-  color: var(--p-primary-color);
-}
-
-.dialog-content {
-  margin-bottom: 1rem;
-}
-
-.dialog-description {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-}
-
-.preview-dialog-table {
-  overflow-x: auto;
-}
-
-.dialog-table {
-  min-width: 100%;
-  border-collapse: collapse;
-  border: 1px solid var(--p-surface-border);
-}
-
-.dialog-table thead {
-  background: var(--p-surface-100);
-}
-
-.dialog-table th {
-  padding: 0.75rem;
-  text-align: left;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  color: var(--p-text-color);
-}
-
-.dialog-table tbody tr {
-  border-top: 1px solid var(--p-surface-border);
-}
-
-.dialog-table td {
-  padding: 0.75rem;
-  font-size: 0.875rem;
-}
-
-.transformed-value {
-  font-weight: 500;
-  color: var(--p-primary-color);
-}
-
-.confirm-dialog-content {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-}
-
-.dialog-warning-icon {
-  font-size: 1.875rem;
-  color: var(--p-orange-500);
-}
-
-.dialog-subtitle {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-}
-</style>

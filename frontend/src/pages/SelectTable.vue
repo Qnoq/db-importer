@@ -1,191 +1,215 @@
 <template>
-  <div class="page-container">
+  <div class="px-4 py-6 md:px-6">
     <!-- Progress Stepper with Navigation -->
     <StepperNav />
 
-    <div class="main-card">
-      <h2 class="page-title">Select Target Table</h2>
-      <p class="page-description">
-        Choose the table where you want to import data
-      </p>
+    <div class="mx-auto max-w-6xl rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
+      <div class="border-b border-slate-200 px-6 py-6 dark:border-slate-700">
+        <h2 class="text-3xl font-bold text-slate-900 dark:text-white">Select Target Table</h2>
+        <p class="mt-2 text-slate-600 dark:text-slate-400">Choose the table where you want to import data</p>
+      </div>
 
-      <Message v-if="!store.hasSchema" severity="warn" :closable="false">
-        <p>No schema loaded. Please upload a SQL file first.</p>
-        <Button
-          @click="router.push('/')"
-          label="Go back to upload schema"
-          icon="pi pi-arrow-left"
-          severity="secondary"
-          text
-          class="mt-3"
-        />
-      </Message>
-
-      <div v-else>
-        <!-- Search and Stats Bar -->
-        <div class="search-section">
-          <!-- Search Input -->
-          <div class="search-wrapper">
-            <div class="search-icon">
-              <i class="pi pi-search"></i>
+      <div class="space-y-6 px-6 py-6">
+        <UAlert
+          v-if="!store.hasSchema"
+          color="amber"
+          variant="subtle"
+          title="No schema loaded"
+          description="Please upload a SQL file first."
+          :closable="false"
+        >
+          <template #description>
+            <div class="space-y-3">
+              <p class="text-sm">Please upload a SQL file first.</p>
+              <UButton
+                @click="router.push('/')"
+                color="slate"
+                variant="outline"
+                size="sm"
+              >
+                Go back to upload schema
+              </UButton>
             </div>
-            <InputText
-              v-model="searchQuery"
-              type="text"
-              placeholder="Search tables by name..."
-              class="search-input"
-            />
-            <div v-if="searchQuery" class="clear-icon">
-              <button @click="searchQuery = ''" class="clear-button">
-                <i class="pi pi-times"></i>
+          </template>
+        </UAlert>
+
+        <template v-else>
+          <!-- Search and Stats Bar -->
+          <div class="space-y-4">
+            <!-- Search Input -->
+            <div class="relative">
+              <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                🔍
+              </div>
+              <UInput
+                v-model="searchQuery"
+                type="text"
+                placeholder="Search tables by name..."
+                class="pl-10"
+              />
+              <button
+                v-if="searchQuery"
+                @click="searchQuery = ''"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 transition-colors hover:text-slate-900 dark:hover:text-white"
+              >
+                ✕
               </button>
             </div>
-          </div>
 
-          <!-- Stats and Sorting -->
-          <div class="stats-bar">
-            <div class="stats-info">
-              <div class="stat-item">
-                <i class="pi pi-database stat-icon"></i>
-                <span class="stat-text">
-                  {{ filteredTables.length }} of {{ store.tables.length }} tables
-                </span>
-              </div>
-              <div v-if="selectedTableName" class="stat-item selected">
-                <i class="pi pi-check-circle"></i>
-                <span class="stat-text">1 selected</span>
-              </div>
-            </div>
-
-            <div class="sort-controls">
-              <label class="sort-label">Sort by:</label>
-              <select v-model="sortBy" class="sort-select">
-                <option value="name">Name A-Z</option>
-                <option value="name-desc">Name Z-A</option>
-                <option value="columns">Columns (Low-High)</option>
-                <option value="columns-desc">Columns (High-Low)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Empty State -->
-        <div v-if="filteredTables.length === 0" class="empty-state">
-          <i class="pi pi-inbox empty-icon"></i>
-          <p class="empty-title">No tables found</p>
-          <p class="empty-subtitle">Try adjusting your search query</p>
-          <Button
-            @click="searchQuery = ''"
-            label="Clear search"
-            text
-            class="mt-4"
-          />
-        </div>
-
-        <!-- Table Grid -->
-        <div v-else class="table-grid">
-          <div
-            v-for="table in paginatedTables"
-            :key="table.name"
-            @click="selectTable(table.name)"
-            class="table-card"
-            :class="{ 'selected': selectedTableName === table.name }"
-          >
-            <!-- Table Header -->
-            <div class="table-header">
-              <div class="table-info">
-                <div class="table-icon">
-                  <i class="pi pi-table"></i>
+            <!-- Stats and Sorting -->
+            <div class="flex flex-col items-center justify-between gap-4 rounded-lg bg-slate-50 p-4 dark:bg-slate-800 md:flex-row">
+              <div class="flex items-center gap-4 text-sm">
+                <div class="flex items-center gap-2">
+                  <span>📊</span>
+                  <span class="font-medium text-slate-700 dark:text-slate-300">
+                    {{ filteredTables.length }} of {{ store.tables.length }} tables
+                  </span>
                 </div>
-                <div class="table-details">
-                  <h3 class="table-name" :title="table.name">
-                    {{ table.name }}
-                  </h3>
-                  <p class="table-columns">
-                    <i class="pi pi-list"></i>
-                    {{ table.fields.length }} column{{ table.fields.length !== 1 ? 's' : '' }}
-                  </p>
+                <div v-if="selectedTableName" class="flex items-center gap-2 text-green-600 dark:text-green-400">
+                  <span>✓</span>
+                  <span class="font-medium">1 selected</span>
                 </div>
               </div>
-              <div v-if="selectedTableName === table.name" class="check-icon">
-                <i class="pi pi-check-circle"></i>
-              </div>
-            </div>
 
-            <!-- Column Preview -->
-            <div class="column-preview">
-              <p class="preview-title">Columns</p>
-              <div class="column-list">
-                <div
-                  v-for="field in table.fields.slice(0, 4)"
-                  :key="field.name"
-                  class="column-item"
+              <div class="flex items-center gap-3">
+                <label class="text-sm font-medium text-slate-700 dark:text-slate-300">Sort by:</label>
+                <select
+                  v-model="sortBy"
+                  class="rounded border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 transition-colors focus:border-green-600 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white"
                 >
-                  <i class="pi pi-circle-fill column-bullet"></i>
-                  <span class="column-name">{{ field.name }}</span>
-                  <span class="column-type">{{ formatType(field.type) }}</span>
+                  <option value="name">Name A-Z</option>
+                  <option value="name-desc">Name Z-A</option>
+                  <option value="columns">Columns (Low-High)</option>
+                  <option value="columns-desc">Columns (High-Low)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-if="filteredTables.length === 0" class="text-center py-12">
+            <div class="text-5xl mb-4">📭</div>
+            <p class="text-lg font-medium text-slate-900 dark:text-white">No tables found</p>
+            <p class="text-sm text-slate-600 dark:text-slate-400">Try adjusting your search query</p>
+            <UButton
+              @click="searchQuery = ''"
+              color="slate"
+              variant="ghost"
+              class="mt-4"
+            >
+              Clear search
+            </UButton>
+          </div>
+
+          <!-- Table Grid -->
+          <div v-else class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div
+              v-for="table in paginatedTables"
+              :key="table.name"
+              @click="selectTable(table.name)"
+              class="cursor-pointer rounded-lg border-2 border-slate-200 bg-white p-5 transition-all hover:border-green-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-800"
+              :class="{ 'border-green-500 bg-green-50 dark:border-green-500 dark:bg-green-950': selectedTableName === table.name }"
+            >
+              <!-- Table Header -->
+              <div class="flex items-start justify-between gap-3 pb-4">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                  <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded bg-green-100 text-lg dark:bg-green-900">
+                    📊
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <h3 class="truncate font-semibold text-slate-900 dark:text-white" :title="table.name">
+                      {{ table.name }}
+                    </h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">
+                      📋 {{ table.fields.length }} column{{ table.fields.length !== 1 ? 's' : '' }}
+                    </p>
+                  </div>
                 </div>
-                <div v-if="table.fields.length > 4" class="column-more">
-                  + {{ table.fields.length - 4 }} more...
+                <div v-if="selectedTableName === table.name" class="flex-shrink-0 text-xl text-green-600 dark:text-green-400">
+                  ✓
+                </div>
+              </div>
+
+              <!-- Column Preview -->
+              <div class="space-y-3 border-t border-slate-200 pt-4 dark:border-slate-700">
+                <p class="text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Columns</p>
+                <div class="space-y-1">
+                  <div
+                    v-for="field in table.fields.slice(0, 4)"
+                    :key="field.name"
+                    class="flex items-center gap-2 text-sm"
+                  >
+                    <span class="text-slate-400 dark:text-slate-600">●</span>
+                    <span class="truncate text-slate-700 dark:text-slate-300">{{ field.name }}</span>
+                    <span class="ml-auto flex-shrink-0 text-xs text-slate-500 dark:text-slate-500">{{ formatType(field.type) }}</span>
+                  </div>
+                  <div v-if="table.fields.length > 4" class="text-xs italic text-slate-500 dark:text-slate-500 pl-3">
+                    + {{ table.fields.length - 4 }} more...
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Pagination -->
-        <div v-if="filteredTables.length > itemsPerPage" class="pagination-wrapper">
-          <div class="pagination-info">
-            Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, filteredTables.length) }} of {{ filteredTables.length }} tables
-          </div>
-          <div class="pagination-controls">
-            <Button
-              @click="currentPage--"
-              :disabled="currentPage === 1"
-              icon="pi pi-chevron-left"
-              outlined
-              size="small"
-            />
-            <div class="page-numbers">
-              <Button
-                v-for="page in visiblePages"
-                :key="page"
-                @click="currentPage = page"
-                :label="String(page)"
-                :outlined="page !== currentPage"
-                :severity="page === currentPage ? 'success' : undefined"
-                size="small"
+          <!-- Pagination -->
+          <div v-if="filteredTables.length > itemsPerPage" class="flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-6 dark:border-slate-700 md:flex-row">
+            <div class="text-sm text-slate-600 dark:text-slate-400">
+              Showing {{ (currentPage - 1) * itemsPerPage + 1 }} to {{ Math.min(currentPage * itemsPerPage, filteredTables.length) }} of {{ filteredTables.length }} tables
+            </div>
+            <div class="flex items-center gap-2">
+              <UButton
+                @click="currentPage--"
+                :disabled="currentPage === 1"
+                color="slate"
+                variant="outline"
+                size="sm"
+                icon="i-heroicons-chevron-left"
+              />
+              <div class="flex items-center gap-1">
+                <UButton
+                  v-for="page in visiblePages"
+                  :key="page"
+                  @click="currentPage = page"
+                  :label="String(page)"
+                  :color="page === currentPage ? 'green' : 'slate'"
+                  :variant="page === currentPage ? 'soft' : 'outline'"
+                  size="sm"
+                />
+              </div>
+              <UButton
+                @click="currentPage++"
+                :disabled="currentPage === totalPages"
+                color="slate"
+                variant="outline"
+                size="sm"
+                icon="i-heroicons-chevron-right"
               />
             </div>
-            <Button
-              @click="currentPage++"
-              :disabled="currentPage === totalPages"
-              icon="pi pi-chevron-right"
-              outlined
-              size="small"
-            />
           </div>
-        </div>
 
-        <!-- Continue Button -->
-        <Message v-if="selectedTableName" severity="success" :closable="false" class="mt-8">
-          <div class="selection-message">
-            <div class="selection-info">
-              <i class="pi pi-check-circle selection-icon"></i>
-              <div>
-                <p class="selection-title">Table selected: {{ selectedTableName }}</p>
-                <p class="selection-subtitle">Ready to upload your data file</p>
+          <!-- Continue Button -->
+          <UAlert v-if="selectedTableName" color="green" variant="subtle" :closable="false" class="mt-8">
+            <template #title>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span>✓</span>
+                  <span>Table selected: {{ selectedTableName }}</span>
+                </div>
+                <UButton
+                  @click="goToUploadData"
+                  color="green"
+                  size="sm"
+                  icon="i-heroicons-arrow-right"
+                >
+                  Continue to Data Upload
+                </UButton>
               </div>
-            </div>
-            <Button
-              @click="goToUploadData"
-              label="Continue to Data Upload"
-              icon="pi pi-arrow-right"
-              iconPos="right"
-              severity="success"
-            />
-          </div>
-        </Message>
+            </template>
+            <template #description>
+              <p class="text-sm">Ready to upload your data file</p>
+            </template>
+          </UAlert>
+        </template>
       </div>
     </div>
   </div>
@@ -196,9 +220,6 @@ import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMappingStore } from '../store/mappingStore'
 import StepperNav from '../components/StepperNav.vue'
-import InputText from 'primevue/inputtext'
-import Button from 'primevue/button'
-import Message from 'primevue/message'
 
 const router = useRouter()
 const store = useMappingStore()
@@ -295,389 +316,3 @@ function goToUploadData() {
 watch(searchQuery, resetPage)
 watch(sortBy, resetPage)
 </script>
-
-<style scoped>
-.page-container {
-  padding: 1.5rem 1rem;
-}
-
-.main-card {
-  background: var(--p-surface-0);
-  border: 1px solid var(--p-surface-border);
-  border-radius: 0.75rem;
-  padding: 2rem;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  transition: colors 0.2s;
-}
-
-.page-title {
-  font-size: 1.875rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  color: var(--p-text-color);
-}
-
-.page-description {
-  margin-bottom: 1.5rem;
-  color: var(--p-text-muted-color);
-}
-
-.search-section {
-  margin-bottom: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.search-wrapper {
-  position: relative;
-}
-
-.search-icon {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  padding-left: 0.75rem;
-  display: flex;
-  align-items: center;
-  pointer-events: none;
-  z-index: 10;
-  color: var(--p-text-muted-color);
-}
-
-.search-input {
-  width: 100%;
-  padding-left: 2.5rem;
-  padding-right: 2.5rem;
-}
-
-.clear-icon {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  padding-right: 0.75rem;
-  display: flex;
-  align-items: center;
-  z-index: 10;
-}
-
-.clear-button {
-  background: none;
-  border: none;
-  color: var(--p-text-muted-color);
-  cursor: pointer;
-  transition: color 0.2s;
-  padding: 0.25rem;
-}
-
-.clear-button:hover {
-  color: var(--p-text-color);
-}
-
-.stats-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: var(--p-surface-50);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-}
-
-.stats-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 0.875rem;
-}
-
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.stat-icon {
-  color: var(--p-green-500);
-}
-
-.stat-item.selected {
-  color: var(--p-green-500);
-}
-
-.stat-text {
-  font-weight: 500;
-  color: var(--p-text-color);
-}
-
-.stat-item.selected .stat-text {
-  color: var(--p-green-500);
-}
-
-.sort-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.sort-label {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-}
-
-.sort-select {
-  font-size: 0.875rem;
-  border: 1px solid var(--p-surface-border);
-  border-radius: 0.375rem;
-  padding: 0.25rem 0.75rem;
-  background: var(--p-surface-0);
-  color: var(--p-text-color);
-  outline: none;
-  transition: all 0.2s;
-}
-
-.sort-select:focus {
-  outline: 2px solid var(--p-green-500);
-  outline-offset: 2px;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 3rem 0;
-}
-
-.empty-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  color: var(--p-surface-300);
-}
-
-.empty-title {
-  font-size: 1.125rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-  color: var(--p-text-muted-color);
-}
-
-.empty-subtitle {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-}
-
-.table-grid {
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 1rem;
-}
-
-@media (min-width: 768px) {
-  .table-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1024px) {
-  .table-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-.table-card {
-  border: 2px solid var(--p-surface-border);
-  border-radius: 0.5rem;
-  padding: 1.25rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: var(--p-surface-0);
-}
-
-.table-card:hover {
-  border-color: var(--p-green-300);
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-}
-
-.table-card.selected {
-  border-color: var(--p-green-500);
-  background: var(--p-green-50);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-}
-
-.table-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
-}
-
-.table-info {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
-  gap: 0.75rem;
-}
-
-.table-icon {
-  flex-shrink: 0;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.5rem;
-  background: var(--p-green-100);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--p-green-600);
-  font-size: 1.125rem;
-}
-
-.table-details {
-  flex: 1;
-  min-width: 0;
-}
-
-.table-name {
-  font-weight: 600;
-  font-size: 1.125rem;
-  color: var(--p-text-color);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.table-columns {
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-  color: var(--p-text-muted-color);
-}
-
-.table-columns i {
-  font-size: 0.75rem;
-  margin-right: 0.25rem;
-}
-
-.check-icon {
-  flex-shrink: 0;
-  margin-left: 0.5rem;
-  color: var(--p-green-600);
-  font-size: 1.25rem;
-}
-
-.column-preview {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--p-surface-border);
-}
-
-.preview-title {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: var(--p-text-muted-color);
-}
-
-.column-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-}
-
-.column-item {
-  display: flex;
-  align-items: center;
-  font-size: 0.875rem;
-}
-
-.column-bullet {
-  font-size: 0.5rem;
-  margin-right: 0.5rem;
-  color: var(--p-surface-400);
-}
-
-.column-name {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--p-text-color);
-}
-
-.column-type {
-  margin-left: auto;
-  padding-left: 0.5rem;
-  font-size: 0.75rem;
-  color: var(--p-text-muted-color);
-}
-
-.column-more {
-  font-size: 0.75rem;
-  font-style: italic;
-  padding-left: 1rem;
-  color: var(--p-text-muted-color);
-}
-
-.pagination-wrapper {
-  margin-top: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top: 1px solid var(--p-surface-border);
-  padding-top: 1.5rem;
-}
-
-.pagination-info {
-  font-size: 0.875rem;
-  color: var(--p-text-muted-color);
-}
-
-.pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.page-numbers {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.selection-message {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.selection-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.selection-icon {
-  font-size: 1.5rem;
-}
-
-.selection-title {
-  font-weight: 600;
-  margin-bottom: 0.25rem;
-}
-
-.selection-subtitle {
-  font-size: 0.875rem;
-}
-
-.mt-3 {
-  margin-top: 0.75rem;
-}
-
-.mt-4 {
-  margin-top: 1rem;
-}
-
-.mt-8 {
-  margin-top: 2rem;
-}
-</style>

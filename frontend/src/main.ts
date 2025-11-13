@@ -1,14 +1,11 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import PrimeVue from 'primevue/config'
-import MyPreset from './theme/my-preset'
-import ToastService from 'primevue/toastservice'
-import Tooltip from 'primevue/tooltip'
+import { createRouter, createWebHistory } from 'vue-router'
+import ui from '@nuxt/ui/vue-plugin'
 import router from './router'
 import App from './App.vue'
 
-// Import des styles PrimeVue et de l'application
-import 'primeicons/primeicons.css'
+// Import des styles de l'application
 import './style.css'
 
 // Initialiser le thème AVANT le montage pour éviter le flash
@@ -21,9 +18,9 @@ const initTheme = () => {
   const isDark = savedTheme ? savedTheme === 'dark' : prefersDark
 
   if (isDark) {
-    document.documentElement.classList.add('p-dark')
+    document.documentElement.classList.add('dark')
   } else {
-    document.documentElement.classList.remove('p-dark')
+    document.documentElement.classList.remove('dark')
   }
 }
 
@@ -35,21 +32,6 @@ const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
-app.use(PrimeVue, {
-  theme: {
-    preset: MyPreset,
-    options: {
-      // PrimeVue 4 utilise 'p-dark' par défaut sur l'élément html
-      darkModeSelector: '.p-dark',
-      // Utiliser CSS layers pour mieux isoler les styles
-      cssLayer: {
-        name: 'primevue',
-        order: 'primevue'
-      }
-    }
-  }
-})
-app.use(ToastService)
-app.directive('tooltip', Tooltip)
+app.use(ui)
 
 app.mount('#app')

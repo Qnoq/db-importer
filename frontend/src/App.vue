@@ -1,88 +1,97 @@
 <template>
-  <div class="app-wrapper">
-    <Toast />
+  <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+    <UNotifications />
 
     <!-- Header -->
-    <header class="app-header">
+    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
       <div class="app-container">
-        <div class="app-header-content">
+        <div class="flex justify-between items-center h-[var(--app-header-height)] gap-8">
           <!-- Logo et Navigation -->
-          <div class="app-header-left">
-            <a @click="handleNewImport" class="app-logo">
-              <img src="/logo.png" alt="SQL Importer" />
+          <div class="flex items-center gap-8">
+            <a @click="handleNewImport" class="flex items-center cursor-pointer transition-transform hover:scale-105">
+              <img src="/logo.png" alt="SQL Importer" class="h-16 w-auto" />
             </a>
 
-            <nav v-if="authStore.isAuthenticated" class="app-nav">
-              <Button
+            <nav v-if="authStore.isAuthenticated" class="app-nav flex gap-2">
+              <UButton
                 label="New Import"
-                icon="pi pi-plus-circle"
-                :text="currentRoute !== '/'"
-                :severity="currentRoute === '/' ? 'success' : 'secondary'"
+                :icon="currentRoute === '/' ? 'i-heroicons-plus-circle' : undefined"
+                :variant="currentRoute === '/' ? 'solid' : 'ghost'"
+                :color="currentRoute === '/' ? 'green' : 'gray'"
                 @click="handleNewImport"
-                size="small"
-              />
-              <Button
+                size="sm"
+              >
+                <template v-if="currentRoute !== '/'" #leading>
+                  <span class="i-heroicons-plus-circle w-4 h-4" />
+                </template>
+              </UButton>
+              <UButton
                 label="History"
-                icon="pi pi-history"
-                :text="currentRoute !== '/history'"
-                :severity="currentRoute === '/history' ? 'success' : 'secondary'"
+                :icon="currentRoute === '/history' ? 'i-heroicons-clock' : undefined"
+                :variant="currentRoute === '/history' ? 'solid' : 'ghost'"
+                :color="currentRoute === '/history' ? 'green' : 'gray'"
                 @click="() => router.push('/history')"
-                size="small"
-              />
+                size="sm"
+              >
+                <template v-if="currentRoute !== '/history'" #leading>
+                  <span class="i-heroicons-clock w-4 h-4" />
+                </template>
+              </UButton>
             </nav>
           </div>
 
           <!-- Actions à droite -->
-          <div class="app-header-right">
+          <div class="flex items-center gap-3">
             <!-- Toggle Thème -->
-            <Button
-              :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
-              text
-              rounded
-              severity="secondary"
-              @click="toggleTheme"
-              v-tooltip.bottom="isDark ? 'Light Mode' : 'Dark Mode'"
-            />
+            <UTooltip :text="isDark ? 'Light Mode' : 'Dark Mode'">
+              <UButton
+                :icon="isDark ? 'i-heroicons-sun' : 'i-heroicons-moon'"
+                variant="ghost"
+                color="gray"
+                @click="toggleTheme"
+                square
+              />
+            </UTooltip>
 
             <!-- Menu utilisateur -->
-            <div v-if="authStore.isAuthenticated" class="app-user">
-              <Chip class="app-chip">
-                <template #icon>
-                  <Avatar
-                    :label="userInitials"
-                    shape="circle"
-                    class="app-avatar"
-                  />
-                </template>
-                <div class="app-user-info">
-                  <span class="app-user-name">{{ authStore.userDisplayName }}</span>
-                  <span class="app-user-email">{{ authStore.user?.email }}</span>
+            <div v-if="authStore.isAuthenticated" class="flex items-center gap-3">
+              <UBadge class="hidden md:flex items-center gap-3 px-3 py-2 bg-gray-100 dark:bg-gray-700">
+                <UAvatar
+                  :text="userInitials"
+                  size="sm"
+                  class="bg-green-600 text-white"
+                />
+                <div class="flex flex-col">
+                  <span class="text-sm font-medium text-gray-900 dark:text-white">{{ authStore.userDisplayName }}</span>
+                  <span class="text-xs text-gray-500 dark:text-gray-400">{{ authStore.user?.email }}</span>
                 </div>
-              </Chip>
+              </UBadge>
 
-              <Button
-                icon="pi pi-sign-out"
-                text
-                rounded
-                severity="danger"
-                @click="handleLogout"
-                v-tooltip.bottom="'Sign Out'"
-              />
+              <UTooltip text="Sign Out">
+                <UButton
+                  icon="i-heroicons-arrow-right-on-rectangle"
+                  variant="ghost"
+                  color="red"
+                  @click="handleLogout"
+                  square
+                />
+              </UTooltip>
             </div>
 
             <!-- Boutons invité -->
-            <div v-else class="app-guest">
-              <Button
+            <div v-else class="flex items-center gap-3">
+              <UButton
                 label="Sign In"
-                icon="pi pi-sign-in"
-                text
+                icon="i-heroicons-arrow-left-on-rectangle"
+                variant="ghost"
+                color="gray"
                 @click="() => router.push('/login')"
-                class="app-signin-btn"
+                class="hidden md:inline-flex"
               />
-              <Button
+              <UButton
                 label="Sign Up"
-                icon="pi pi-user-plus"
-                severity="success"
+                icon="i-heroicons-user-plus"
+                color="green"
                 @click="() => router.push('/register')"
               />
             </div>
@@ -92,24 +101,39 @@
     </header>
 
     <!-- Contenu principal -->
-    <main class="app-main">
+    <main class="flex-1 py-8">
       <div class="app-container">
         <router-view />
       </div>
     </main>
 
     <!-- Footer -->
-    <footer class="app-footer">
+    <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 py-6 mt-auto">
       <div class="app-container">
-        <div class="app-footer-content">
-          <div class="app-footer-links">
-            <router-link to="/terms-of-service">Terms of Service</router-link>
-            <span class="app-footer-separator">•</span>
-            <router-link to="/privacy-policy">Privacy Policy</router-link>
-            <span class="app-footer-separator">•</span>
-            <router-link to="/legal-notice">Legal Notice</router-link>
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div class="flex items-center gap-4">
+            <router-link
+              to="/terms-of-service"
+              class="text-sm text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors no-underline"
+            >
+              Terms of Service
+            </router-link>
+            <span class="text-gray-500 dark:text-gray-400">•</span>
+            <router-link
+              to="/privacy-policy"
+              class="text-sm text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors no-underline"
+            >
+              Privacy Policy
+            </router-link>
+            <span class="text-gray-500 dark:text-gray-400">•</span>
+            <router-link
+              to="/legal-notice"
+              class="text-sm text-gray-500 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors no-underline"
+            >
+              Legal Notice
+            </router-link>
           </div>
-          <div class="app-footer-version">v{{ appVersion }}</div>
+          <div class="text-sm text-gray-500 dark:text-gray-400">v{{ appVersion }}</div>
         </div>
       </div>
     </footer>
@@ -123,12 +147,6 @@ import { useAuthStore } from './store/authStore'
 import { useMappingStore } from './store/mappingStore'
 import { useTheme } from './composables/useTheme'
 import { APP_VERSION } from './version'
-
-// Composants PrimeVue
-import Button from 'primevue/button'
-import Avatar from 'primevue/avatar'
-import Chip from 'primevue/chip'
-import Toast from 'primevue/toast'
 
 const router = useRouter()
 const route = useRoute()
@@ -158,171 +176,3 @@ const handleLogout = async () => {
   router.push('/login')
 }
 </script>
-
-<style scoped>
-.app-wrapper {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  background: var(--p-surface-ground);
-}
-
-/* Header */
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--p-surface-0);
-  border-bottom: 1px solid var(--p-surface-border);
-  box-shadow: var(--p-shadow-2);
-}
-
-.app-header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: var(--app-header-height);
-  gap: 2rem;
-}
-
-.app-header-left {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-}
-
-.app-logo {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-
-.app-logo:hover {
-  transform: scale(1.05);
-}
-
-.app-logo img {
-  height: 4rem;
-  width: auto;
-}
-
-.app-nav {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.app-header-right {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.app-user,
-.app-guest {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.app-chip {
-  display: none;
-}
-
-.app-avatar {
-  background-color: var(--p-primary-color);
-  color: var(--p-primary-contrast-color);
-}
-
-.app-user-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.app-user-name {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--p-text-color);
-}
-
-.app-user-email {
-  font-size: 0.75rem;
-  color: var(--p-text-muted-color);
-}
-
-.app-signin-btn {
-  display: none;
-}
-
-/* Main */
-.app-main {
-  flex: 1;
-  padding: 2rem 0;
-}
-
-/* Footer */
-.app-footer {
-  background: var(--p-surface-0);
-  border-top: 1px solid var(--p-surface-border);
-  padding: 1.5rem 0;
-  margin-top: auto;
-}
-
-.app-footer-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.app-footer-links {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.app-footer-links a {
-  color: var(--p-text-muted-color);
-  text-decoration: none;
-  transition: color 0.3s;
-  font-size: 0.875rem;
-}
-
-.app-footer-links a:hover {
-  color: var(--p-primary-color);
-}
-
-.app-footer-separator {
-  color: var(--p-text-muted-color);
-}
-
-.app-footer-version {
-  color: var(--p-text-muted-color);
-  font-size: 0.875rem;
-}
-
-/* Responsive */
-@media (min-width: 768px) {
-  .app-chip {
-    display: flex;
-  }
-
-  .app-signin-btn {
-    display: inline-flex;
-  }
-}
-
-@media (max-width: 768px) {
-  .app-nav {
-    display: none;
-  }
-
-  .app-header-content {
-    gap: 1rem;
-  }
-
-  .app-footer-content {
-    flex-direction: column;
-    gap: 1rem;
-  }
-}
-</style>
