@@ -8,7 +8,6 @@ export interface WorkflowSessionState {
   error: string | null
   lastSavedAt: Date | null
   sessionId: string | null
-  restoredTransformations: Record<string, string> | null
   isRestoring: boolean
 }
 
@@ -20,7 +19,6 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
     error: null,
     lastSavedAt: null,
     sessionId: null,
-    restoredTransformations: null,
     isRestoring: false
   }),
 
@@ -276,9 +274,8 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
           mappingStore.setMapping(session.columnMapping)
         }
 
-        // Store transformations for Mapping.vue to pick up
         if (session.fieldTransformations && Object.keys(session.fieldTransformations).length > 0) {
-          this.restoredTransformations = session.fieldTransformations
+          mappingStore.setTransformations(session.fieldTransformations)
         }
 
         console.log('Session restored successfully', {
@@ -340,15 +337,7 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
       this.sessionId = null
       this.lastSavedAt = null
       this.error = null
-      this.restoredTransformations = null
       this.isRestoring = false
-    },
-
-    /**
-     * Clear restored transformations after use
-     */
-    clearRestoredTransformations() {
-      this.restoredTransformations = null
     }
   },
 
