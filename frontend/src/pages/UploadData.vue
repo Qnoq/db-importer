@@ -188,14 +188,17 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMappingStore } from '../store/mappingStore'
+import { useWorkflowSessionStore } from '../store/workflowSessionStore'
 import StepperNav from '../components/StepperNav.vue'
 import * as XLSX from 'xlsx'
 
 const router = useRouter()
 const store = useMappingStore()
+const sessionStore = useWorkflowSessionStore()
 const fileInput = ref<HTMLInputElement>()
 const loading = ref(false)
 const error = ref('')
+const currentFileName = ref<string>('')
 
 function processFile(file: File) {
   if (!file) return
@@ -226,6 +229,10 @@ function processFile(file: File) {
       const rows = jsonData.slice(1).filter(row => row.some(cell => cell !== null && cell !== undefined && cell !== ''))
 
       store.setExcelData(headers, rows)
+
+      // Save to session (for authenticated users)
+      sessionStore.saveDataFile(currentFileName.value, headers, rows)
+
       loading.value = false
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Failed to parse file'
@@ -245,6 +252,7 @@ function handleFileUpload(event: Event) {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {
+    currentFileName.value = file.name
     processFile(file)
   }
 }
@@ -252,6 +260,7 @@ function handleFileUpload(event: Event) {
 function handleDrop(event: DragEvent) {
   const file = event.dataTransfer?.files?.[0]
   if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls') || file.name.endsWith('.csv'))) {
+    currentFileName.value = file.name
     processFile(file)
   } else {
     error.value = 'Please upload a valid Excel or CSV file'
