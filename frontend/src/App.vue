@@ -213,7 +213,16 @@ function getCurrentStepPath(): string {
   return '/'
 }
 
-const handleNewImport = () => {
+const handleNewImport = async () => {
+  // Restore session to ensure transformations and other data are loaded
+  if (authStore.isAuthenticated) {
+    try {
+      await sessionStore.restoreSession()
+    } catch (error) {
+      console.error('Failed to restore session during navigation:', error)
+    }
+  }
+
   const targetPath = getCurrentStepPath()
   router.push(targetPath)
 }
