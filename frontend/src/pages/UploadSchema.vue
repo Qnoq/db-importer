@@ -212,14 +212,17 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMappingStore } from '../store/mappingStore'
+import { useWorkflowSessionStore } from '../store/workflowSessionStore'
 import StepperNav from '../components/StepperNav.vue'
 
 const router = useRouter()
 const store = useMappingStore()
+const sessionStore = useWorkflowSessionStore()
 const fileInput = ref<HTMLInputElement>()
 const loading = ref(false)
 const error = ref('')
 const showSingleTableDialog = ref(false)
+const schemaFileContent = ref<string>('') // Store schema content for session saving
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
@@ -230,6 +233,10 @@ async function processFile(file: File) {
   loading.value = true
 
   try {
+    // Read file content for session saving
+    const fileContent = await file.text()
+    schemaFileContent.value = fileContent
+
     const formData = new FormData()
     formData.append('file', file)
 
@@ -250,6 +257,9 @@ async function processFile(file: File) {
     }
 
     store.setTables(data.tables)
+
+    // Save to session (for authenticated users)
+    await sessionStore.saveSchema(schemaFileContent.value, data.tables)
 
     // If only one table, show dialog
     if (data.tables.length === 1) {

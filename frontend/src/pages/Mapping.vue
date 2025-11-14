@@ -418,6 +418,7 @@ import StepperNav from '../components/StepperNav.vue'
 import { useMappingStore, Field, type CellValue } from '../store/mappingStore'
 import { useAuthStore } from '../store/authStore'
 import { useImportStore } from '../store/importStore'
+import { useWorkflowSessionStore } from '../store/workflowSessionStore'
 import { transformations, applyTransformation, suggestTransformations, hasYearOnlyValues, type TransformationType } from '../utils/transformations'
 import { validateDataset, getCellClass, getValidationIcon, type ValidationResult } from '../utils/dataValidation'
 
@@ -425,6 +426,7 @@ const router = useRouter()
 const store = useMappingStore()
 const authStore = useAuthStore()
 const importStore = useImportStore()
+const sessionStore = useWorkflowSessionStore()
 
 // Mapping state (Excel column → DB field)
 const localMapping = ref<Record<string, string>>({})
@@ -621,6 +623,9 @@ function autoMap() {
  */
 function updateMapping() {
   store.setMapping(localMapping.value)
+
+  // Save to session (for authenticated users)
+  sessionStore.saveMapping(localMapping.value)
 }
 
 /**

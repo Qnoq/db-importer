@@ -141,18 +141,34 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useColorMode } from '@vueuse/core'
 import { useAuthStore } from './store/authStore'
 import { useMappingStore } from './store/mappingStore'
+import { useWorkflowSessionStore } from './store/workflowSessionStore'
 import { APP_VERSION } from './version'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const mappingStore = useMappingStore()
+const sessionStore = useWorkflowSessionStore()
 const appVersion = APP_VERSION
+
+// Restore session on app mount (for authenticated users)
+onMounted(async () => {
+  if (authStore.isAuthenticated) {
+    try {
+      const restored = await sessionStore.restoreSession()
+      if (restored) {
+        console.log('Workflow session restored from backend')
+      }
+    } catch (error) {
+      console.error('Failed to restore workflow session:', error)
+    }
+  }
+})
 
 const colorMode = useColorMode()
 
@@ -180,8 +196,18 @@ const userInitials = computed(() => {
   return 'U'
 })
 
-const handleNewImport = () => {
+const handleNewImport = async () => {
   mappingStore.reset()
+
+  // Delete session when starting a new import
+  if (authStore.isAuthenticated) {
+    try {
+      await sessionStore.deleteSession()
+    } catch (error) {
+      console.error('Failed to delete session:', error)
+    }
+  }
+
   router.push('/')
 }
 

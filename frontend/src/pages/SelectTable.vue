@@ -219,10 +219,12 @@
 import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMappingStore } from '../store/mappingStore'
+import { useWorkflowSessionStore } from '../store/workflowSessionStore'
 import StepperNav from '../components/StepperNav.vue'
 
 const router = useRouter()
 const store = useMappingStore()
+const sessionStore = useWorkflowSessionStore()
 const selectedTableName = ref('')
 const searchQuery = ref('')
 const sortBy = ref('name')
@@ -303,9 +305,12 @@ function formatType(type: string): string {
   return match ? match[1].toUpperCase() : type.toUpperCase()
 }
 
-function selectTable(tableName: string) {
+async function selectTable(tableName: string) {
   selectedTableName.value = tableName
   store.selectTable(tableName)
+
+  // Save to session (for authenticated users)
+  await sessionStore.saveTableSelection(tableName)
 }
 
 function goToUploadData() {
