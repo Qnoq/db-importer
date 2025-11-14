@@ -8,7 +8,7 @@
           <!-- Logo et Navigation -->
           <div class="flex items-center gap-8">
             <a @click="handleNewImport" class="flex items-center cursor-pointer transition-transform hover:scale-105">
-              <img src="/logo.png" alt="SQL Importer" class="h-16 w-auto" />
+              <img src="/logo.png" alt="SQL Importer" class="h-32 w-auto" />
             </a>
 
             <nav v-if="authStore.isAuthenticated" class="app-nav flex gap-2">
