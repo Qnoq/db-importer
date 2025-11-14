@@ -12,21 +12,27 @@ import (
 func AuthMiddleware(jwtConfig utils.JWTConfig) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Extract token from Authorization header
+			var tokenString string
+
+			// Try to get token from Authorization header first
 			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
-				utils.Unauthorized(w, "Missing authorization header")
-				return
+			if authHeader != "" {
+				// Check if it starts with "Bearer "
+				parts := strings.Split(authHeader, " ")
+				if len(parts) == 2 && parts[0] == "Bearer" {
+					tokenString = parts[1]
+				}
 			}
 
-			// Check if it starts with "Bearer "
-			parts := strings.Split(authHeader, " ")
-			if len(parts) != 2 || parts[0] != "Bearer" {
-				utils.Unauthorized(w, "Invalid authorization header format")
-				return
+			// If no token in header, try to get from cookie
+			if tokenString == "" {
+				cookie, err := r.Cookie("access_token")
+				if err != nil {
+					utils.Unauthorized(w, "Missing authorization token")
+					return
+				}
+				tokenString = cookie.Value
 			}
-
-			tokenString := parts[1]
 
 			// Validate access token
 			claims, err := utils.ValidateAccessToken(tokenString, jwtConfig)
@@ -53,23 +59,31 @@ func AuthMiddleware(jwtConfig utils.JWTConfig) func(http.Handler) http.Handler {
 func OptionalAuthMiddleware(jwtConfig utils.JWTConfig) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Extract token from Authorization header
+			var tokenString string
+
+			// Try to get token from Authorization header first
 			authHeader := r.Header.Get("Authorization")
-			if authHeader == "" {
-				// No token, continue without authentication
+			if authHeader != "" {
+				// Check if it starts with "Bearer "
+				parts := strings.Split(authHeader, " ")
+				if len(parts) == 2 && parts[0] == "Bearer" {
+					tokenString = parts[1]
+				}
+			}
+
+			// If no token in header, try to get from cookie
+			if tokenString == "" {
+				cookie, err := r.Cookie("access_token")
+				if err == nil {
+					tokenString = cookie.Value
+				}
+			}
+
+			// If no token found, continue without authentication
+			if tokenString == "" {
 				next.ServeHTTP(w, r)
 				return
 			}
-
-			// Check if it starts with "Bearer "
-			parts := strings.Split(authHeader, " ")
-			if len(parts) != 2 || parts[0] != "Bearer" {
-				// Invalid format, continue without authentication
-				next.ServeHTTP(w, r)
-				return
-			}
-
-			tokenString := parts[1]
 
 			// Validate access token
 			claims, err := utils.ValidateAccessToken(tokenString, jwtConfig)

@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import { useAuthStore } from './authStore'
 
 export interface ImportMetadata {
   sourceFileName?: string
@@ -93,7 +92,6 @@ export const useImportStore = defineStore('import', {
 
   actions: {
     async createImport(req: CreateImportRequest): Promise<Import> {
-      const authStore = useAuthStore()
       this.loading = true
       this.error = null
 
@@ -101,9 +99,9 @@ export const useImportStore = defineStore('import', {
         const response = await fetch(`${API_URL}/api/v1/imports`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            ...authStore.getAuthHeader()
+            'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify(req)
         })
 
@@ -123,7 +121,6 @@ export const useImportStore = defineStore('import', {
     },
 
     async listImports(req: GetImportsRequest = {}): Promise<void> {
-      const authStore = useAuthStore()
       this.loading = true
       this.error = null
 
@@ -138,7 +135,7 @@ export const useImportStore = defineStore('import', {
         if (req.sortOrder) params.append('sortOrder', req.sortOrder)
 
         const response = await fetch(`${API_URL}/api/v1/imports/list?${params}`, {
-          headers: authStore.getAuthHeader()
+          credentials: 'include'
         })
 
         if (!response.ok) {
@@ -163,13 +160,12 @@ export const useImportStore = defineStore('import', {
     },
 
     async getImport(id: string): Promise<Import> {
-      const authStore = useAuthStore()
       this.loading = true
       this.error = null
 
       try {
         const response = await fetch(`${API_URL}/api/v1/imports/get?id=${id}`, {
-          headers: authStore.getAuthHeader()
+          credentials: 'include'
         })
 
         if (!response.ok) {
@@ -188,13 +184,12 @@ export const useImportStore = defineStore('import', {
     },
 
     async getImportWithSQL(id: string): Promise<ImportWithSQL> {
-      const authStore = useAuthStore()
       this.loading = true
       this.error = null
 
       try {
         const response = await fetch(`${API_URL}/api/v1/imports/sql?id=${id}`, {
-          headers: authStore.getAuthHeader()
+          credentials: 'include'
         })
 
         if (!response.ok) {
@@ -213,14 +208,13 @@ export const useImportStore = defineStore('import', {
     },
 
     async deleteImport(id: string): Promise<void> {
-      const authStore = useAuthStore()
       this.loading = true
       this.error = null
 
       try {
         const response = await fetch(`${API_URL}/api/v1/imports/delete?id=${id}`, {
           method: 'DELETE',
-          headers: authStore.getAuthHeader()
+          credentials: 'include'
         })
 
         if (!response.ok) {
@@ -240,13 +234,12 @@ export const useImportStore = defineStore('import', {
     },
 
     async getStats(): Promise<void> {
-      const authStore = useAuthStore()
       this.loading = true
       this.error = null
 
       try {
         const response = await fetch(`${API_URL}/api/v1/imports/stats`, {
-          headers: authStore.getAuthHeader()
+          credentials: 'include'
         })
 
         if (!response.ok) {
@@ -265,14 +258,13 @@ export const useImportStore = defineStore('import', {
     },
 
     async deleteOldImports(days: number = 30): Promise<number> {
-      const authStore = useAuthStore()
       this.loading = true
       this.error = null
 
       try {
         const response = await fetch(`${API_URL}/api/v1/imports/old?days=${days}`, {
           method: 'DELETE',
-          headers: authStore.getAuthHeader()
+          credentials: 'include'
         })
 
         if (!response.ok) {

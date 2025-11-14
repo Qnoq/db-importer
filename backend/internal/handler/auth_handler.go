@@ -107,76 +107,135 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.RespondSuccess(w, http.StatusOK, loginResp, "Login successful")
+	// Set access token in HTTP-only cookie
+	accessCookie := &http.Cookie{
+		Name:     "access_token",
+		Value:    loginResp.AccessToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   r.TLS != nil, // Secure only in HTTPS
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   15 * 60, // 15 minutes
+	}
+	http.SetCookie(w, accessCookie)
+
+	// Set refresh token in HTTP-only cookie
+	// MaxAge depends on rememberMe (1 day or 3 days)
+	refreshMaxAge := 24 * 60 * 60 // 1 day in seconds
+	if req.RememberMe {
+		refreshMaxAge = 72 * 60 * 60 // 3 days in seconds
+	}
+	refreshCookie := &http.Cookie{
+		Name:     "refresh_token",
+		Value:    loginResp.RefreshToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   r.TLS != nil,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   refreshMaxAge,
+	}
+	http.SetCookie(w, refreshCookie)
+
+	// Return user data only (tokens are in cookies now)
+	utils.RespondSuccess(w, http.StatusOK, map[string]interface{}{
+		"user": loginResp.User,
+	}, "Login successful")
 }
 
 // RefreshToken handles token refresh
 // @Summary      Refresh access token
-// @Description  Generate new access and refresh tokens using a valid refresh token
+// @Description  Generate new access and refresh tokens using a valid refresh token from cookie
 // @Tags         Auth
 // @Accept       json
 // @Produce      json
-// @Param        request  body      models.RefreshTokenRequest  true  "Refresh token"
-// @Success      200      {object}  map[string]interface{}      "Tokens refreshed successfully with new tokens"
-// @Failure      400      {object}  map[string]interface{}      "Invalid request body or validation failed"
+// @Success      200      {object}  map[string]interface{}      "Tokens refreshed successfully"
 // @Failure      401      {object}  map[string]interface{}      "Invalid or expired refresh token"
 // @Router       /auth/refresh [post]
 func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
-	var req models.RefreshTokenRequest
-
-	// Parse request body
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.BadRequest(w, "Invalid request body")
-		return
-	}
-
-	// Validate request
-	if err := utils.ValidateStruct(&req); err != nil {
-		utils.RespondError(w, http.StatusBadRequest, utils.ErrValidationFailed, err.Error(), nil)
+	// Read refresh token from cookie
+	refreshCookie, err := r.Cookie("refresh_token")
+	if err != nil {
+		utils.RespondError(w, http.StatusUnauthorized, utils.ErrTokenInvalid, "No refresh token found", nil)
 		return
 	}
 
 	// Refresh tokens
-	tokens, err := h.authService.RefreshTokens(r.Context(), req.RefreshToken)
+	tokens, err := h.authService.RefreshTokens(r.Context(), refreshCookie.Value)
 	if err != nil {
 		utils.RespondError(w, http.StatusUnauthorized, utils.ErrTokenInvalid, "Invalid or expired refresh token", nil)
 		return
 	}
 
-	utils.RespondSuccess(w, http.StatusOK, tokens, "Tokens refreshed successfully")
+	// Set new access token in HTTP-only cookie
+	accessCookie := &http.Cookie{
+		Name:     "access_token",
+		Value:    tokens.AccessToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   r.TLS != nil,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   15 * 60, // 15 minutes
+	}
+	http.SetCookie(w, accessCookie)
+
+	// Set new refresh token in HTTP-only cookie
+	// Keep same expiry as before (we need to get it from the cookie's MaxAge)
+	newRefreshCookie := &http.Cookie{
+		Name:     "refresh_token",
+		Value:    tokens.RefreshToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   r.TLS != nil,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   refreshCookie.MaxAge, // Keep same expiry
+	}
+	http.SetCookie(w, newRefreshCookie)
+
+	utils.RespondSuccess(w, http.StatusOK, nil, "Tokens refreshed successfully")
 }
 
 // Logout handles user logout
 // @Summary      User logout
-// @Description  Invalidate the refresh token to log out the user
+// @Description  Invalidate the refresh token from cookie and clear cookies
 // @Tags         Auth
 // @Accept       json
 // @Produce      json
-// @Param        request  body      models.RefreshTokenRequest  true  "Refresh token to invalidate"
 // @Success      200      {object}  map[string]interface{}      "Logout successful"
-// @Failure      400      {object}  map[string]interface{}      "Invalid request body or validation failed"
 // @Failure      500      {object}  map[string]interface{}      "Internal server error"
 // @Router       /auth/logout [post]
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	var req models.RefreshTokenRequest
-
-	// Parse request body
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		utils.BadRequest(w, "Invalid request body")
-		return
+	// Read refresh token from cookie
+	refreshCookie, err := r.Cookie("refresh_token")
+	if err == nil && refreshCookie.Value != "" {
+		// Logout user (revoke refresh token)
+		if err := h.authService.Logout(r.Context(), refreshCookie.Value); err != nil {
+			// Log error but continue with cookie clearing
+		}
 	}
 
-	// Validate request
-	if err := utils.ValidateStruct(&req); err != nil {
-		utils.RespondError(w, http.StatusBadRequest, utils.ErrValidationFailed, err.Error(), nil)
-		return
+	// Clear access token cookie
+	clearCookie := &http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   r.TLS != nil,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1, // Delete cookie
 	}
+	http.SetCookie(w, clearCookie)
 
-	// Logout user
-	if err := h.authService.Logout(r.Context(), req.RefreshToken); err != nil {
-		utils.InternalServerError(w, "Failed to logout")
-		return
+	// Clear refresh token cookie
+	clearRefreshCookie := &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   r.TLS != nil,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1, // Delete cookie
 	}
+	http.SetCookie(w, clearRefreshCookie)
 
 	utils.RespondSuccess(w, http.StatusOK, nil, "Logout successful")
 }

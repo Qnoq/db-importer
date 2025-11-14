@@ -41,9 +41,9 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
         const response = await fetch(`${API_URL}/api/v1/workflow/session/schema`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            ...authStore.getAuthHeader()
+            'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify({
             schemaContent,
             tables
@@ -84,9 +84,9 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
         const response = await fetch(`${API_URL}/api/v1/workflow/session/table`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            ...authStore.getAuthHeader()
+            'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify({
             tableName
           })
@@ -126,9 +126,9 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
         const response = await fetch(`${API_URL}/api/v1/workflow/session/data`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            ...authStore.getAuthHeader()
+            'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify({
             fileName,
             headers,
@@ -167,9 +167,9 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
         const response = await fetch(`${API_URL}/api/v1/workflow/session/mapping`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            ...authStore.getAuthHeader()
+            'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify({
             mapping,
             transformations
@@ -205,7 +205,7 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
 
       try {
         const response = await fetch(`${API_URL}/api/v1/workflow/session`, {
-          headers: authStore.getAuthHeader()
+          credentials: 'include'
         })
 
         if (!response.ok) {
@@ -311,7 +311,7 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
       try {
         const response = await fetch(`${API_URL}/api/v1/workflow/session`, {
           method: 'DELETE',
-          headers: authStore.getAuthHeader()
+          credentials: 'include'
         })
 
         if (!response.ok) {

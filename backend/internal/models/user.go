@@ -56,8 +56,9 @@ type CreateUserRequest struct {
 
 // LoginRequest represents the login credentials
 type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
+	Email      string `json:"email" validate:"required,email"`
+	Password   string `json:"password" validate:"required"`
+	RememberMe bool   `json:"rememberMe"`
 }
 
 // LoginResponse represents the response after successful login

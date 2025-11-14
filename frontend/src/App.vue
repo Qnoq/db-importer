@@ -156,8 +156,12 @@ const mappingStore = useMappingStore()
 const sessionStore = useWorkflowSessionStore()
 const appVersion = APP_VERSION
 
-// Restore session on app mount (for authenticated users)
+// Check authentication and restore session on app mount
 onMounted(async () => {
+  // Check if user is authenticated via cookies
+  await authStore.checkAuth()
+
+  // Restore session for authenticated users
   if (authStore.isAuthenticated) {
     try {
       const restored = await sessionStore.restoreSession()

@@ -89,42 +89,6 @@ const router = createRouter({
 router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore()
 
-  // If user appears authenticated, check token status
-  if (authStore.isAuthenticated && authStore.tokens) {
-    // If token is expired, try to refresh it
-    if (authStore.isTokenExpired) {
-      console.log('Access token expired, attempting refresh...')
-      try {
-        await authStore.refreshAccessToken()
-        console.log('Token refreshed successfully')
-      } catch (error) {
-        console.error('Token refresh failed:', error)
-        // Clear auth state and redirect to login
-        await authStore.logout()
-
-        // Don't redirect if already going to login/register
-        if (to.name !== 'Login' && to.name !== 'Register') {
-          next({
-            name: 'Login',
-            query: { redirect: to.fullPath, reason: 'session_expired' }
-          })
-          return
-        }
-      }
-    }
-    // If token will expire soon, proactively refresh it
-    else if (authStore.shouldRefreshToken()) {
-      try {
-        await authStore.refreshAccessToken()
-        console.log('Token proactively refreshed')
-      } catch (error) {
-        console.error('Proactive token refresh failed:', error)
-        // Don't logout for proactive refresh failures
-        // The token is still valid, just couldn't refresh yet
-      }
-    }
-  }
-
   // If route requires authentication
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     // Redirect to login with return URL

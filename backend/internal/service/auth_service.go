@@ -95,8 +95,21 @@ func (s *AuthService) Login(ctx context.Context, req *models.LoginRequest) (*mod
 		return nil, fmt.Errorf("failed to generate access token: %w", err)
 	}
 
-	// Generate refresh token
-	refreshToken, _, err := utils.GenerateRefreshToken(user.ID, s.jwtConfig)
+	// Determine refresh token expiry based on rememberMe
+	// RememberMe = true: 3 days, false: 1 day
+	refreshExpiry := 24 * time.Hour // 1 day
+	if req.RememberMe {
+		refreshExpiry = 72 * time.Hour // 3 days
+	}
+
+	// Generate refresh token with custom expiry (create new config instance)
+	customConfig := utils.JWTConfig{
+		AccessSecret:  s.jwtConfig.AccessSecret,
+		RefreshSecret: s.jwtConfig.RefreshSecret,
+		AccessExpiry:  s.jwtConfig.AccessExpiry,
+		RefreshExpiry: refreshExpiry,
+	}
+	refreshToken, _, err := utils.GenerateRefreshToken(user.ID, customConfig)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
 	}
@@ -106,7 +119,7 @@ func (s *AuthService) Login(ctx context.Context, req *models.LoginRequest) (*mod
 	refreshTokenModel := &models.RefreshToken{
 		UserID:    user.ID,
 		TokenHash: tokenHash,
-		ExpiresAt: time.Now().Add(s.jwtConfig.RefreshExpiry),
+		ExpiresAt: time.Now().Add(refreshExpiry),
 	}
 
 	if err := s.refreshTokenRepo.Create(ctx, refreshTokenModel); err != nil {
