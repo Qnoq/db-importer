@@ -10,142 +10,24 @@ export interface User {
   createdAt: string
 }
 
-export interface AuthTokens {
-  accessToken: string
-  refreshToken: string
-  expiresAt: number
-}
-
 export interface AuthState {
   user: User | null
-  tokens: AuthTokens | null
   isAuthenticated: boolean
   isGuest: boolean
-  rememberMe: boolean
   loading: boolean
   error: string | null
-}
-
-const STORAGE_KEY = 'db-importer-auth'
-const STORAGE_VERSION = '1.0'
-
-// Load auth state from storage (checks both localStorage and sessionStorage)
-function loadFromStorage(): Partial<AuthState> | null {
-  try {
-    // Check sessionStorage first (takes precedence)
-    let stored = sessionStorage.getItem(STORAGE_KEY)
-
-    // If not in session, check localStorage
-    if (!stored) {
-      stored = localStorage.getItem(STORAGE_KEY)
-    }
-
-    if (!stored) return null
-
-    const parsed = JSON.parse(stored)
-
-    // Check version compatibility
-    if (parsed.version !== STORAGE_VERSION) {
-      console.warn('Auth storage version mismatch, clearing old data')
-      localStorage.removeItem(STORAGE_KEY)
-      sessionStorage.removeItem(STORAGE_KEY)
-      return null
-    }
-
-    // Validate that stored data is complete and not corrupted
-    const state = parsed.state
-    if (state && state.isAuthenticated && state.tokens) {
-      // If marked as authenticated, must have valid user and complete tokens
-      if (!state.user || !state.user.id || !state.user.email) {
-        console.warn('Auth storage corrupted: missing user data, clearing')
-        localStorage.removeItem(STORAGE_KEY)
-        sessionStorage.removeItem(STORAGE_KEY)
-        return null
-      }
-      if (!state.tokens.accessToken || !state.tokens.refreshToken || !state.tokens.expiresAt) {
-        console.warn('Auth storage corrupted: incomplete token data, clearing')
-        localStorage.removeItem(STORAGE_KEY)
-        sessionStorage.removeItem(STORAGE_KEY)
-        return null
-      }
-    }
-
-    // Don't check access token expiration here - we'll handle refresh in the router
-    // The refresh token is valid for 7 days, so we should still load the state
-    // and let the router handle refreshing the access token if needed
-
-    return state
-  } catch (error) {
-    console.error('Failed to load auth state from storage:', error)
-    localStorage.removeItem(STORAGE_KEY)
-    sessionStorage.removeItem(STORAGE_KEY)
-    return null
-  }
-}
-
-// Save auth state to storage
-function saveToStorage(state: AuthState, rememberMe: boolean = false): void {
-  try {
-    const toStore = {
-      version: STORAGE_VERSION,
-      timestamp: new Date().toISOString(),
-      state: {
-        user: state.user,
-        tokens: state.tokens,
-        isAuthenticated: state.isAuthenticated,
-        isGuest: state.isGuest,
-        rememberMe: rememberMe
-      }
-    }
-
-    const serialized = JSON.stringify(toStore)
-
-    // Clear both storages first
-    localStorage.removeItem(STORAGE_KEY)
-    sessionStorage.removeItem(STORAGE_KEY)
-
-    // Save to the appropriate storage
-    if (rememberMe) {
-      localStorage.setItem(STORAGE_KEY, serialized)
-      console.log('Auth saved to localStorage (remember me enabled)')
-    } else {
-      sessionStorage.setItem(STORAGE_KEY, serialized)
-      console.log('Auth saved to sessionStorage (remember me disabled)')
-    }
-  } catch (error) {
-    console.error('Failed to save auth state to storage:', error)
-  }
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 export const useAuthStore = defineStore('auth', {
-  state: (): AuthState => {
-    const stored = loadFromStorage()
-
-    if (stored && stored.user && stored.tokens) {
-      return {
-        user: stored.user,
-        tokens: stored.tokens,
-        isAuthenticated: true,
-        isGuest: false,
-        rememberMe: stored.rememberMe || false,
-        loading: false,
-        error: null
-      }
-    }
-
-    // Default: guest mode
-    return {
-      user: null,
-      tokens: null,
-      isAuthenticated: false,
-      isGuest: true,
-      rememberMe: false,
-      loading: false,
-      error: null
-    }
-  },
+  state: (): AuthState => ({
+    user: null,
+    isAuthenticated: false,
+    isGuest: false,
+    loading: false,
+    error: null
+  }),
 
   actions: {
     async register(email: string, password: string, firstName?: string, lastName?: string) {
@@ -158,11 +40,12 @@ export const useAuthStore = defineStore('auth', {
           headers: {
             'Content-Type': 'application/json'
           },
+          credentials: 'include',
           body: JSON.stringify({
             email,
             password,
-            first_name: firstName,
-            last_name: lastName
+            firstName,
+            lastName
           })
         })
 
@@ -195,7 +78,12 @@ export const useAuthStore = defineStore('auth', {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ email, password })
+          credentials: 'include', // Send and receive cookies
+          body: JSON.stringify({
+            email,
+            password,
+            rememberMe
+          })
         })
 
         if (!response.ok) {
@@ -205,20 +93,10 @@ export const useAuthStore = defineStore('auth', {
 
         const data = await response.json()
 
-        // Calculate token expiration (15 minutes from now)
-        const expiresAt = Date.now() + 15 * 60 * 1000
-
+        // Tokens are now in HTTP-only cookies, just store user data
         this.user = data.data.user
-        this.tokens = {
-          accessToken: data.data.accessToken,
-          refreshToken: data.data.refreshToken,
-          expiresAt
-        }
         this.isAuthenticated = true
         this.isGuest = false
-        this.rememberMe = rememberMe
-
-        this.persist()
 
         return data
       } catch (error: any) {
@@ -230,19 +108,13 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async refreshAccessToken() {
-      if (!this.tokens?.refreshToken) {
-        throw new Error('No refresh token available')
-      }
-
       try {
         const response = await fetch(`${API_URL}/auth/refresh`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            refreshToken: this.tokens.refreshToken
-          })
+          credentials: 'include' // Send cookies with refresh token
         })
 
         if (!response.ok) {
@@ -251,19 +123,8 @@ export const useAuthStore = defineStore('auth', {
           throw new Error(errorData.error || 'Token refresh failed')
         }
 
-        const data = await response.json()
-
-        // Update tokens
-        const expiresAt = Date.now() + 15 * 60 * 1000
-        this.tokens = {
-          accessToken: data.data.accessToken,
-          refreshToken: data.data.refreshToken,
-          expiresAt
-        }
-
-        this.persist()
-
-        return data
+        // New tokens are set in cookies by the backend
+        return true
       } catch (error: any) {
         console.error('Token refresh error:', error)
         throw error
@@ -271,61 +132,54 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async logout() {
-      // Call backend logout endpoint if authenticated
-      if (this.tokens?.refreshToken) {
-        try {
-          await fetch(`${API_URL}/auth/logout`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${this.tokens.accessToken}`
-            },
-            body: JSON.stringify({
-              refreshToken: this.tokens.refreshToken
-            })
-          })
-        } catch (error) {
-          console.error('Logout request failed:', error)
-        }
+      try {
+        await fetch(`${API_URL}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include' // Send cookies for logout
+        })
+      } catch (error) {
+        console.error('Logout request failed:', error)
       }
 
       // Clear state
       this.user = null
-      this.tokens = null
       this.isAuthenticated = false
       this.isGuest = true
       this.error = null
-
-      this.clearStorage()
     },
 
-    // Check if token needs refresh (5 minutes before expiration)
-    shouldRefreshToken(): boolean {
-      if (!this.tokens) return false
-      const fiveMinutes = 5 * 60 * 1000
-      return Date.now() > this.tokens.expiresAt - fiveMinutes
-    },
-
-    // Get authorization header
-    getAuthHeader(): Record<string, string> {
-      if (!this.tokens?.accessToken) {
-        return {}
-      }
-      return {
-        Authorization: `Bearer ${this.tokens.accessToken}`
-      }
-    },
-
-    persist() {
-      saveToStorage(this.$state, this.rememberMe)
-    },
-
-    clearStorage() {
+    // Check authentication status by calling /auth/me
+    async checkAuth() {
       try {
-        localStorage.removeItem(STORAGE_KEY)
-        sessionStorage.removeItem(STORAGE_KEY)
+        const response = await fetch(`${API_URL}/auth/me`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include' // Send cookies
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          this.user = data.data
+          this.isAuthenticated = true
+          this.isGuest = false
+          return true
+        } else {
+          this.user = null
+          this.isAuthenticated = false
+          this.isGuest = false
+          return false
+        }
       } catch (error) {
-        console.error('Failed to clear auth storage:', error)
+        console.error('Auth check failed:', error)
+        this.user = null
+        this.isAuthenticated = false
+        this.isGuest = false
+        return false
       }
     },
 
@@ -334,8 +188,6 @@ export const useAuthStore = defineStore('auth', {
       this.isGuest = true
       this.isAuthenticated = false
       this.user = null
-      this.tokens = null
-      this.clearStorage()
     }
   },
 
@@ -349,11 +201,6 @@ export const useAuthStore = defineStore('auth', {
         return state.user.firstName
       }
       return state.user.email
-    },
-
-    isTokenExpired: (state): boolean => {
-      if (!state.tokens) return true
-      return Date.now() > state.tokens.expiresAt
     }
   }
 })
