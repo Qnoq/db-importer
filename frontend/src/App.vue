@@ -145,14 +145,12 @@ import { computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useColorMode } from '@vueuse/core'
 import { useAuthStore } from './store/authStore'
-import { useMappingStore } from './store/mappingStore'
 import { useWorkflowSessionStore } from './store/workflowSessionStore'
 import { APP_VERSION } from './version'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
-const mappingStore = useMappingStore()
 const sessionStore = useWorkflowSessionStore()
 const appVersion = APP_VERSION
 
@@ -196,18 +194,7 @@ const userInitials = computed(() => {
   return 'U'
 })
 
-const handleNewImport = async () => {
-  mappingStore.reset()
-
-  // Delete session when starting a new import
-  if (authStore.isAuthenticated) {
-    try {
-      await sessionStore.deleteSession()
-    } catch (error) {
-      console.error('Failed to delete session:', error)
-    }
-  }
-
+const handleNewImport = () => {
   router.push('/')
 }
 
