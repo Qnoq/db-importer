@@ -145,12 +145,14 @@ import { computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useColorMode } from '@vueuse/core'
 import { useAuthStore } from './store/authStore'
+import { useMappingStore } from './store/mappingStore'
 import { useWorkflowSessionStore } from './store/workflowSessionStore'
 import { APP_VERSION } from './version'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const mappingStore = useMappingStore()
 const sessionStore = useWorkflowSessionStore()
 const appVersion = APP_VERSION
 
@@ -194,8 +196,26 @@ const userInitials = computed(() => {
   return 'U'
 })
 
+// Determine which step to navigate to based on current workflow state
+function getCurrentStepPath(): string {
+  // Check workflow progress and return the appropriate path
+  if (Object.keys(mappingStore.mapping).length > 0 || mappingStore.excelHeaders.length > 0) {
+    // If we have mapping or data, we're at step 4
+    return '/mapping'
+  } else if (mappingStore.selectedTable) {
+    // If we have a selected table, we're at step 3
+    return '/upload-data'
+  } else if (mappingStore.tables.length > 0) {
+    // If we have tables, we're at step 2
+    return '/select-table'
+  }
+  // Otherwise, start from step 1
+  return '/'
+}
+
 const handleNewImport = () => {
-  router.push('/')
+  const targetPath = getCurrentStepPath()
+  router.push(targetPath)
 }
 
 const handleLogout = async () => {
