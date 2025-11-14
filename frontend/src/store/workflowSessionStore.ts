@@ -8,6 +8,8 @@ export interface WorkflowSessionState {
   error: string | null
   lastSavedAt: Date | null
   sessionId: string | null
+  restoredTransformations: Record<string, string> | null
+  isRestoring: boolean
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
@@ -17,7 +19,9 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
     loading: false,
     error: null,
     lastSavedAt: null,
-    sessionId: null
+    sessionId: null,
+    restoredTransformations: null,
+    isRestoring: false
   }),
 
   actions: {
@@ -149,9 +153,9 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
     },
 
     /**
-     * Save column mapping (Step 4)
+     * Save column mapping and transformations (Step 4)
      */
-    async saveMapping(mapping: Record<string, string>): Promise<void> {
+    async saveMapping(mapping: Record<string, string>, transformations: Record<string, string> = {}): Promise<void> {
       const authStore = useAuthStore()
 
       if (!authStore.isAuthenticated) {
@@ -169,7 +173,8 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
             ...authStore.getAuthHeader()
           },
           body: JSON.stringify({
-            mapping
+            mapping,
+            transformations
           })
         })
 
@@ -242,10 +247,13 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
         return false
       }
 
+      this.isRestoring = true
+
       try {
         const session = await this.getSession()
 
         if (!session) {
+          this.isRestoring = false
           return false
         }
 
@@ -268,16 +276,24 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
           mappingStore.setMapping(session.columnMapping)
         }
 
+        // Store transformations for Mapping.vue to pick up
+        if (session.fieldTransformations && Object.keys(session.fieldTransformations).length > 0) {
+          this.restoredTransformations = session.fieldTransformations
+        }
+
         console.log('Session restored successfully', {
           step: session.currentStep,
           tables: session.schemaTables?.length,
           selectedTable: session.selectedTableName,
-          hasData: session.dataHeaders?.length > 0
+          hasData: session.dataHeaders?.length > 0,
+          hasTransformations: !!session.fieldTransformations
         })
 
+        this.isRestoring = false
         return true
       } catch (error) {
         console.error('Error restoring session:', error)
+        this.isRestoring = false
         return false
       }
     },
@@ -324,6 +340,15 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
       this.sessionId = null
       this.lastSavedAt = null
       this.error = null
+      this.restoredTransformations = null
+      this.isRestoring = false
+    },
+
+    /**
+     * Clear restored transformations after use
+     */
+    clearRestoredTransformations() {
+      this.restoredTransformations = null
     }
   },
 

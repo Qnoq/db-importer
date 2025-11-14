@@ -14,7 +14,16 @@
         </div>
       </div>
 
-      <UAlert v-if="!store.hasExcelData || !store.hasSelectedTable" icon="i-heroicons-exclamation-triangle" color="warning" variant="soft" class="mb-4">
+      <!-- Loading State During Session Restoration -->
+      <UAlert v-if="sessionStore.isRestoring" icon="i-heroicons-arrow-path" color="info" variant="soft" class="mb-4">
+        <template #title>Restoring your session...</template>
+        <template #description>
+          <p>Please wait while we load your previous work.</p>
+        </template>
+      </UAlert>
+
+      <!-- Missing Data Alert (only if not restoring) -->
+      <UAlert v-else-if="!store.hasExcelData || !store.hasSelectedTable" icon="i-heroicons-exclamation-triangle" color="warning" variant="soft" class="mb-4">
         <template #title>Missing data</template>
         <template #description>
           <div class="flex flex-col gap-2">
@@ -461,8 +470,21 @@ const validationStats = ref<{
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 onMounted(() => {
-  // Initialize auto-mapping
-  autoMap()
+  // Restore transformations from session if available
+  if (sessionStore.restoredTransformations && Object.keys(sessionStore.restoredTransformations).length > 0) {
+    fieldTransformations.value = { ...sessionStore.restoredTransformations }
+    console.log('Restored transformations from session:', sessionStore.restoredTransformations)
+    sessionStore.clearRestoredTransformations() // Clear after use
+  }
+
+  // Initialize auto-mapping (only if no mapping exists yet)
+  if (Object.keys(localMapping.value).length === 0) {
+    autoMap()
+  } else {
+    // If we have mapping, just sync it
+    syncFieldToExcelMapping()
+  }
+
   validateData()
 })
 
@@ -624,8 +646,8 @@ function autoMap() {
 function updateMapping() {
   store.setMapping(localMapping.value)
 
-  // Save to session (for authenticated users)
-  sessionStore.saveMapping(localMapping.value)
+  // Save to session (for authenticated users) with transformations
+  sessionStore.saveMapping(localMapping.value, fieldTransformations.value)
 }
 
 /**

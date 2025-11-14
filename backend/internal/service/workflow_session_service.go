@@ -222,7 +222,7 @@ func (s *WorkflowSessionService) SaveDataFile(ctx context.Context, userID uuid.U
 	return session.ToResponse(), nil
 }
 
-// SaveMapping saves column mapping (step 4)
+// SaveMapping saves column mapping and transformations (step 4)
 func (s *WorkflowSessionService) SaveMapping(ctx context.Context, userID uuid.UUID, req *models.SaveMappingRequest) (*models.WorkflowSessionResponse, error) {
 	session, err := s.sessionRepo.GetByUserID(ctx, userID)
 	if err != nil {
@@ -236,6 +236,7 @@ func (s *WorkflowSessionService) SaveMapping(ctx context.Context, userID uuid.UU
 	// Update session
 	session.CurrentStep = int(models.StepMapColumns)
 	session.ColumnMapping = req.Mapping
+	session.FieldTransformations = req.Transformations
 
 	err = s.sessionRepo.Update(ctx, session)
 	if err != nil {
