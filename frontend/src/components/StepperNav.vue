@@ -71,10 +71,14 @@
 import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useMappingStore } from '../store/mappingStore'
+import { useAuthStore } from '../store/authStore'
+import { useWorkflowSessionStore } from '../store/workflowSessionStore'
 
 const router = useRouter()
 const route = useRoute()
 const store = useMappingStore()
+const authStore = useAuthStore()
+const sessionStore = useWorkflowSessionStore()
 const showResetDialog = ref(false)
 
 interface Step {
@@ -198,7 +202,17 @@ function onStepClick(newIndex: number) {
   }
 }
 
-function confirmReset() {
+async function confirmReset() {
+  // Delete backend session for authenticated users
+  if (authStore.isAuthenticated) {
+    try {
+      await sessionStore.deleteSession()
+    } catch (error) {
+      console.error('Failed to delete session:', error)
+    }
+  }
+
+  // Reset local state
   store.reset()
   router.push('/')
   showResetDialog.value = false
