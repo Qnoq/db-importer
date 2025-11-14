@@ -29,7 +29,7 @@ func (r *WorkflowSessionRepository) GetByUserID(ctx context.Context, userID uuid
 	query := `
 		SELECT id, user_id, current_step, schema_content, schema_tables,
 		       selected_table_name, data_file_name, data_headers, sample_data,
-		       column_mapping, expires_at, created_at, updated_at
+		       column_mapping, field_transformations, expires_at, created_at, updated_at
 		FROM workflow_sessions
 		WHERE user_id = $1 AND expires_at > NOW()
 	`
@@ -54,9 +54,9 @@ func (r *WorkflowSessionRepository) Create(ctx context.Context, session *models.
 		INSERT INTO workflow_sessions (
 			user_id, current_step, schema_content, schema_tables,
 			selected_table_name, data_file_name, data_headers, sample_data,
-			column_mapping, expires_at
+			column_mapping, field_transformations, expires_at
 		)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 		RETURNING id, created_at, updated_at
 	`
 
@@ -72,6 +72,7 @@ func (r *WorkflowSessionRepository) Create(ctx context.Context, session *models.
 		session.DataHeaders,
 		session.SampleData,
 		session.ColumnMapping,
+		session.FieldTransformations,
 		session.ExpiresAt,
 	).Scan(&session.ID, &session.CreatedAt, &session.UpdatedAt)
 
@@ -94,8 +95,9 @@ func (r *WorkflowSessionRepository) Update(ctx context.Context, session *models.
 		    data_headers = $6,
 		    sample_data = $7,
 		    column_mapping = $8,
-		    expires_at = $9
-		WHERE id = $10 AND user_id = $11
+		    field_transformations = $9,
+		    expires_at = $10
+		WHERE id = $11 AND user_id = $12
 		RETURNING updated_at
 	`
 
@@ -110,6 +112,7 @@ func (r *WorkflowSessionRepository) Update(ctx context.Context, session *models.
 		session.DataHeaders,
 		session.SampleData,
 		session.ColumnMapping,
+		session.FieldTransformations,
 		session.ExpiresAt,
 		session.ID,
 		session.UserID,

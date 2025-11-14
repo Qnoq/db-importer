@@ -127,6 +127,30 @@ func (m ColumnMapping) Value() (driver.Value, error) {
 	return json.Marshal(m)
 }
 
+// FieldTransformations represents transformations applied to fields (DB field -> transformation type)
+type FieldTransformations map[string]string
+
+// Scan implements the sql.Scanner interface for FieldTransformations
+func (f *FieldTransformations) Scan(value interface{}) error {
+	if value == nil {
+		*f = FieldTransformations{}
+		return nil
+	}
+	bytes, ok := value.([]byte)
+	if !ok {
+		return nil
+	}
+	return json.Unmarshal(bytes, f)
+}
+
+// Value implements the driver.Valuer interface for FieldTransformations
+func (f FieldTransformations) Value() (driver.Value, error) {
+	if len(f) == 0 {
+		return json.Marshal(map[string]string{})
+	}
+	return json.Marshal(f)
+}
+
 // WorkflowSession represents a user's workflow session in the database
 type WorkflowSession struct {
 	ID          uuid.UUID `db:"id" json:"id"`
@@ -146,7 +170,8 @@ type WorkflowSession struct {
 	SampleData   SampleData  `db:"sample_data" json:"sampleData"`
 
 	// Step 4: Column mapping
-	ColumnMapping ColumnMapping `db:"column_mapping" json:"columnMapping"`
+	ColumnMapping        ColumnMapping        `db:"column_mapping" json:"columnMapping"`
+	FieldTransformations FieldTransformations `db:"field_transformations" json:"fieldTransformations"`
 
 	// Metadata
 	ExpiresAt time.Time `db:"expires_at" json:"expiresAt"`
@@ -156,35 +181,37 @@ type WorkflowSession struct {
 
 // WorkflowSessionResponse is the response returned to clients
 type WorkflowSessionResponse struct {
-	ID                uuid.UUID        `json:"id"`
-	UserID            uuid.UUID        `json:"userId"`
-	CurrentStep       int              `json:"currentStep"`
-	SchemaTables      TableDefinitions `json:"schemaTables"`
-	SelectedTableName *string          `json:"selectedTableName,omitempty"`
-	DataFileName      *string          `json:"dataFileName,omitempty"`
-	DataHeaders       DataHeaders      `json:"dataHeaders"`
-	SampleData        SampleData       `json:"sampleData"`
-	ColumnMapping     ColumnMapping    `json:"columnMapping"`
-	ExpiresAt         time.Time        `json:"expiresAt"`
-	CreatedAt         time.Time        `json:"createdAt"`
-	UpdatedAt         time.Time        `json:"updatedAt"`
+	ID                   uuid.UUID            `json:"id"`
+	UserID               uuid.UUID            `json:"userId"`
+	CurrentStep          int                  `json:"currentStep"`
+	SchemaTables         TableDefinitions     `json:"schemaTables"`
+	SelectedTableName    *string              `json:"selectedTableName,omitempty"`
+	DataFileName         *string              `json:"dataFileName,omitempty"`
+	DataHeaders          DataHeaders          `json:"dataHeaders"`
+	SampleData           SampleData           `json:"sampleData"`
+	ColumnMapping        ColumnMapping        `json:"columnMapping"`
+	FieldTransformations FieldTransformations `json:"fieldTransformations"`
+	ExpiresAt            time.Time            `json:"expiresAt"`
+	CreatedAt            time.Time            `json:"createdAt"`
+	UpdatedAt            time.Time            `json:"updatedAt"`
 }
 
 // ToResponse converts WorkflowSession to WorkflowSessionResponse
 func (w *WorkflowSession) ToResponse() *WorkflowSessionResponse {
 	return &WorkflowSessionResponse{
-		ID:                w.ID,
-		UserID:            w.UserID,
-		CurrentStep:       w.CurrentStep,
-		SchemaTables:      w.SchemaTables,
-		SelectedTableName: w.SelectedTableName,
-		DataFileName:      w.DataFileName,
-		DataHeaders:       w.DataHeaders,
-		SampleData:        w.SampleData,
-		ColumnMapping:     w.ColumnMapping,
-		ExpiresAt:         w.ExpiresAt,
-		CreatedAt:         w.CreatedAt,
-		UpdatedAt:         w.UpdatedAt,
+		ID:                   w.ID,
+		UserID:               w.UserID,
+		CurrentStep:          w.CurrentStep,
+		SchemaTables:         w.SchemaTables,
+		SelectedTableName:    w.SelectedTableName,
+		DataFileName:         w.DataFileName,
+		DataHeaders:          w.DataHeaders,
+		SampleData:           w.SampleData,
+		ColumnMapping:        w.ColumnMapping,
+		FieldTransformations: w.FieldTransformations,
+		ExpiresAt:            w.ExpiresAt,
+		CreatedAt:            w.CreatedAt,
+		UpdatedAt:            w.UpdatedAt,
 	}
 }
 
@@ -214,5 +241,6 @@ type SaveDataFileRequest struct {
 
 // SaveMappingRequest represents the request to save column mapping (step 4)
 type SaveMappingRequest struct {
-	Mapping map[string]string `json:"mapping" validate:"required,min=1"`
+	Mapping        map[string]string `json:"mapping" validate:"required,min=1"`
+	Transformations map[string]string `json:"transformations"`
 }
