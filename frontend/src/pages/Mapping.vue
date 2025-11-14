@@ -196,6 +196,7 @@
                     :disabled="!getMappedExcelColumn(field.name)"
                     placeholder="None"
                     class="w-full"
+                    :key="`transform-${field.name}-${fieldTransformations[field.name] || 'none'}`"
                   />
                   <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 min-h-[1.25rem]">
                     <!-- Empty placeholder for alignment -->
@@ -806,6 +807,12 @@ function getTransformationOptions(field: Field) {
   const columnIndex = store.excelHeaders.indexOf(excelCol)
   const columnData = store.excelData.map(row => row[columnIndex])
   const transformationTypes = suggestTransformations(columnData, field.type)
+
+  // Ensure currently selected transformation is in the options
+  const currentTransform = fieldTransformations.value[field.name]
+  if (currentTransform && currentTransform !== 'none' && !transformationTypes.includes(currentTransform)) {
+    transformationTypes.push(currentTransform)
+  }
 
   return transformationTypes.map(type => ({
     label: transformations[type].label,
