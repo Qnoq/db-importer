@@ -3,6 +3,19 @@
     <!-- Progress Stepper with Navigation -->
     <StepperNav />
 
+    <!-- Scroll to Top/Bottom Button -->
+    <UButton
+      v-if="showScrollButton"
+      @click="scrollToTopOrBottom"
+      :icon="isNearBottom ? 'i-heroicons-arrow-up' : 'i-heroicons-arrow-down'"
+      color="primary"
+      size="lg"
+      class="fixed bottom-8 right-8 z-50 shadow-lg"
+      :aria-label="isNearBottom ? 'Scroll to top' : 'Scroll to bottom'"
+    >
+      {{ isNearBottom ? 'Top' : 'Bottom' }}
+    </UButton>
+
     <div class="main-card bg-white dark:bg-gray-950 rounded-lg border border-gray-200 dark:border-gray-800 shadow-md p-6">
       <!-- Header -->
       <div class="page-header mb-6 flex justify-between items-center">
@@ -14,16 +27,8 @@
         </div>
       </div>
 
-      <!-- Loading State During Session Restoration -->
-      <UAlert v-if="sessionStore.isRestoring" icon="i-heroicons-arrow-path" color="info" variant="soft" class="mb-4">
-        <template #title>Restoring your session...</template>
-        <template #description>
-          <p>Please wait while we load your previous work.</p>
-        </template>
-      </UAlert>
-
-      <!-- Missing Data Alert (only if not restoring) -->
-      <UAlert v-else-if="!store.hasExcelData || !store.hasSelectedTable" icon="i-heroicons-exclamation-triangle" color="warning" variant="soft" class="mb-4">
+      <!-- Missing Data Alert -->
+      <UAlert v-if="!sessionStore.isRestoring && (!store.hasExcelData || !store.hasSelectedTable)" icon="i-heroicons-exclamation-triangle" color="warning" variant="soft" class="mb-4">
         <template #title>Missing data</template>
         <template #description>
           <div class="flex flex-col gap-2">
@@ -77,7 +82,7 @@
         </UAlert>
 
         <!-- Info Banner -->
-        <UAlert icon="i-heroicons-information-circle" color="blue" variant="soft" class="mb-4">
+        <UAlert v-if="!sessionStore.isRestoring" icon="i-heroicons-information-circle" color="blue" variant="soft" class="mb-4">
           <template #title>Mapping Information</template>
           <template #description>
             <div class="space-y-2">
@@ -100,6 +105,18 @@
           </template>
         </UAlert>
 
+        <!-- Info Banner Skeleton -->
+        <div v-else class="mb-4 border border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-950 rounded-lg p-4">
+          <div class="space-y-2">
+            <USkeleton class="h-5 w-40" />
+            <USkeleton class="h-4 w-64" />
+            <div class="flex gap-4">
+              <USkeleton class="h-4 w-20" />
+              <USkeleton class="h-4 w-24" />
+            </div>
+          </div>
+        </div>
+
         <!-- Column Mapping -->
         <div class="mapping-section mb-6">
           <div class="section-header flex justify-between items-center mb-4">
@@ -110,6 +127,7 @@
                 color="info"
                 variant="soft"
                 size="sm"
+                :disabled="sessionStore.isRestoring"
               >
                 ⚡ Auto-map Columns
               </UButton>
@@ -118,13 +136,58 @@
                 color="neutral"
                 variant="soft"
                 size="sm"
+                :disabled="sessionStore.isRestoring"
               >
                 ✕ Clear All
               </UButton>
             </div>
           </div>
 
-          <div class="mapping-list space-y-3">
+          <!-- Skeleton Loading State -->
+          <div v-if="sessionStore.isRestoring" class="mapping-list space-y-3">
+            <div v-for="i in 5" :key="`skeleton-${i}`" class="mapping-card border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-lg p-4">
+              <div class="mapping-grid grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
+                <!-- DB Field Skeleton -->
+                <div class="field-column flex flex-col gap-2">
+                  <USkeleton class="h-3 w-24" />
+                  <div class="flex items-center gap-2">
+                    <USkeleton class="h-8 w-8 rounded" />
+                    <div class="flex-1 space-y-2">
+                      <USkeleton class="h-4 w-32" />
+                      <USkeleton class="h-3 w-20" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Arrow Skeleton -->
+                <div class="arrow-column flex justify-center">
+                  <USkeleton class="h-6 w-6" />
+                </div>
+
+                <!-- Excel Column Skeleton -->
+                <div class="excel-column flex flex-col gap-2">
+                  <USkeleton class="h-3 w-24" />
+                  <USkeleton class="h-10 w-full" />
+                  <USkeleton class="h-3 w-28" />
+                </div>
+
+                <!-- Transformation Skeleton -->
+                <div class="transform-column flex flex-col gap-2">
+                  <USkeleton class="h-3 w-28" />
+                  <USkeleton class="h-10 w-full" />
+                  <USkeleton class="h-3 w-full" />
+                </div>
+
+                <!-- Actions Skeleton -->
+                <div class="actions-column flex gap-2 justify-end items-center">
+                  <USkeleton class="h-8 w-16 rounded" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actual Mapping Content -->
+          <div v-else class="mapping-list space-y-3">
             <div
               v-for="(field, index) in store.selectedTable?.fields"
               :key="index"
@@ -315,7 +378,7 @@
         </div>
 
         <!-- Action Buttons -->
-        <div class="bottom-actions flex flex-wrap gap-4 mb-6">
+        <div v-if="!sessionStore.isRestoring" class="bottom-actions flex flex-wrap gap-4 mb-6">
           <UButton
             @click="generateSQL"
             :disabled="loading || !canGenerate"
@@ -334,6 +397,12 @@
           >
             {{ showPreview ? 'Hide' : 'Show' }} Preview
           </UButton>
+        </div>
+
+        <!-- Action Buttons Skeleton -->
+        <div v-else class="bottom-actions flex flex-wrap gap-4 mb-6">
+          <USkeleton class="h-12 w-64 rounded-lg" />
+          <USkeleton class="h-12 w-40 rounded-lg" />
         </div>
 
         <!-- Loading Indicator -->
@@ -422,7 +491,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import StepperNav from '../components/StepperNav.vue'
 import { useMappingStore, Field, type CellValue } from '../store/mappingStore'
@@ -460,6 +529,10 @@ const autoMappingStats = ref<{
   skipped: number
 } | null>(null)
 
+// Scroll button state
+const showScrollButton = ref(false)
+const isNearBottom = ref(false)
+
 // Validation state
 const cellValidations = ref<Map<string, ValidationResult>>(new Map())
 const validationStats = ref<{
@@ -471,8 +544,13 @@ const validationStats = ref<{
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 onMounted(() => {
-  // Initialize auto-mapping (only if no mapping exists yet)
-  if (Object.keys(localMapping.value).length === 0) {
+  // Initialize localMapping from store first (for session restoration)
+  if (Object.keys(store.mapping).length > 0) {
+    localMapping.value = { ...store.mapping }
+  }
+
+  // Initialize auto-mapping (only if no mapping exists yet and not restoring)
+  if (!sessionStore.isRestoring && Object.keys(localMapping.value).length === 0) {
     autoMap()
   } else {
     // If we have mapping, just sync it
@@ -480,7 +558,25 @@ onMounted(() => {
   }
 
   validateData()
+
+  // Add scroll listener for scroll button
+  window.addEventListener('scroll', handleScroll)
 })
+
+// Cleanup on unmount
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+
+// Watch for store mapping changes (handles async restoration)
+watch(() => store.mapping, (newMapping) => {
+  if (newMapping && Object.keys(newMapping).length > 0) {
+    console.log('Syncing localMapping from store:', newMapping)
+    localMapping.value = { ...newMapping }
+    syncFieldToExcelMapping()
+    validateData()
+  }
+}, { deep: true, immediate: true })
 
 // Watch for restored transformations from session (handles async restoration)
 watch(() => sessionStore.restoredTransformations, (transformations) => {
@@ -1071,6 +1167,40 @@ interface FieldInfo {
   name: string
   type: string
   nullable: boolean
+}
+
+/**
+ * Handle scroll event to show/hide and update scroll button
+ */
+function handleScroll() {
+  const scrollTop = window.scrollY || document.documentElement.scrollTop
+  const scrollHeight = document.documentElement.scrollHeight
+  const clientHeight = document.documentElement.clientHeight
+
+  // Show button after scrolling 200px
+  showScrollButton.value = scrollTop > 200
+
+  // Determine if near bottom (within 300px of bottom)
+  isNearBottom.value = scrollTop + clientHeight >= scrollHeight - 300
+}
+
+/**
+ * Scroll to top or bottom based on current position
+ */
+function scrollToTopOrBottom() {
+  if (isNearBottom.value) {
+    // Scroll to top
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    })
+  } else {
+    // Scroll to bottom
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'smooth'
+    })
+  }
 }
 
 /**
