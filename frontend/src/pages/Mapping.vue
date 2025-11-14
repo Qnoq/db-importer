@@ -173,8 +173,8 @@
                     placeholder="-- Skip this field --"
                     class="w-full"
                   />
-                  <p v-if="getMappedExcelColumn(field.name)" class="sample-value text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    Sample: {{ getSampleValue(getMappedExcelColumn(field.name)!) }}
+                  <p class="sample-value text-xs text-gray-600 dark:text-gray-400 mt-1 min-h-[1.25rem]">
+                    <span v-if="getMappedExcelColumn(field.name)">Sample: {{ getSampleValue(getMappedExcelColumn(field.name)!) }}</span>
                   </p>
                 </div>
 
@@ -188,6 +188,9 @@
                     placeholder="None"
                     class="w-full"
                   />
+                  <p class="text-xs text-gray-600 dark:text-gray-400 mt-1 min-h-[1.25rem]">
+                    <!-- Empty placeholder for alignment -->
+                  </p>
                 </div>
 
                 <!-- Actions -->

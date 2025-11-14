@@ -185,7 +185,7 @@
       </template>
 
       <template #footer>
-        <div class="flex flex-col gap-3">
+        <div class="flex flex-col gap-3 w-full">
           <UButton
             @click="continueToProceed"
             color="success"
