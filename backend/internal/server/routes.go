@@ -58,11 +58,13 @@ func (s *Server) setupAuthRoutes(mux *http.ServeMux) {
 	logger.Info("Registering authentication endpoints", nil)
 
 	corsAndLog := s.withCORS(s.withLogging)
+	requireAuth := s.withRequireAuth
 
 	mux.HandleFunc("/auth/register", corsAndLog(s.authHandler.Register))
 	mux.HandleFunc("/auth/login", corsAndLog(s.authHandler.Login))
 	mux.HandleFunc("/auth/refresh", corsAndLog(s.authHandler.RefreshToken))
 	mux.HandleFunc("/auth/logout", corsAndLog(s.authHandler.Logout))
+	mux.HandleFunc("/auth/me", corsAndLog(requireAuth(s.authHandler.Me)))
 }
 
 // setupProtectedRoutes registers routes that require authentication
