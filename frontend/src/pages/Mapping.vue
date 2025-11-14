@@ -254,7 +254,8 @@
                 <div class="transform-column flex flex-col gap-2">
                   <label class="field-label text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-400">Transformation</label>
                   <USelect
-                    v-model="fieldTransformations[field.name]"
+                    :model-value="fieldTransformations[field.name]"
+                    @update:model-value="(value) => store.updateTransformation(field.name, value)"
                     :items="getTransformationOptions(field)"
                     :disabled="!getMappedExcelColumn(field.name)"
                     placeholder="None"
@@ -511,8 +512,8 @@ const sessionStore = useWorkflowSessionStore()
 const localMapping = ref<Record<string, string>>({})
 // Field to Excel column mapping (DB field → Excel column) - for v-model binding
 const fieldToExcelMapping = ref<Record<string, string | null>>({})
-// Field transformations (DB field → transformation type)
-const fieldTransformations = ref<Record<string, TransformationType>>({})
+// Field transformations (DB field → transformation type) - use store directly
+const fieldTransformations = computed(() => store.transformations)
 const previousFieldTransformations = ref<Record<string, TransformationType>>({}) // Store previous transformations when skipping
 
 // UI state
@@ -577,17 +578,6 @@ watch(() => store.mapping, (newMapping) => {
     validateData()
   }
 }, { deep: true, immediate: true })
-
-// Watch for restored transformations from session (handles async restoration)
-watch(() => sessionStore.restoredTransformations, (transformations) => {
-  if (transformations && Object.keys(transformations).length > 0) {
-    console.log('Applying restored transformations:', transformations)
-    fieldTransformations.value = { ...transformations }
-    sessionStore.clearRestoredTransformations() // Clear after use
-    // Re-validate with new transformations
-    validateData()
-  }
-}, { immediate: true })
 
 // Watch fieldTransformations for changes and trigger validation
 watch(fieldTransformations, () => {
@@ -726,7 +716,7 @@ function autoMap() {
   }
 
   localMapping.value = mapping
-  fieldTransformations.value = transformsToApply
+  store.setTransformations(transformsToApply)
 
   // Update fieldToExcelMapping for v-model binding
   syncFieldToExcelMapping()
@@ -782,7 +772,7 @@ function syncFieldToExcelMapping() {
  */
 function confirmClearMappings() {
   localMapping.value = {}
-  fieldTransformations.value = {}
+  store.setTransformations({})
   syncFieldToExcelMapping()
   updateMapping()
   showClearDialog.value = false
@@ -823,10 +813,10 @@ function onFieldMappingChange(fieldName: string, excelColumn: string) {
       const columnIndex = store.excelHeaders.indexOf(excelColumn)
       const columnData = store.excelData.map(row => row[columnIndex])
       const suggestions = suggestTransformations(columnData, field.type)
-      fieldTransformations.value[fieldName] = suggestions[1] || 'none'
+      store.updateTransformation(fieldName, suggestions[1] || 'none')
     }
   } else {
-    fieldTransformations.value[fieldName] = 'none'
+    store.updateTransformation(fieldName, 'none')
   }
 
   onMappingChange()
@@ -842,7 +832,7 @@ function toggleSkipField(fieldName: string) {
     // Currently mapped, skip it - save transformation before clearing
     previousFieldTransformations.value[fieldName] = fieldTransformations.value[fieldName] || 'none'
     delete localMapping.value[mappedExcelCol]
-    fieldTransformations.value[fieldName] = 'none'
+    store.updateTransformation(fieldName, 'none')
   } else {
     // Currently skipped, try to auto-map it
     const field = store.selectedTable?.fields.find(f => f.name === fieldName)
@@ -870,12 +860,12 @@ function toggleSkipField(fieldName: string) {
 
       // Restore previous transformation if it exists, otherwise suggest one
       if (previousFieldTransformations.value[fieldName] && previousFieldTransformations.value[fieldName] !== 'none') {
-        fieldTransformations.value[fieldName] = previousFieldTransformations.value[fieldName]
+        store.updateTransformation(fieldName, previousFieldTransformations.value[fieldName])
       } else {
         const columnIndex = store.excelHeaders.indexOf(bestMatch)
         const columnData = store.excelData.map(row => row[columnIndex])
         const suggestions = suggestTransformations(columnData, field.type)
-        fieldTransformations.value[fieldName] = suggestions[1] || 'none'
+        store.updateTransformation(fieldName, suggestions[1] || 'none')
       }
     }
   }

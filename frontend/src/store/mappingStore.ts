@@ -20,6 +20,7 @@ export interface MappingState {
   excelData: CellValue[][]
   excelHeaders: string[]
   mapping: Record<string, string>
+  transformations: Record<string, string>
 }
 
 const STORAGE_KEY = 'db-importer-state'
@@ -59,7 +60,8 @@ function saveToStorage(state: MappingState): void {
         excelHeaders: state.excelHeaders,
         // Don't store full excel data to avoid storage limits
         excelDataRowCount: state.excelData.length,
-        mapping: state.mapping
+        mapping: state.mapping,
+        transformations: state.transformations
       }
     }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore))
@@ -78,7 +80,8 @@ export const useMappingStore = defineStore('mapping', {
         selectedTable: stored.selectedTable || null,
         excelData: [], // Excel data is not persisted due to size
         excelHeaders: stored.excelHeaders || [],
-        mapping: stored.mapping || {}
+        mapping: stored.mapping || {},
+        transformations: stored.transformations || {}
       }
     }
 
@@ -87,7 +90,8 @@ export const useMappingStore = defineStore('mapping', {
       selectedTable: null,
       excelData: [],
       excelHeaders: [],
-      mapping: {}
+      mapping: {},
+      transformations: {}
     }
   },
 
@@ -118,12 +122,23 @@ export const useMappingStore = defineStore('mapping', {
       this.persist()
     },
 
+    setTransformations(transformations: Record<string, string>) {
+      this.transformations = transformations
+      this.persist()
+    },
+
+    updateTransformation(fieldName: string, transformation: string) {
+      this.transformations[fieldName] = transformation
+      this.persist()
+    },
+
     reset() {
       this.tables = []
       this.selectedTable = null
       this.excelData = []
       this.excelHeaders = []
       this.mapping = {}
+      this.transformations = {}
       this.clearStorage()
     },
 
