@@ -470,13 +470,6 @@ const validationStats = ref<{
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 onMounted(() => {
-  // Restore transformations from session if available
-  if (sessionStore.restoredTransformations && Object.keys(sessionStore.restoredTransformations).length > 0) {
-    fieldTransformations.value = { ...sessionStore.restoredTransformations }
-    console.log('Restored transformations from session:', sessionStore.restoredTransformations)
-    sessionStore.clearRestoredTransformations() // Clear after use
-  }
-
   // Initialize auto-mapping (only if no mapping exists yet)
   if (Object.keys(localMapping.value).length === 0) {
     autoMap()
@@ -487,6 +480,17 @@ onMounted(() => {
 
   validateData()
 })
+
+// Watch for restored transformations from session (handles async restoration)
+watch(() => sessionStore.restoredTransformations, (transformations) => {
+  if (transformations && Object.keys(transformations).length > 0) {
+    console.log('Applying restored transformations:', transformations)
+    fieldTransformations.value = { ...transformations }
+    sessionStore.clearRestoredTransformations() // Clear after use
+    // Re-validate with new transformations
+    validateData()
+  }
+}, { immediate: true })
 
 // Watch fieldTransformations for changes and trigger validation
 watch(fieldTransformations, () => {
