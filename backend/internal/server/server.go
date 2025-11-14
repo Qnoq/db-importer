@@ -25,10 +25,17 @@ type Server struct {
 	httpServer  *http.Server
 	rateLimiter *middleware.RateLimiter
 
+	// Services
+	workflowSessionService *service.WorkflowSessionService
+
 	// Handlers
-	authHandler   *handler.AuthHandler
-	importHandler *handler.ImportHandler
-	publicHandler *handlers.PublicHandler
+	authHandler           *handler.AuthHandler
+	importHandler         *handler.ImportHandler
+	workflowSessionHandler *handler.WorkflowSessionHandler
+	publicHandler         *handlers.PublicHandler
+
+	// Cleanup
+	cleanupCancel context.CancelFunc
 }
 
 // New creates a new Server instance
@@ -150,16 +157,22 @@ func (s *Server) initHandlers() {
 		userRepo := repository.NewUserRepository(s.db)
 		refreshTokenRepo := repository.NewRefreshTokenRepository(s.db)
 		importRepo := repository.NewImportRepository(s.db)
+		workflowSessionRepo := repository.NewWorkflowSessionRepository(s.db)
 
 		// Initialize services
 		authService := service.NewAuthService(userRepo, refreshTokenRepo, jwtConfig)
 		importService := service.NewImportService(importRepo)
+		s.workflowSessionService = service.NewWorkflowSessionService(workflowSessionRepo)
 
 		// Initialize handlers
 		s.authHandler = handler.NewAuthHandler(authService)
 		s.importHandler = handler.NewImportHandler(importService)
+		s.workflowSessionHandler = handler.NewWorkflowSessionHandler(s.workflowSessionService)
 
-		logger.Info("Authentication and import systems initialized", nil)
+		// Start cleanup job for expired workflow sessions
+		s.startCleanupJob()
+
+		logger.Info("Authentication, import, and workflow session systems initialized", nil)
 	}
 }
 
@@ -202,9 +215,63 @@ func (s *Server) Start() error {
 	return s.httpServer.ListenAndServe()
 }
 
+// startCleanupJob starts a background job to cleanup expired workflow sessions
+func (s *Server) startCleanupJob() {
+	if s.workflowSessionService == nil {
+		return
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	s.cleanupCancel = cancel
+
+	go func() {
+		// Run immediately on startup
+		s.cleanupExpiredSessions()
+
+		// Then run every hour
+		ticker := time.NewTicker(1 * time.Hour)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				s.cleanupExpiredSessions()
+			case <-ctx.Done():
+				logger.Info("Cleanup job stopped", nil)
+				return
+			}
+		}
+	}()
+
+	logger.Info("Workflow session cleanup job started (runs every hour)", nil)
+}
+
+// cleanupExpiredSessions removes expired workflow sessions
+func (s *Server) cleanupExpiredSessions() {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	deleted, err := s.workflowSessionService.CleanupExpiredSessions(ctx)
+	if err != nil {
+		logger.Error("Failed to cleanup expired workflow sessions", err)
+		return
+	}
+
+	if deleted > 0 {
+		logger.Info("Cleaned up expired workflow sessions", map[string]interface{}{
+			"deleted_count": deleted,
+		})
+	}
+}
+
 // Shutdown gracefully shuts down the server
 func (s *Server) Shutdown(ctx context.Context) error {
 	logger.Info("Shutting down server", nil)
+
+	// Stop cleanup job
+	if s.cleanupCancel != nil {
+		s.cleanupCancel()
+	}
 
 	// Shutdown HTTP server
 	if err := s.httpServer.Shutdown(ctx); err != nil {

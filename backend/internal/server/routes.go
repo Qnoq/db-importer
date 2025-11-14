@@ -72,6 +72,7 @@ func (s *Server) setupProtectedRoutes(mux *http.ServeMux) {
 	corsAndLog := s.withCORS(s.withLogging)
 	requireAuth := s.withRequireAuth
 
+	// Import endpoints
 	mux.HandleFunc("/api/v1/imports", corsAndLog(requireAuth(s.importHandler.CreateImport)))
 	mux.HandleFunc("/api/v1/imports/list", corsAndLog(requireAuth(s.importHandler.ListImports)))
 	mux.HandleFunc("/api/v1/imports/get", corsAndLog(requireAuth(s.importHandler.GetImport)))
@@ -79,6 +80,38 @@ func (s *Server) setupProtectedRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/v1/imports/delete", corsAndLog(requireAuth(s.importHandler.DeleteImport)))
 	mux.HandleFunc("/api/v1/imports/stats", corsAndLog(requireAuth(s.importHandler.GetStats)))
 	mux.HandleFunc("/api/v1/imports/old", corsAndLog(requireAuth(s.importHandler.DeleteOldImports)))
+
+	// Workflow session endpoints
+	mux.HandleFunc("/api/v1/workflow/session", corsAndLog(requireAuth(s.handleWorkflowSession)))
+	mux.HandleFunc("/api/v1/workflow/session/schema", corsAndLog(requireAuth(s.handleWorkflowSessionSchema)))
+	mux.HandleFunc("/api/v1/workflow/session/table", corsAndLog(requireAuth(s.workflowSessionHandler.SaveTableSelection)))
+	mux.HandleFunc("/api/v1/workflow/session/data", corsAndLog(requireAuth(s.workflowSessionHandler.SaveDataFile)))
+	mux.HandleFunc("/api/v1/workflow/session/mapping", corsAndLog(requireAuth(s.workflowSessionHandler.SaveMapping)))
+	mux.HandleFunc("/api/v1/workflow/session/extend", corsAndLog(requireAuth(s.workflowSessionHandler.ExtendExpiration)))
+}
+
+// handleWorkflowSession routes GET and DELETE for /api/v1/workflow/session
+func (s *Server) handleWorkflowSession(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		s.workflowSessionHandler.GetSession(w, r)
+	case http.MethodDelete:
+		s.workflowSessionHandler.DeleteSession(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// handleWorkflowSessionSchema routes GET and POST for /api/v1/workflow/session/schema
+func (s *Server) handleWorkflowSessionSchema(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		s.workflowSessionHandler.GetSessionWithSchema(w, r)
+	case http.MethodPost:
+		s.workflowSessionHandler.SaveSchema(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
 }
 
 // Middleware helpers
