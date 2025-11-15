@@ -85,7 +85,7 @@
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Status</label>
           <USelect
             v-model="filters.status"
-            :options="statusOptions"
+            :items="statusOptions"
             placeholder="All statuses"
             size="md"
           />
