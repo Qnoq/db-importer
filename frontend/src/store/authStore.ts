@@ -16,6 +16,7 @@ export interface AuthState {
   isGuest: boolean
   loading: boolean
   error: string | null
+  initialized: boolean
 }
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
@@ -26,7 +27,8 @@ export const useAuthStore = defineStore('auth', {
     isAuthenticated: false,
     isGuest: false,
     loading: false,
-    error: null
+    error: null,
+    initialized: false
   }),
 
   actions: {
@@ -167,11 +169,13 @@ export const useAuthStore = defineStore('auth', {
           this.user = data.data
           this.isAuthenticated = true
           this.isGuest = false
+          this.initialized = true
           return true
         } else {
           this.user = null
           this.isAuthenticated = false
           this.isGuest = false
+          this.initialized = true
           return false
         }
       } catch (error) {
@@ -179,6 +183,7 @@ export const useAuthStore = defineStore('auth', {
         this.user = null
         this.isAuthenticated = false
         this.isGuest = false
+        this.initialized = true
         return false
       }
     },

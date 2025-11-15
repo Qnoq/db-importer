@@ -89,6 +89,11 @@ const router = createRouter({
 router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore()
 
+  // Wait for auth check to complete on first load
+  if (!authStore.initialized) {
+    await authStore.checkAuth()
+  }
+
   // If route requires authentication
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     // Redirect to login with return URL
