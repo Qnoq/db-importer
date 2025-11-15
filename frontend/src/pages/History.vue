@@ -96,92 +96,16 @@
     <!-- Import List -->
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
       <UTable
-        :rows="importStore.imports"
+        :data="importStore.imports"
         :columns="columns"
         :loading="importStore.loading"
       >
-        <template #empty-state>
+        <template #empty>
           <div class="flex flex-col items-center justify-center py-8 text-gray-500 dark:text-gray-400">
             <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
             <p>No imports found</p>
-          </div>
-        </template>
-
-        <template #loading-state>
-          <div class="flex items-center justify-center py-8">
-            <svg class="animate-spin h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-          </div>
-        </template>
-
-        <template #tableName-data="{ row }">
-          <span class="font-medium text-gray-900 dark:text-white">{{ row.tableName }}</span>
-        </template>
-
-        <template #rowCount-data="{ row }">
-          <span class="text-gray-700 dark:text-gray-300">{{ formatNumber(row.rowCount) }}</span>
-        </template>
-
-        <template #status-data="{ row }">
-          <UBadge
-            :label="row.status"
-            :color="getStatusColor(row.status)"
-            variant="subtle"
-          />
-        </template>
-
-        <template #errorCount-data="{ row }">
-          <span v-if="row.errorCount > 0" class="font-medium text-red-600 dark:text-red-400">
-            {{ row.errorCount }}
-          </span>
-          <span v-else class="text-gray-500 dark:text-gray-400">0</span>
-        </template>
-
-        <template #warningCount-data="{ row }">
-          <span v-if="row.warningCount > 0" class="font-medium text-amber-600 dark:text-amber-400">
-            {{ row.warningCount }}
-          </span>
-          <span v-else class="text-gray-500 dark:text-gray-400">0</span>
-        </template>
-
-        <template #createdAt-data="{ row }">
-          <span class="text-gray-700 dark:text-gray-300">{{ formatDate(row.createdAt) }}</span>
-        </template>
-
-        <template #actions-data="{ row }">
-          <div class="flex gap-2">
-            <UTooltip text="View Details">
-              <UButton
-                icon="i-heroicons-eye"
-                color="neutral"
-                variant="ghost"
-                size="sm"
-                @click="viewDetails(row)"
-              />
-            </UTooltip>
-            <UTooltip text="Download SQL">
-              <UButton
-                icon="i-heroicons-arrow-down-tray"
-                color="neutral"
-                variant="ghost"
-                size="sm"
-                :loading="downloadingId === row.id"
-                @click="downloadSQL(row)"
-              />
-            </UTooltip>
-            <UTooltip text="Delete">
-              <UButton
-                icon="i-heroicons-trash"
-                color="error"
-                variant="ghost"
-                size="sm"
-                @click="confirmDelete(row)"
-              />
-            </UTooltip>
           </div>
         </template>
       </UTable>
@@ -379,34 +303,95 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, computed, h, resolveComponent } from 'vue'
 import { useImportStore, type Import } from '../store/importStore'
+import type { TableColumn } from '@nuxt/ui'
 
 const importStore = useImportStore()
 const toast = useToast()
 
+const UBadge = resolveComponent('UBadge')
+const UButton = resolveComponent('UButton')
+const UTooltip = resolveComponent('UTooltip')
+
 // Table columns configuration
-const columns = [{
-  key: 'tableName',
-  header: 'Table'
+const columns: TableColumn<Import>[] = [{
+  accessorKey: 'tableName',
+  header: 'Table',
+  cell: ({ row }) => h('span', { class: 'font-medium text-gray-900 dark:text-white' }, row.getValue('tableName'))
 }, {
-  key: 'rowCount',
-  header: 'Rows'
+  accessorKey: 'rowCount',
+  header: 'Rows',
+  cell: ({ row }) => h('span', { class: 'text-gray-700 dark:text-gray-300' }, formatNumber(row.getValue('rowCount')))
 }, {
-  key: 'status',
-  header: 'Status'
+  accessorKey: 'status',
+  header: 'Status',
+  cell: ({ row }) => {
+    const status = row.getValue('status') as string
+    return h(UBadge, {
+      label: status,
+      color: getStatusColor(status),
+      variant: 'subtle'
+    })
+  }
 }, {
-  key: 'errorCount',
-  header: 'Errors'
+  accessorKey: 'errorCount',
+  header: 'Errors',
+  cell: ({ row }) => {
+    const errorCount = row.getValue('errorCount') as number
+    return h('span', {
+      class: errorCount > 0 ? 'font-medium text-red-600 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'
+    }, errorCount.toString())
+  }
 }, {
-  key: 'warningCount',
-  header: 'Warnings'
+  accessorKey: 'warningCount',
+  header: 'Warnings',
+  cell: ({ row }) => {
+    const warningCount = row.getValue('warningCount') as number
+    return h('span', {
+      class: warningCount > 0 ? 'font-medium text-amber-600 dark:text-amber-400' : 'text-gray-500 dark:text-gray-400'
+    }, warningCount.toString())
+  }
 }, {
-  key: 'createdAt',
-  header: 'Date'
+  accessorKey: 'createdAt',
+  header: 'Date',
+  cell: ({ row }) => h('span', { class: 'text-gray-700 dark:text-gray-300' }, formatDate(row.getValue('createdAt')))
 }, {
-  key: 'actions',
-  header: 'Actions'
+  id: 'actions',
+  header: 'Actions',
+  cell: ({ row }) => {
+    const importData = row.original
+    return h('div', { class: 'flex gap-2' }, [
+      h(UTooltip, { text: 'View Details' }, () =>
+        h(UButton, {
+          icon: 'i-heroicons-eye',
+          color: 'neutral',
+          variant: 'ghost',
+          size: 'sm',
+          onClick: () => viewDetails(importData)
+        })
+      ),
+      h(UTooltip, { text: 'Download SQL' }, () =>
+        h(UButton, {
+          icon: 'i-heroicons-arrow-down-tray',
+          color: 'neutral',
+          variant: 'ghost',
+          size: 'sm',
+          loading: downloadingId.value === importData.id,
+          onClick: () => downloadSQL(importData)
+        })
+      ),
+      h(UTooltip, { text: 'Delete' }, () =>
+        h(UButton, {
+          icon: 'i-heroicons-trash',
+          color: 'error',
+          variant: 'ghost',
+          size: 'sm',
+          onClick: () => confirmDelete(importData)
+        })
+      )
+    ])
+  }
 }]
 
 const filters = ref({
