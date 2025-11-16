@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { useAuthStore } from './authStore'
 import { useMappingStore } from './mappingStore'
 import type { Table } from './mappingStore'
+import { apiClient, ApiError } from '../utils/apiClient'
 
 export interface WorkflowSessionState {
   loading: boolean
@@ -10,8 +11,6 @@ export interface WorkflowSessionState {
   sessionId: string | null
   isRestoring: boolean
 }
-
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
 export const useWorkflowSessionStore = defineStore('workflowSession', {
   state: (): WorkflowSessionState => ({
@@ -38,28 +37,15 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/api/v1/workflow/session/schema`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            schemaContent,
-            tables
-          })
+        const data = await apiClient.post('/api/v1/workflow/session/schema', {
+          schemaContent,
+          tables
         })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to save schema' }))
-          throw new Error(errorData.error || 'Failed to save schema')
-        }
-
-        const data = await response.json()
         this.sessionId = data.data.id
         this.lastSavedAt = new Date()
-      } catch (error: any) {
-        this.error = error.message || 'Failed to save schema'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to save schema'
+        this.error = errorMessage
         console.error('Error saving schema to session:', error)
         // Don't throw - allow the app to continue with localStorage fallback
       } finally {
@@ -81,25 +67,11 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/api/v1/workflow/session/table`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            tableName
-          })
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to save table selection' }))
-          throw new Error(errorData.error || 'Failed to save table selection')
-        }
-
+        await apiClient.post('/api/v1/workflow/session/table', { tableName })
         this.lastSavedAt = new Date()
-      } catch (error: any) {
-        this.error = error.message || 'Failed to save table selection'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to save table selection'
+        this.error = errorMessage
         console.error('Error saving table selection to session:', error)
       } finally {
         this.loading = false
@@ -123,27 +95,15 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
         // Limit sample data to 50 rows
         const limitedSampleData = sampleData.slice(0, 50)
 
-        const response = await fetch(`${API_URL}/api/v1/workflow/session/data`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            fileName,
-            headers,
-            sampleData: limitedSampleData
-          })
+        await apiClient.post('/api/v1/workflow/session/data', {
+          fileName,
+          headers,
+          sampleData: limitedSampleData
         })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to save data file' }))
-          throw new Error(errorData.error || 'Failed to save data file')
-        }
-
         this.lastSavedAt = new Date()
-      } catch (error: any) {
-        this.error = error.message || 'Failed to save data file'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to save data file'
+        this.error = errorMessage
         console.error('Error saving data file to session:', error)
       } finally {
         this.loading = false
@@ -164,26 +124,14 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/api/v1/workflow/session/mapping`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            mapping,
-            transformations
-          })
+        await apiClient.post('/api/v1/workflow/session/mapping', {
+          mapping,
+          transformations
         })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to save mapping' }))
-          throw new Error(errorData.error || 'Failed to save mapping')
-        }
-
         this.lastSavedAt = new Date()
-      } catch (error: any) {
-        this.error = error.message || 'Failed to save mapping'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to save mapping'
+        this.error = errorMessage
         console.error('Error saving mapping to session:', error)
       } finally {
         this.loading = false
@@ -204,19 +152,7 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/api/v1/workflow/session`, {
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            return null // No active session
-          }
-          const errorData = await response.json().catch(() => ({ error: 'Failed to get session' }))
-          throw new Error(errorData.error || 'Failed to get session')
-        }
-
-        const data = await response.json()
+        const data = await apiClient.get('/api/v1/workflow/session')
 
         if (data.data) {
           this.sessionId = data.data.id
@@ -224,8 +160,14 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
         }
 
         return null
-      } catch (error: any) {
-        this.error = error.message || 'Failed to get session'
+      } catch (error) {
+        // 404 means no active session - not an error
+        if (error instanceof ApiError && error.status === 404) {
+          return null
+        }
+
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to get session'
+        this.error = errorMessage
         console.error('Error getting session:', error)
         return null
       } finally {
@@ -309,20 +251,12 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/api/v1/workflow/session`, {
-          method: 'DELETE',
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to delete session' }))
-          throw new Error(errorData.error || 'Failed to delete session')
-        }
-
+        await apiClient.delete('/api/v1/workflow/session')
         this.sessionId = null
         this.lastSavedAt = null
-      } catch (error: any) {
-        this.error = error.message || 'Failed to delete session'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to delete session'
+        this.error = errorMessage
         console.error('Error deleting session:', error)
         throw error
       } finally {

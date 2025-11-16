@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { apiClient, ApiError } from '../utils/apiClient'
 
 export interface ImportMetadata {
   sourceFileName?: string
@@ -76,8 +77,6 @@ export interface ImportState {
   error: string | null
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
 export const useImportStore = defineStore('import', {
   state: (): ImportState => ({
     imports: [],
@@ -96,24 +95,11 @@ export const useImportStore = defineStore('import', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/api/v1/imports`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify(req)
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to create import' }))
-          throw new Error(errorData.error || 'Failed to create import')
-        }
-
-        const data = await response.json()
+        const data = await apiClient.post('/api/v1/imports', req)
         return data.data
-      } catch (error: any) {
-        this.error = error.message || 'Failed to create import'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to create import'
+        this.error = errorMessage
         throw error
       } finally {
         this.loading = false
@@ -134,16 +120,7 @@ export const useImportStore = defineStore('import', {
         if (req.sortBy) params.append('sortBy', req.sortBy)
         if (req.sortOrder) params.append('sortOrder', req.sortOrder)
 
-        const response = await fetch(`${API_URL}/api/v1/imports/list?${params}`, {
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to list imports' }))
-          throw new Error(errorData.error || 'Failed to list imports')
-        }
-
-        const data = await response.json()
+        const data = await apiClient.get(`/api/v1/imports/list?${params}`)
         const result: GetImportsResponse = data.data
 
         this.imports = result.imports || []
@@ -151,8 +128,9 @@ export const useImportStore = defineStore('import', {
         this.page = result.page
         this.pageSize = result.pageSize
         this.totalPages = result.totalPages
-      } catch (error: any) {
-        this.error = error.message || 'Failed to list imports'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to list imports'
+        this.error = errorMessage
         throw error
       } finally {
         this.loading = false
@@ -164,19 +142,11 @@ export const useImportStore = defineStore('import', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/api/v1/imports/get?id=${id}`, {
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Import not found' }))
-          throw new Error(errorData.error || 'Import not found')
-        }
-
-        const data = await response.json()
+        const data = await apiClient.get(`/api/v1/imports/get?id=${id}`)
         return data.data
-      } catch (error: any) {
-        this.error = error.message || 'Failed to get import'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to get import'
+        this.error = errorMessage
         throw error
       } finally {
         this.loading = false
@@ -188,19 +158,11 @@ export const useImportStore = defineStore('import', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/api/v1/imports/sql?id=${id}`, {
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Import not found' }))
-          throw new Error(errorData.error || 'Import not found')
-        }
-
-        const data = await response.json()
+        const data = await apiClient.get(`/api/v1/imports/sql?id=${id}`)
         return data.data
-      } catch (error: any) {
-        this.error = error.message || 'Failed to get import SQL'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to get import SQL'
+        this.error = errorMessage
         throw error
       } finally {
         this.loading = false
@@ -212,21 +174,14 @@ export const useImportStore = defineStore('import', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/api/v1/imports/delete?id=${id}`, {
-          method: 'DELETE',
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to delete import' }))
-          throw new Error(errorData.error || 'Failed to delete import')
-        }
+        await apiClient.delete(`/api/v1/imports/delete?id=${id}`)
 
         // Remove from local state
         this.imports = this.imports.filter(imp => imp.id !== id)
         this.total = Math.max(0, this.total - 1)
-      } catch (error: any) {
-        this.error = error.message || 'Failed to delete import'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to delete import'
+        this.error = errorMessage
         throw error
       } finally {
         this.loading = false
@@ -238,19 +193,11 @@ export const useImportStore = defineStore('import', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/api/v1/imports/stats`, {
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to get stats' }))
-          throw new Error(errorData.error || 'Failed to get stats')
-        }
-
-        const data = await response.json()
+        const data = await apiClient.get('/api/v1/imports/stats')
         this.stats = data.data
-      } catch (error: any) {
-        this.error = error.message || 'Failed to get stats'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to get stats'
+        this.error = errorMessage
         throw error
       } finally {
         this.loading = false
@@ -262,20 +209,11 @@ export const useImportStore = defineStore('import', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/api/v1/imports/old?days=${days}`, {
-          method: 'DELETE',
-          credentials: 'include'
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Failed to delete old imports' }))
-          throw new Error(errorData.error || 'Failed to delete old imports')
-        }
-
-        const data = await response.json()
+        const data = await apiClient.delete(`/api/v1/imports/old?days=${days}`)
         return data.data.deletedCount
-      } catch (error: any) {
-        this.error = error.message || 'Failed to delete old imports'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Failed to delete old imports'
+        this.error = errorMessage
         throw error
       } finally {
         this.loading = false

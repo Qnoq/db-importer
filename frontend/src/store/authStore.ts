@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { apiClient, ApiError } from '../utils/apiClient'
 
 export interface User {
   id: string
@@ -19,8 +20,6 @@ export interface AuthState {
   initialized: boolean
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
 export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     user: null,
@@ -37,33 +36,20 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/auth/register`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            email,
-            password,
-            firstName,
-            lastName
-          })
+        const data = await apiClient.post('/auth/register', {
+          email,
+          password,
+          firstName,
+          lastName
         })
-
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || 'Registration failed')
-        }
-
-        const data = await response.json()
 
         // After successful registration, log in automatically (with remember me enabled by default)
         await this.login(email, password, true)
 
         return data
-      } catch (error: any) {
-        this.error = error.message || 'Registration failed'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Registration failed'
+        this.error = errorMessage
         throw error
       } finally {
         this.loading = false
@@ -75,25 +61,11 @@ export const useAuthStore = defineStore('auth', {
       this.error = null
 
       try {
-        const response = await fetch(`${API_URL}/auth/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include', // Send and receive cookies
-          body: JSON.stringify({
-            email,
-            password,
-            rememberMe
-          })
+        const data = await apiClient.post('/auth/login', {
+          email,
+          password,
+          rememberMe
         })
-
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || 'Login failed')
-        }
-
-        const data = await response.json()
 
         // Tokens are now in HTTP-only cookies, just store user data
         this.user = data.data.user
@@ -101,8 +73,9 @@ export const useAuthStore = defineStore('auth', {
         this.isGuest = false
 
         return data
-      } catch (error: any) {
-        this.error = error.message || 'Login failed'
+      } catch (error) {
+        const errorMessage = error instanceof ApiError ? error.message : 'Login failed'
+        this.error = errorMessage
         throw error
       } finally {
         this.loading = false
@@ -111,23 +84,10 @@ export const useAuthStore = defineStore('auth', {
 
     async refreshAccessToken() {
       try {
-        const response = await fetch(`${API_URL}/auth/refresh`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include' // Send cookies with refresh token
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Token refresh failed' }))
-          console.error('Token refresh failed:', errorData)
-          throw new Error(errorData.error || 'Token refresh failed')
-        }
-
+        await apiClient.post('/auth/refresh')
         // New tokens are set in cookies by the backend
         return true
-      } catch (error: any) {
+      } catch (error) {
         console.error('Token refresh error:', error)
         throw error
       }
@@ -135,13 +95,7 @@ export const useAuthStore = defineStore('auth', {
 
     async logout() {
       try {
-        await fetch(`${API_URL}/auth/logout`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include' // Send cookies for logout
-        })
+        await apiClient.post('/auth/logout')
       } catch (error) {
         console.error('Logout request failed:', error)
       }
@@ -156,28 +110,12 @@ export const useAuthStore = defineStore('auth', {
     // Check authentication status by calling /auth/me
     async checkAuth() {
       try {
-        const response = await fetch(`${API_URL}/auth/me`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include' // Send cookies
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          this.user = data.data
-          this.isAuthenticated = true
-          this.isGuest = false
-          this.initialized = true
-          return true
-        } else {
-          this.user = null
-          this.isAuthenticated = false
-          this.isGuest = false
-          this.initialized = true
-          return false
-        }
+        const data = await apiClient.get('/auth/me')
+        this.user = data.data
+        this.isAuthenticated = true
+        this.isGuest = false
+        this.initialized = true
+        return true
       } catch (error) {
         console.error('Auth check failed:', error)
         this.user = null
