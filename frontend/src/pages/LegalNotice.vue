@@ -17,6 +17,9 @@
             </p>
             <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6 mb-4">
               <p class="text-gray-700 dark:text-gray-300 mb-2"><strong>Service Name:</strong> SQLSheetr</p>
+              <p class="text-gray-700 dark:text-gray-300 mb-2"><strong>Publisher:</strong> SQLSheetr - Service managed by Emeric</p>
+              <p class="text-gray-700 dark:text-gray-300 mb-2"><strong>Status:</strong> Independent Developer</p>
+              <p class="text-gray-700 dark:text-gray-300 mb-2"><strong>Location:</strong> St Martin de Crau, France</p>
               <p class="text-gray-700 dark:text-gray-300 mb-2"><strong>Type:</strong> Web-based SQL Data Import Tool</p>
               <p class="text-gray-700 dark:text-gray-300 mb-2"><strong>Description:</strong> Secure platform for importing data from Excel/CSV files into SQL databases (MySQL/MariaDB, PostgreSQL)</p>
               <p class="text-gray-700 dark:text-gray-300 mb-2"><strong>Technology Stack:</strong></p>
@@ -27,9 +30,6 @@
                 <li>Hosting: Docker containerization on VPS</li>
               </ul>
             </div>
-            <p class="text-sm italic text-gray-600 dark:text-gray-400">
-              Note: Please update this section with your actual company information, including registered business name, business address, company registration number (SIRET/SIREN for France, equivalent for other jurisdictions), and official contact details.
-            </p>
           </section>
 
           <section class="mb-10">
@@ -39,13 +39,13 @@
             </p>
             <div class="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg p-6 mb-4">
               <p class="text-gray-700 dark:text-gray-300 mb-2"><strong>Web Application Hosting:</strong> VPS (Virtual Private Server) with Docker containerization</p>
+              <p class="text-gray-700 dark:text-gray-300 mb-2">Hostinger International Ltd.<br>61 Lordou Vironos Street<br>6023 Larnaca, Cyprus</p>
+              <p class="text-gray-700 dark:text-gray-300 text-sm mb-4">Hostinger provides secure VPS hosting services with enterprise-grade infrastructure.</p>
+
               <p class="text-gray-700 dark:text-gray-300 mb-2"><strong>Database Hosting:</strong> Supabase (PostgreSQL managed database service)</p>
               <p class="text-gray-700 dark:text-gray-300 mb-2">Supabase Inc.<br>970 Toa Payoh North, #07-04<br>Singapore 318992</p>
               <p class="text-gray-700 dark:text-gray-300 text-sm">Supabase is SOC 2 Type II compliant and provides secure, managed PostgreSQL database services.</p>
             </div>
-            <p class="text-sm italic text-gray-600 dark:text-gray-400">
-              Note: Please add your specific VPS hosting provider information (name, address, contact) as required by applicable law in your jurisdiction.
-            </p>
           </section>
 
           <section class="mb-10">
@@ -100,8 +100,9 @@
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-green-600 text-gray-900 dark:text-gray-100">5. Website Director</h2>
-            <p class="text-sm italic text-gray-600 dark:text-gray-400">
-              Note: Please add publication director information as required by applicable law in your jurisdiction.
+            <p class="text-lg text-gray-700 dark:text-gray-300">
+              <strong>Publication Director:</strong> Emeric<br>
+              <strong>Role:</strong> Service Owner and Developer
             </p>
           </section>
 
@@ -151,10 +152,7 @@
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-green-600 text-gray-900 dark:text-gray-100">10. Applicable Law</h2>
             <p class="text-lg mb-4 text-gray-700 dark:text-gray-300">
-              This website and these legal notices are governed by and construed in accordance with applicable laws. Any disputes relating to this website shall be subject to the exclusive jurisdiction of the competent courts.
-            </p>
-            <p class="text-sm italic text-gray-600 dark:text-gray-400">
-              Note: Please specify the applicable jurisdiction and governing law for your service.
+              This website and these legal notices are governed by and construed in accordance with French law. Any disputes relating to this website shall be subject to the exclusive jurisdiction of the competent French courts.
             </p>
           </section>
 
@@ -182,21 +180,14 @@
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-green-600 text-gray-900 dark:text-gray-100">13. Contact</h2>
             <p class="text-lg mb-4 text-gray-700 dark:text-gray-300">
-              For any questions regarding this legal notice or the website, please contact us.
+              For any questions regarding this legal notice or the website, please contact us:
             </p>
-            <p class="text-sm italic text-gray-600 dark:text-gray-400">
-              Note: Please add specific contact information (email, phone, postal address) as required by law.
-            </p>
+            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
+              <p class="text-gray-700 dark:text-gray-300 mb-2"><strong>Email:</strong> <a href="mailto:contact@sqlsheetr.com" class="text-green-600 dark:text-green-400 hover:underline">contact@sqlsheetr.com</a></p>
+              <p class="text-gray-700 dark:text-gray-300"><strong>Location:</strong> St Martin de Crau, France</p>
+            </div>
           </section>
 
-          <UAlert color="yellow" variant="solid" :close-button="null">
-            <template #title>Important Notice</template>
-            <template #description>
-              <p>
-                This legal notice template should be customized with your actual company information and reviewed by legal counsel to ensure compliance with applicable laws in your jurisdiction. Areas requiring customization are marked with <em>italic notes</em>.
-              </p>
-            </template>
-          </UAlert>
         </div>
 
         <!-- Footer Navigation -->
