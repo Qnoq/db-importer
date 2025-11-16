@@ -178,11 +178,11 @@ if err := sqlxDB.PingContext(ctx); err != nil {
 
 ## 📁 Fichiers à Supprimer
 
-### Suppression Immédiate (~96 KB)
+### Suppression Immédiate (~50 KB)
 ```bash
 rm backend/main.go.old
 rm -rf backend/docs/  # Auto-généré par swag
-rm dev.sh  # Doublon de scripts/dev.sh
+# Note: dev.sh racine utilisé par Makefile - ne PAS supprimer
 ```
 
 ### À Archiver puis Supprimer (~130 KB)
