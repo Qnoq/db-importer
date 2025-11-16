@@ -29,11 +29,11 @@
 
       <!-- Mapping Header Component (Alerts & Info Banners) -->
       <MappingHeader
-        :show-missing-data-alert="!sessionStore.isRestoring && (!store.hasExcelData || !store.hasSelectedTable)"
+        :show-missing-data-alert="!isLoadingData && (!store.hasExcelData || !store.hasSelectedTable)"
         :auto-mapping-stats="autoMappingStats"
         :sample-field-names="store.selectedTable?.fields.slice(0, 2).map(f => f.name) || []"
         :auto-increment-fields="getAutoIncrementFieldNames()"
-        :is-restoring="sessionStore.isRestoring"
+        :is-restoring="isLoadingData"
         :table-name="store.selectedTable?.name"
         :data-row-count="store.excelData.length"
         :validation-stats="validationStats"
@@ -48,7 +48,7 @@
 
             <!-- Mapping Actions Component (Auto-map & Clear All buttons) -->
             <MappingActions
-              :is-restoring="sessionStore.isRestoring"
+              :is-restoring="isLoadingData"
               :has-mapping="Object.keys(localMapping).length > 0"
               @auto-map="autoMap"
               @clear-all="showClearDialog = true"
@@ -56,7 +56,7 @@
           </div>
 
           <!-- Skeleton Loading State -->
-          <div v-if="sessionStore.isRestoring" class="mapping-list space-y-3">
+          <div v-if="isLoadingData" class="mapping-list space-y-3">
             <div v-for="i in 5" :key="`skeleton-${i}`" class="mapping-card border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-lg p-4">
               <div class="mapping-grid grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
                 <div class="field-column flex flex-col gap-2">
@@ -126,7 +126,7 @@
         <!-- GenerateSQLPanel Component (Action Buttons) -->
         <GenerateSQLPanel
           :validation-errors="validationErrors"
-          :is-restoring="sessionStore.isRestoring"
+          :is-restoring="isLoadingData"
           :is-loading="loading"
           :error="error"
           :is-authenticated="authStore.isAuthenticated"
@@ -247,6 +247,14 @@ const {
 
 // Field transformations (from store)
 const fieldTransformations = computed(() => store.transformations)
+
+// Loading state - show skeleton if restoring OR if data is not fully loaded yet
+const isLoadingData = computed(() => {
+  return sessionStore.isRestoring ||
+         !store.selectedTable ||
+         !store.excelHeaders ||
+         store.excelHeaders.length === 0
+})
 
 // UI state
 const showClearDialog = ref(false)
