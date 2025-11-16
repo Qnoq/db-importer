@@ -40,23 +40,22 @@
         @start-over="router.push('/')"
       />
 
-      <div v-if="store.hasExcelData && store.hasSelectedTable">
-        <!-- Column Mapping Section -->
-        <div class="mapping-section mb-6">
-          <div class="section-header flex justify-between items-center mb-4">
-            <h3 class="section-title text-lg font-semibold text-gray-900 dark:text-white">Column Mapping</h3>
+      <!-- Column Mapping Section -->
+      <div class="mapping-section mb-6">
+        <div class="section-header flex justify-between items-center mb-4">
+          <h3 class="section-title text-lg font-semibold text-gray-900 dark:text-white">Column Mapping</h3>
 
-            <!-- Mapping Actions Component (Auto-map & Clear All buttons) -->
-            <MappingActions
-              :is-restoring="isLoadingData"
-              :has-mapping="Object.keys(localMapping).length > 0"
-              @auto-map="autoMap"
-              @clear-all="showClearDialog = true"
-            />
-          </div>
+          <!-- Mapping Actions Component (Auto-map & Clear All buttons) -->
+          <MappingActions
+            :is-restoring="isLoadingData"
+            :has-mapping="Object.keys(localMapping).length > 0"
+            @auto-map="autoMap"
+            @clear-all="showClearDialog = true"
+          />
+        </div>
 
-          <!-- Skeleton Loading State -->
-          <div v-if="isLoadingData" class="mapping-list space-y-3">
+        <!-- Skeleton Loading State -->
+        <div v-if="isLoadingData" class="mapping-list space-y-3">
             <div v-for="i in 5" :key="`skeleton-${i}`" class="mapping-card border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-lg p-4">
               <div class="mapping-grid grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
                 <div class="field-column flex flex-col gap-2">
@@ -90,7 +89,7 @@
           </div>
 
           <!-- Actual Mapping Content with MappingCard Components -->
-          <div v-else class="mapping-list space-y-3">
+          <div v-else-if="store.hasExcelData && store.hasSelectedTable" class="mapping-list space-y-3">
             <MappingCard
               v-for="(field, index) in store.selectedTable?.fields"
               :key="index"
@@ -113,6 +112,7 @@
 
         <!-- ValidationSummary Component (Errors, Warnings, Preview) -->
         <ValidationSummary
+          v-if="store.hasExcelData && store.hasSelectedTable"
           :validation-errors="validationErrors"
           :transformation-warnings="transformationWarnings"
           :server-validation-errors="serverValidationErrors"
@@ -125,6 +125,7 @@
 
         <!-- GenerateSQLPanel Component (Action Buttons) -->
         <GenerateSQLPanel
+          v-if="store.hasExcelData && store.hasSelectedTable"
           :validation-errors="validationErrors"
           :is-restoring="isLoadingData"
           :is-loading="loading"
@@ -134,7 +135,6 @@
           @generate-sql="generateSQL"
           @generate-and-save="generateAndSave"
         />
-      </div>
     </div>
 
     <!-- TransformPreviewModal Component -->

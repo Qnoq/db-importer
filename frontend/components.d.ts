@@ -11,9 +11,14 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    GenerateSQLPanel: typeof import('./src/components/mapping/GenerateSQLPanel.vue')['default']
+    MappingActions: typeof import('./src/components/mapping/MappingActions.vue')['default']
+    MappingCard: typeof import('./src/components/mapping/MappingCard.vue')['default']
+    MappingHeader: typeof import('./src/components/mapping/MappingHeader.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     StepperNav: typeof import('./src/components/StepperNav.vue')['default']
+    TransformPreviewModal: typeof import('./src/components/mapping/TransformPreviewModal.vue')['default']
     UAlert: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/Alert.vue')['default']
     UApp: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/App.vue')['default']
     UAvatar: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/Avatar.vue')['default']
@@ -27,5 +32,6 @@ declare module 'vue' {
     UStepper: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/Stepper.vue')['default']
     UTable: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/Table.vue')['default']
     UTooltip: typeof import('./node_modules/@nuxt/ui/dist/runtime/components/Tooltip.vue')['default']
+    ValidationSummary: typeof import('./src/components/mapping/ValidationSummary.vue')['default']
   }
 }

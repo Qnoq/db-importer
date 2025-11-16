@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { nextTick } from 'vue'
 import { useAuthStore } from './authStore'
 import { useMappingStore } from './mappingStore'
 import type { Table } from './mappingStore'
@@ -228,6 +229,8 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
           hasTransformations: !!session.fieldTransformations
         })
 
+        // Wait for Vue to update the DOM before hiding the skeleton
+        await nextTick()
         this.isRestoring = false
         return true
       } catch (error) {
