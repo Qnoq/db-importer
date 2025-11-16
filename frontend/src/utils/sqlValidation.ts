@@ -2,6 +2,8 @@
  * SQL Validation utilities for security and data integrity
  */
 
+import type { CellValue } from '../store/mappingStore'
+
 export interface ValidationResult {
   valid: boolean
   warnings: string[]
@@ -135,7 +137,7 @@ export function validateSQL(sql: string): ValidationResult {
  * Validates a single value for a given SQL field type
  */
 export function validateValue(
-  value: any,
+  value: CellValue,
   fieldType: string,
   fieldName: string
 ): { valid: boolean; error?: string } {

@@ -3,6 +3,8 @@
  * Provides a unified interface for all HTTP requests with consistent error handling
  */
 
+import type { RequestBody, UnknownErrorResponse } from '../types/api'
+
 // API Configuration
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
@@ -14,7 +16,7 @@ export class ApiError extends Error {
     message: string,
     public status: number,
     public statusText: string,
-    public data?: any
+    public data?: unknown
   ) {
     super(message)
     this.name = 'ApiError'
@@ -33,7 +35,7 @@ export interface ApiRequestOptions {
 /**
  * API Response wrapper
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   data: T
   message?: string
   error?: string
@@ -51,7 +53,7 @@ const getDefaultHeaders = (): Record<string, string> => ({
  */
 async function processResponse<T>(response: Response): Promise<T> {
   // Try to parse JSON response
-  let data: any
+  let data: unknown
   try {
     data = await response.json()
   } catch {
@@ -63,25 +65,26 @@ async function processResponse<T>(response: Response): Promise<T> {
         response.statusText
       )
     }
-    return data
+    return data as T
   }
 
   // Handle error responses
   if (!response.ok) {
-    const errorMessage = data.error || data.message || response.statusText || 'Request failed'
+    const errorData = data as UnknownErrorResponse
+    const errorMessage = errorData.error || errorData.message || response.statusText || 'Request failed'
     throw new ApiError(errorMessage, response.status, response.statusText, data)
   }
 
-  return data
+  return data as T
 }
 
 /**
  * Make a request to the API
  */
-async function request<T = any>(
+async function request<T = unknown>(
   endpoint: string,
   method: string,
-  body?: any,
+  body?: RequestBody,
   options: ApiRequestOptions = {}
 ): Promise<T> {
   const url = `${API_URL}${endpoint}`
@@ -98,7 +101,7 @@ async function request<T = any>(
 
   // Add body for non-GET requests
   if (body && method !== 'GET' && method !== 'HEAD') {
-    config.body = JSON.stringify(body)
+    config.body = body instanceof FormData ? body : JSON.stringify(body)
   }
 
   const response = await fetch(url, config)
@@ -112,42 +115,42 @@ export const apiClient = {
   /**
    * GET request
    */
-  get<T = any>(endpoint: string, options?: ApiRequestOptions): Promise<T> {
+  get<T = unknown>(endpoint: string, options?: ApiRequestOptions): Promise<T> {
     return request<T>(endpoint, 'GET', undefined, options)
   },
 
   /**
    * POST request
    */
-  post<T = any>(endpoint: string, body?: any, options?: ApiRequestOptions): Promise<T> {
+  post<T = unknown>(endpoint: string, body?: RequestBody, options?: ApiRequestOptions): Promise<T> {
     return request<T>(endpoint, 'POST', body, options)
   },
 
   /**
    * PUT request
    */
-  put<T = any>(endpoint: string, body?: any, options?: ApiRequestOptions): Promise<T> {
+  put<T = unknown>(endpoint: string, body?: RequestBody, options?: ApiRequestOptions): Promise<T> {
     return request<T>(endpoint, 'PUT', body, options)
   },
 
   /**
    * PATCH request
    */
-  patch<T = any>(endpoint: string, body?: any, options?: ApiRequestOptions): Promise<T> {
+  patch<T = unknown>(endpoint: string, body?: RequestBody, options?: ApiRequestOptions): Promise<T> {
     return request<T>(endpoint, 'PATCH', body, options)
   },
 
   /**
    * DELETE request
    */
-  delete<T = any>(endpoint: string, options?: ApiRequestOptions): Promise<T> {
+  delete<T = unknown>(endpoint: string, options?: ApiRequestOptions): Promise<T> {
     return request<T>(endpoint, 'DELETE', undefined, options)
   },
 
   /**
    * Upload file with multipart/form-data
    */
-  upload<T = any>(endpoint: string, formData: FormData, options?: ApiRequestOptions): Promise<T> {
+  upload<T = unknown>(endpoint: string, formData: FormData, options?: ApiRequestOptions): Promise<T> {
     const url = `${API_URL}${endpoint}`
 
     // Don't set Content-Type for FormData, let browser set it with boundary
@@ -183,7 +186,7 @@ export const apiClient = {
  * )
  * await action()
  */
-export function createAsyncAction<T = any>(
+export function createAsyncAction<T = unknown>(
   apiCall: () => Promise<T>,
   onSuccess?: (data: T) => void,
   onError?: (error: ApiError) => void

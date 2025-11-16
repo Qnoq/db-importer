@@ -1,5 +1,12 @@
 import { defineStore } from 'pinia'
 import { apiClient, ApiError } from '../utils/apiClient'
+import type {
+  RegisterRequest,
+  RegisterResponse,
+  LoginRequest,
+  LoginResponse,
+  MeResponse
+} from '../types/api'
 
 export interface User {
   id: string
@@ -31,22 +38,24 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   actions: {
-    async register(email: string, password: string, firstName?: string, lastName?: string) {
+    async register(email: string, password: string, firstName?: string, lastName?: string): Promise<RegisterResponse> {
       this.loading = true
       this.error = null
 
       try {
-        const data = await apiClient.post('/auth/register', {
+        const requestBody: RegisterRequest = {
           email,
           password,
           firstName,
           lastName
-        })
+        }
+
+        const response = await apiClient.post<{ data: RegisterResponse }>('/auth/register', requestBody)
 
         // After successful registration, log in automatically (with remember me enabled by default)
         await this.login(email, password, true)
 
-        return data
+        return response.data
       } catch (error) {
         const errorMessage = error instanceof ApiError ? error.message : 'Registration failed'
         this.error = errorMessage
@@ -56,23 +65,25 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async login(email: string, password: string, rememberMe: boolean = false) {
+    async login(email: string, password: string, rememberMe: boolean = false): Promise<LoginResponse> {
       this.loading = true
       this.error = null
 
       try {
-        const data = await apiClient.post('/auth/login', {
+        const requestBody: LoginRequest = {
           email,
           password,
           rememberMe
-        })
+        }
+
+        const response = await apiClient.post<{ data: LoginResponse }>('/auth/login', requestBody)
 
         // Tokens are now in HTTP-only cookies, just store user data
-        this.user = data.data.user
+        this.user = response.data.user
         this.isAuthenticated = true
         this.isGuest = false
 
-        return data
+        return response.data
       } catch (error) {
         const errorMessage = error instanceof ApiError ? error.message : 'Login failed'
         this.error = errorMessage
@@ -108,10 +119,10 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // Check authentication status by calling /auth/me
-    async checkAuth() {
+    async checkAuth(): Promise<boolean> {
       try {
-        const data = await apiClient.get('/auth/me')
-        this.user = data.data
+        const response = await apiClient.get<{ data: MeResponse }>('/auth/me')
+        this.user = response.data
         this.isAuthenticated = true
         this.isGuest = false
         this.initialized = true
