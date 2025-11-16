@@ -78,6 +78,13 @@ func NewDB(cfg Config) (*DB, error) {
 	sqlxDB.SetConnMaxLifetime(cfg.ConnMaxLifetime)
 	sqlxDB.SetConnMaxIdleTime(cfg.ConnMaxIdleTime)
 
+	// Test sqlx connection
+	if err := sqlxDB.PingContext(ctx); err != nil {
+		pool.Close()
+		sqlxDB.Close()
+		return nil, fmt.Errorf("unable to ping database via sqlx: %w", err)
+	}
+
 	log.Println("✅ Database connection established successfully")
 
 	return &DB{

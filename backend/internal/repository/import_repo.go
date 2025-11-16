@@ -272,10 +272,10 @@ func (r *ImportRepository) GetStats(ctx context.Context, userID uuid.UUID) (*mod
 func (r *ImportRepository) DeleteOldImports(ctx context.Context, userID uuid.UUID, olderThanDays int) (int64, error) {
 	query := `
 		DELETE FROM imports
-		WHERE user_id = $1 AND created_at < NOW() - INTERVAL '%d days'
+		WHERE user_id = $1 AND created_at < NOW() - INTERVAL '1 day' * $2
 	`
 
-	result, err := r.db.Sqlx.ExecContext(ctx, fmt.Sprintf(query, olderThanDays), userID)
+	result, err := r.db.Sqlx.ExecContext(ctx, query, userID, olderThanDays)
 	if err != nil {
 		return 0, fmt.Errorf("failed to delete old imports: %w", err)
 	}

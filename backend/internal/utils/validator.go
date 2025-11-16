@@ -21,9 +21,13 @@ func ValidateStruct(s interface{}) error {
 	}
 
 	// Convert validation errors to user-friendly messages
-	validationErrors := err.(validator.ValidationErrors)
-	var messages []string
+	validationErrors, ok := err.(validator.ValidationErrors)
+	if !ok {
+		// If it's not a ValidationErrors type, return the original error
+		return fmt.Errorf("validation error: %w", err)
+	}
 
+	var messages []string
 	for _, e := range validationErrors {
 		messages = append(messages, formatValidationError(e))
 	}
