@@ -35,15 +35,8 @@ func NewWorkflowSessionHandler(sessionService *service.WorkflowSessionService) *
 // @Router       /api/v1/workflow/session [get]
 func (h *WorkflowSessionHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -70,15 +63,8 @@ func (h *WorkflowSessionHandler) GetSession(w http.ResponseWriter, r *http.Reque
 // @Router       /api/v1/workflow/session/schema [get]
 func (h *WorkflowSessionHandler) GetSessionWithSchema(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -126,15 +112,8 @@ func (h *WorkflowSessionHandler) SaveSchema(w http.ResponseWriter, r *http.Reque
 	}
 
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -178,15 +157,8 @@ func (h *WorkflowSessionHandler) SaveTableSelection(w http.ResponseWriter, r *ht
 	}
 
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -234,15 +206,8 @@ func (h *WorkflowSessionHandler) SaveDataFile(w http.ResponseWriter, r *http.Req
 	}
 
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -290,15 +255,8 @@ func (h *WorkflowSessionHandler) SaveMapping(w http.ResponseWriter, r *http.Requ
 	}
 
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -329,20 +287,13 @@ func (h *WorkflowSessionHandler) SaveMapping(w http.ResponseWriter, r *http.Requ
 // @Router       /api/v1/workflow/session [delete]
 func (h *WorkflowSessionHandler) DeleteSession(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
 	// Delete session
-	err = h.sessionService.DeleteSession(r.Context(), uid)
+	err := h.sessionService.DeleteSession(r.Context(), uid)
 	if err != nil {
 		if err.Error() == "workflow session not found" {
 			utils.NotFound(w, "Session not found")
@@ -370,15 +321,8 @@ func (h *WorkflowSessionHandler) DeleteSession(w http.ResponseWriter, r *http.Re
 // @Router       /api/v1/workflow/session/extend [post]
 func (h *WorkflowSessionHandler) ExtendExpiration(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -392,7 +336,7 @@ func (h *WorkflowSessionHandler) ExtendExpiration(w http.ResponseWriter, r *http
 	}
 
 	// Extend expiration
-	err = h.sessionService.ExtendExpiration(r.Context(), uid, days)
+	err := h.sessionService.ExtendExpiration(r.Context(), uid, days)
 	if err != nil {
 		if err.Error() == "workflow session not found or expired" {
 			utils.NotFound(w, "Session not found or expired")

@@ -51,16 +51,9 @@ func (h *ImportHandler) CreateImport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get user ID from context (set by auth middleware)
-	userID, ok := r.Context().Value("userID").(string)
+	// Get user ID from context
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -103,15 +96,8 @@ func (h *ImportHandler) GetImport(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -152,15 +138,8 @@ func (h *ImportHandler) GetImportSQL(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -193,15 +172,8 @@ func (h *ImportHandler) GetImportSQL(w http.ResponseWriter, r *http.Request) {
 // @Router       /api/v1/imports/list [get]
 func (h *ImportHandler) ListImports(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -273,15 +245,8 @@ func (h *ImportHandler) DeleteImport(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -307,15 +272,8 @@ func (h *ImportHandler) DeleteImport(w http.ResponseWriter, r *http.Request) {
 // @Router       /api/v1/imports/stats [get]
 func (h *ImportHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
@@ -342,15 +300,8 @@ func (h *ImportHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 // @Router       /api/v1/imports/old [delete]
 func (h *ImportHandler) DeleteOldImports(w http.ResponseWriter, r *http.Request) {
 	// Get user ID from context
-	userID, ok := r.Context().Value("userID").(string)
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
