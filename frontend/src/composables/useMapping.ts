@@ -1,7 +1,7 @@
-import { ref, watch, type Ref } from 'vue'
+import { ref, computed, watch, type Ref } from 'vue'
 import { useMappingStore, type Field } from '../store/mappingStore'
 import { useWorkflowSessionStore } from '../store/workflowSessionStore'
-import { suggestTransformations, type TransformationType } from '../utils/transformations'
+import { suggestTransformations, transformations, type TransformationType } from '../utils/transformations'
 
 export function useMapping() {
   const store = useMappingStore()
@@ -320,6 +320,29 @@ export function useMapping() {
     return strValue.substring(0, 30) + (strValue.length > 30 ? '...' : '')
   }
 
+  /**
+   * Get transformation options for a field
+   */
+  function getTransformationOptions(field: Field) {
+    const excelCol = getMappedExcelColumn(field.name)
+    if (!excelCol) return [{ label: transformations.none.label, value: 'none' }]
+
+    const columnIndex = store.excelHeaders.indexOf(excelCol)
+    const columnData = store.excelData.map(row => row[columnIndex])
+    const transformationTypes = suggestTransformations(columnData, field.type)
+
+    // Ensure currently selected transformation is in the options
+    const currentTransform = store.transformations[field.name]
+    if (currentTransform && currentTransform !== 'none' && !transformationTypes.includes(currentTransform)) {
+      transformationTypes.push(currentTransform)
+    }
+
+    return transformationTypes.map(type => ({
+      label: transformations[type].label,
+      value: type
+    }))
+  }
+
   // Watch for store mapping changes (handles async restoration)
   watch(() => store.mapping, (newMapping) => {
     if (newMapping && Object.keys(newMapping).length > 0) {
@@ -341,6 +364,7 @@ export function useMapping() {
     toggleSkipField,
     getExcelColumnOptions,
     getSampleValue,
+    getTransformationOptions,
     isAutoIncrementField,
     getAutoIncrementFieldNames
   }

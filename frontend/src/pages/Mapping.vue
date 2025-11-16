@@ -211,7 +211,6 @@ const {
   getMappedExcelColumn,
   onFieldMappingChange,
   toggleSkipField,
-  getExcelColumnOptions,
   getSampleValue,
   isAutoIncrementField,
   getAutoIncrementFieldNames,
