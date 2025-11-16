@@ -144,11 +144,14 @@ defineEmits<{
   'skip-field': []
 }>()
 
-// Convert headers to options format
+// Convert headers to options format with skip option
 const excelColumnOptions = computed(() => {
-  return props.excelHeaders.map(header => ({
-    label: header,
-    value: header
-  }))
+  return [
+    { label: '-- Skip this field --', value: null },
+    ...props.excelHeaders.map(header => ({
+      label: header,
+      value: header
+    }))
+  ]
 })
 </script>
