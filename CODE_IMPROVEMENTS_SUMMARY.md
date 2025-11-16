@@ -306,3 +306,149 @@ Pour questions ou clarifications sur ces améliorations:
 ---
 
 **Dernière mise à jour**: 16 novembre 2025
+
+---
+
+## 🔄 Phase 3: Refactoring de Mapping.vue (EN COURS) ⏳
+
+### État Actuel
+**Fichier**: `frontend/src/pages/Mapping.vue`
+**Taille**: 1,355 lignes (monolithique)
+**Problèmes**:
+- Trop de responsabilités en un seul composant
+- Difficile à tester et maintenir
+- Performance: re-render complet sur chaque changement
+- Duplication de logique
+
+### Plan de Refactoring
+**Document**: `MAPPING_COMPONENT_REFACTORING_PLAN.md`
+**Objectif**: Diviser en 6 composants + 3 composables
+**Réduction cible**: 1,355 → ~400 lignes (-70%)
+
+### Architecture Cible
+
+#### Composants Créés
+1. ✅ **MappingHeader.vue** (~130 lignes)
+   - Alertes et bannières d'information
+   - Auto-mapping stats
+   - Validation stats
+   - Skeleton loading states
+
+#### Composants À Créer
+2. ⏳ **MappingCard.vue** (~250 lignes)
+   - Carte de mapping individuelle (field → excel column)
+   - Sélecteurs et transformations
+   
+3. ⏳ **MappingActions.vue** (~100 lignes)
+   - Boutons Auto-map et Clear All
+   
+4. ⏳ **ValidationSummary.vue** (~200 lignes)
+   - Résumé de validation
+   - Preview data table avec highlighting
+   
+5. ⏳ **GenerateSQLPanel.vue** (~150 lignes)
+   - Actions de génération SQL
+   
+6. ⏳ **TransformPreviewModal.vue** (~120 lignes)
+   - Modal de prévisualisation transformations
+
+#### Composables À Créer
+- ⏳ `useMapping.ts` - Logique de mapping
+- ⏳ `useValidation.ts` - Logique de validation
+- ⏳ `useSQLGeneration.ts` - Logique de génération SQL
+
+### Bénéfices Attendus
+- ✅ Maintenabilité: Code divisé en responsabilités claires
+- ✅ Testabilité: Composants isolés
+- ✅ Performance: Re-renders optimisés
+- ✅ DX: Code plus lisible, TypeScript strict
+
+### Progression
+- [x] Phase 1.1: Créer MappingHeader ✅ (1/6)
+- [ ] Phase 1.2: Créer les 5 composants restants (0/5)
+- [ ] Phase 2: Créer les 3 composables (0/3)
+- [ ] Phase 3: Refactoriser Mapping.vue principal
+- [ ] Phase 4: Tests
+- [ ] Phase 5: Optimisation
+
+**Temps Estimé Restant**: 6-8 heures
+
+---
+
+## 📊 Métriques Globales Mises à Jour
+
+| Métrique | Avant | Après | Delta |
+|----------|-------|-------|-------|
+| **Vulnérabilités critiques** | 3 | 0 | -100% ✅ |
+| **Patterns de fetch dupliqués** | 18+ | 1 | -94% ✅ |
+| **API_URL definitions** | 3 | 1 | -67% ✅ |
+| **Lignes dupliquées (stores)** | ~281 | ~101 | -180 ✅ |
+| **Fichier le plus gros** | 1,355 lignes | En cours | TBD |
+| **Composants réutilisables** | 1 | 2 (+5 prévus) | +600% ⏳ |
+
+---
+
+## 🚀 Commits Mis à Jour
+
+### Session 1: Sécurité & Analyse
+1. `docs: Add comprehensive code analysis reports`
+2. `fix: Critical security vulnerabilities in backend`
+3. `docs: Add comprehensive code improvements summary`
+
+### Session 2: Client API
+4. `refactor: Centralize API calls with unified apiClient`
+
+### Session 3: Refactoring Composants (EN COURS)
+5. `docs: Add Mapping.vue refactoring plan and create first component`
+
+**Total Commits**: 5
+**Fichiers Modifiés**: 11
+**Fichiers Créés**: 8
+
+---
+
+## 🎯 Roadmap Mise à Jour
+
+### ✅ Phase 1: Sécurité Critique (COMPLÈTE)
+- [x] Corriger injection SQL
+- [x] Corriger type assertion
+- [x] Corriger fuite de connexion
+
+### ✅ Phase 2: Centralisation API (COMPLÈTE)
+- [x] Créer apiClient.ts
+- [x] Refactoriser tous les stores
+
+### ⏳ Phase 3: Refactoring Composants (EN COURS - 15% complété)
+- [x] Créer plan de refactoring
+- [x] Créer MappingHeader (1/6)
+- [ ] Créer 5 composants restants
+- [ ] Créer 3 composables
+- [ ] Refactoriser Mapping.vue
+
+### 📋 Phase 4: Tests (À FAIRE)
+- [ ] Tests backend (services, handlers)
+- [ ] Tests frontend (composants, stores)
+- [ ] Tests d'intégration
+
+### 📋 Phase 5: Optimisation & Cleanup (À FAIRE)
+- [ ] Supprimer fichiers obsolètes
+- [ ] Créer helpers backend
+- [ ] Types TypeScript stricts partout
+- [ ] Documentation complète
+
+---
+
+## ⏱️ Temps Total Investi
+
+| Phase | Temps | Statut |
+|-------|-------|--------|
+| Analyse & Planning | 2h | ✅ Complété |
+| Sécurité Backend | 1h | ✅ Complété |
+| Client API Frontend | 2h | ✅ Complété |
+| Refactoring Mapping.vue | 1h / 7-9h estimé | ⏳ En cours (14%) |
+| **Total** | **6h / 14-16h estimé** | **37% complété** |
+
+---
+
+**Dernière mise à jour**: 16 novembre 2025 - Fin de session
+**Prochaine étape**: Créer les 5 composants restants pour Mapping.vue
