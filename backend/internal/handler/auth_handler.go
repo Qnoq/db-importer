@@ -108,16 +108,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set access token in HTTP-only cookie
-	accessCookie := &http.Cookie{
-		Name:     "access_token",
-		Value:    loginResp.AccessToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   r.TLS != nil, // Secure only in HTTPS
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   15 * 60, // 15 minutes
-	}
-	http.SetCookie(w, accessCookie)
+	utils.SetCookie(w, r, "access_token", loginResp.AccessToken, 15*60) // 15 minutes
 
 	// Set refresh token in HTTP-only cookie
 	// MaxAge depends on rememberMe (1 day or 3 days)
@@ -125,16 +116,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if req.RememberMe {
 		refreshMaxAge = 72 * 60 * 60 // 3 days in seconds
 	}
-	refreshCookie := &http.Cookie{
-		Name:     "refresh_token",
-		Value:    loginResp.RefreshToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   r.TLS != nil,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   refreshMaxAge,
-	}
-	http.SetCookie(w, refreshCookie)
+	utils.SetCookie(w, r, "refresh_token", loginResp.RefreshToken, refreshMaxAge)
 
 	// Return user data only (tokens are in cookies now)
 	utils.RespondSuccess(w, http.StatusOK, map[string]interface{}{
@@ -167,29 +149,11 @@ func (h *AuthHandler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set new access token in HTTP-only cookie
-	accessCookie := &http.Cookie{
-		Name:     "access_token",
-		Value:    tokens.AccessToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   r.TLS != nil,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   15 * 60, // 15 minutes
-	}
-	http.SetCookie(w, accessCookie)
+	utils.SetCookie(w, r, "access_token", tokens.AccessToken, 15*60) // 15 minutes
 
 	// Set new refresh token in HTTP-only cookie
 	// Keep same expiry as before (we need to get it from the cookie's MaxAge)
-	newRefreshCookie := &http.Cookie{
-		Name:     "refresh_token",
-		Value:    tokens.RefreshToken,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   r.TLS != nil,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   refreshCookie.MaxAge, // Keep same expiry
-	}
-	http.SetCookie(w, newRefreshCookie)
+	utils.SetCookie(w, r, "refresh_token", tokens.RefreshToken, refreshCookie.MaxAge)
 
 	utils.RespondSuccess(w, http.StatusOK, nil, "Tokens refreshed successfully")
 }
@@ -213,29 +177,9 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Clear access token cookie
-	clearCookie := &http.Cookie{
-		Name:     "access_token",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   r.TLS != nil,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   -1, // Delete cookie
-	}
-	http.SetCookie(w, clearCookie)
-
-	// Clear refresh token cookie
-	clearRefreshCookie := &http.Cookie{
-		Name:     "refresh_token",
-		Value:    "",
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   r.TLS != nil,
-		SameSite: http.SameSiteLaxMode,
-		MaxAge:   -1, // Delete cookie
-	}
-	http.SetCookie(w, clearRefreshCookie)
+	// Clear cookies
+	utils.ClearCookie(w, r, "access_token")
+	utils.ClearCookie(w, r, "refresh_token")
 
 	utils.RespondSuccess(w, http.StatusOK, nil, "Logout successful")
 }
@@ -243,17 +187,9 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // Me returns the current authenticated user
 // GET /auth/me
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
-	// Get user ID from context (set by auth middleware)
-	userID, ok := r.Context().Value("userID").(string)
+	// Get user ID from context
+	uid, ok := utils.GetUserIDFromContext(w, r)
 	if !ok {
-		utils.Unauthorized(w, "Unauthorized")
-		return
-	}
-
-	// Parse user ID
-	uid, err := utils.ParseUUID(userID)
-	if err != nil {
-		utils.BadRequest(w, "Invalid user ID")
 		return
 	}
 
