@@ -11,7 +11,7 @@
               <img src="/logo.png" alt="SQL Importer" class="h-32 w-auto" />
             </a>
 
-            <nav v-if="authStore.isAuthenticated" class="app-nav flex gap-2">
+            <nav v-if="authStore.initialized && authStore.isAuthenticated" class="app-nav flex gap-2">
               <UButton
                 label="New Import"
                 :icon="currentRoute === '/' ? 'i-heroicons-plus-circle' : undefined"
@@ -53,7 +53,7 @@
             </UTooltip>
 
             <!-- Menu utilisateur -->
-            <div v-if="authStore.isAuthenticated" class="flex items-center gap-3">
+            <div v-if="authStore.initialized && authStore.isAuthenticated" class="flex items-center gap-3">
               <UBadge class="hidden md:flex items-center gap-3 px-3 py-2 bg-gray-100 dark:bg-gray-700">
                 <UAvatar
                   :text="userInitials"
@@ -78,7 +78,7 @@
             </div>
 
             <!-- Boutons invité -->
-            <div v-else class="flex items-center gap-3">
+            <div v-if="authStore.initialized && !authStore.isAuthenticated" class="flex items-center gap-3">
               <UButton
                 label="Sign In"
                 icon="i-heroicons-arrow-left-on-rectangle"
