@@ -274,9 +274,14 @@
 
           <section class="mb-10">
             <h2 class="text-3xl font-bold mb-4 pb-2 border-b-2 border-green-600 text-gray-900 dark:text-gray-100">14. Contact Us</h2>
-            <p class="text-lg text-gray-700 dark:text-gray-300">
-              If you have any questions about this Privacy Policy or our privacy practices, please contact us.
+            <p class="text-lg mb-4 text-gray-700 dark:text-gray-300">
+              If you have any questions about this Privacy Policy or our privacy practices, please contact us:
             </p>
+            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-6">
+              <p class="text-gray-700 dark:text-gray-300 mb-2"><strong>Email:</strong> <a href="mailto:contact@sqlsheetr.com" class="text-green-600 dark:text-green-400 hover:underline">contact@sqlsheetr.com</a></p>
+              <p class="text-gray-700 dark:text-gray-300 mb-2"><strong>Service:</strong> SQLSheetr</p>
+              <p class="text-gray-700 dark:text-gray-300"><strong>Location:</strong> St Martin de Crau, France</p>
+            </div>
           </section>
         </div>
 
