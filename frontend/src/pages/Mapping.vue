@@ -293,23 +293,38 @@ const validationSummaryRef = ref<HTMLElement | null>(null)
 
 // Lifecycle hooks
 onMounted(() => {
+  console.timeEnd('⏱️ [STEP 3→4] Navigation time')
+  console.time('⏱️ [STEP 4] Total Page Load')
+  console.log(`🔍 [STEP 4] Starting with ${store.excelData.length} rows and ${store.excelHeaders.length} columns`)
+
   // Initialize localMapping from store first (for session restoration)
+  console.time('⏱️ [STEP 4] Initialize mapping from store')
   if (Object.keys(store.mapping).length > 0) {
     localMapping.value = { ...store.mapping }
   }
+  console.timeEnd('⏱️ [STEP 4] Initialize mapping from store')
 
   // Initialize auto-mapping (only if no mapping exists yet and not restoring)
   if (!sessionStore.isRestoring && Object.keys(localMapping.value).length === 0) {
+    console.time('⏱️ [STEP 4] Auto-mapping')
     autoMap()
+    console.timeEnd('⏱️ [STEP 4] Auto-mapping')
   } else {
     // If we have mapping, just sync it
+    console.time('⏱️ [STEP 4] Sync field-to-excel mapping')
     syncFieldToExcelMapping()
+    console.timeEnd('⏱️ [STEP 4] Sync field-to-excel mapping')
   }
 
+  console.time('⏱️ [STEP 4] Initial validation')
   validateData()
+  console.timeEnd('⏱️ [STEP 4] Initial validation')
 
   // Add scroll listener for scroll button
   window.addEventListener('scroll', handleScroll)
+
+  console.timeEnd('⏱️ [STEP 4] Total Page Load')
+  console.log('✅ [STEP 4] Page fully loaded and ready')
 })
 
 onUnmounted(() => {

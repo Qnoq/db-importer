@@ -210,28 +210,45 @@ function processFile(file: File) {
 
   reader.onload = (e) => {
     try {
+      console.time('⏱️ [STEP 3] Total Excel Parsing')
+
+      console.time('⏱️ [STEP 3] XLSX.read()')
       const data = e.target?.result
       const workbook = XLSX.read(data, { type: 'array' })
+      console.timeEnd('⏱️ [STEP 3] XLSX.read()')
 
       // Get first sheet
+      console.time('⏱️ [STEP 3] Get worksheet')
       const firstSheetName = workbook.SheetNames[0]
       const worksheet = workbook.Sheets[firstSheetName]
+      console.timeEnd('⏱️ [STEP 3] Get worksheet')
 
       // Convert to JSON
+      console.time('⏱️ [STEP 3] sheet_to_json()')
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][]
+      console.timeEnd('⏱️ [STEP 3] sheet_to_json()')
 
       if (jsonData.length === 0) {
         throw new Error('File is empty')
       }
 
       // First row is headers
+      console.time('⏱️ [STEP 3] Process headers/rows')
       const headers = jsonData[0].map(h => String(h))
       const rows = jsonData.slice(1).filter(row => row.some(cell => cell !== null && cell !== undefined && cell !== ''))
+      console.timeEnd('⏱️ [STEP 3] Process headers/rows')
 
+      console.time('⏱️ [STEP 3] Store data (setExcelData)')
       store.setExcelData(headers, rows)
+      console.timeEnd('⏱️ [STEP 3] Store data (setExcelData)')
 
       // Save to session (for authenticated users)
+      console.time('⏱️ [STEP 3] Save to session')
       sessionStore.saveDataFile(currentFileName.value, headers, rows)
+      console.timeEnd('⏱️ [STEP 3] Save to session')
+
+      console.timeEnd('⏱️ [STEP 3] Total Excel Parsing')
+      console.log(`✅ [STEP 3] Parsed ${rows.length} rows with ${headers.length} columns`)
 
       loading.value = false
     } catch (err) {
@@ -268,6 +285,8 @@ function handleDrop(event: DragEvent) {
 }
 
 function goToMapping() {
+  console.log('🚀 [STEP 3→4] Navigating to mapping page...')
+  console.time('⏱️ [STEP 3→4] Navigation time')
   router.push('/mapping')
 }
 </script>
