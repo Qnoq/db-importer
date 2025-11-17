@@ -8,12 +8,17 @@
         <div>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Data Preview with Validation (Editable)</h3>
           <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Showing {{ displayData.length }} rows with transformations applied - Double-click any cell to edit
+            Showing {{ paginatedData.length }} of {{ displayData.length }} rows with transformations applied - Double-click any cell to edit
           </p>
         </div>
-        <UBadge color="blue" variant="soft">
-          Double-click to edit
-        </UBadge>
+        <div class="flex items-center gap-2">
+          <UBadge v-if="displayData.length > maxRowsPerPage" color="amber" variant="soft">
+            Limited to {{ maxRowsPerPage }} rows for performance
+          </UBadge>
+          <UBadge color="blue" variant="soft">
+            Double-click to edit
+          </UBadge>
+        </div>
       </div>
     </template>
 
@@ -29,21 +34,21 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(row, rowIndex) in displayData" :key="rowIndex" class="border-t border-gray-200 dark:border-gray-700">
-              <td class="px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700">{{ rowIndex + 1 }}</td>
+            <tr v-for="(row, rowIndex) in paginatedData" :key="rowIndex" class="border-t border-gray-200 dark:border-gray-700">
+              <td class="px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700">{{ rowIndex + currentPage * maxRowsPerPage + 1 }}</td>
               <td
                 v-for="(cell, colIndex) in row"
                 :key="colIndex"
                 class="px-3 py-2 text-xs border border-gray-200 dark:border-gray-700 relative group"
-                :class="getCellClass(rowIndex, colIndex)"
+                :class="getCellClass(getActualRowIndex(rowIndex), colIndex)"
               >
                 <!-- Editing Mode -->
-                <div v-if="isEditing(rowIndex, colIndex)" class="flex items-center gap-1">
+                <div v-if="isEditing(getActualRowIndex(rowIndex), colIndex)" class="flex items-center gap-1">
                   <UInput
                     v-model="editingValue"
-                    @keyup.enter="saveEdit(rowIndex, colIndex)"
+                    @keyup.enter="saveEdit(getActualRowIndex(rowIndex), colIndex)"
                     @keyup.escape="cancelEdit"
-                    @blur="saveEdit(rowIndex, colIndex)"
+                    @blur="saveEdit(getActualRowIndex(rowIndex), colIndex)"
                     size="xs"
                     class="w-full"
                     autofocus
@@ -53,22 +58,51 @@
                 <!-- Display Mode -->
                 <div
                   v-else
-                  @dblclick="startEdit(rowIndex, colIndex, cell)"
+                  @dblclick="startEdit(getActualRowIndex(rowIndex), colIndex, cell)"
                   class="flex items-center gap-1 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 px-1 py-0.5 rounded transition-colors"
                   :title="'Double-click to edit: ' + formatCellValue(cell)"
                 >
-                  <span v-if="getCellIcon(rowIndex, colIndex)" class="flex-shrink-0">{{ getCellIcon(rowIndex, colIndex) }}</span>
+                  <span v-if="getCellIcon(getActualRowIndex(rowIndex), colIndex)" class="flex-shrink-0">{{ getCellIcon(getActualRowIndex(rowIndex), colIndex) }}</span>
                   <span class="truncate">{{ formatCellValue(cell) }}</span>
                 </div>
 
                 <!-- Validation Tooltip -->
-                <div v-if="getCellMessage(rowIndex, colIndex)" class="absolute hidden group-hover:block z-10 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded px-2 py-1 -top-8 left-0 whitespace-nowrap shadow-lg">
-                  {{ getCellMessage(rowIndex, colIndex) }}
+                <div v-if="getCellMessage(getActualRowIndex(rowIndex), colIndex)" class="absolute hidden group-hover:block z-10 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded px-2 py-1 -top-8 left-0 whitespace-nowrap shadow-lg">
+                  {{ getCellMessage(getActualRowIndex(rowIndex), colIndex) }}
                 </div>
               </td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <!-- Pagination Info & Controls -->
+      <div v-if="displayData.length > maxRowsPerPage" class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-600 dark:text-gray-400">
+            Rows {{ currentPage * maxRowsPerPage + 1 }} - {{ Math.min((currentPage + 1) * maxRowsPerPage, displayData.length) }} of {{ displayData.length }}
+          </div>
+          <div class="flex gap-2">
+            <UButton
+              @click="previousPage"
+              :disabled="currentPage === 0"
+              icon="i-heroicons-chevron-left"
+              size="xs"
+              variant="soft"
+            >
+              Previous
+            </UButton>
+            <UButton
+              @click="nextPage"
+              :disabled="(currentPage + 1) * maxRowsPerPage >= displayData.length"
+              icon="i-heroicons-chevron-right"
+              size="xs"
+              variant="soft"
+            >
+              Next
+            </UButton>
+          </div>
+        </div>
       </div>
 
       <p class="text-xs text-gray-600 dark:text-gray-400 mt-3">
@@ -125,9 +159,19 @@ const toast = useToast()
 const editingCell = ref<{ row: number; col: number } | null>(null)
 const editingValue = ref<string>('')
 
+// Pagination state
+const maxRowsPerPage = 100 // Show 100 rows at a time for performance
+const currentPage = ref(0)
+
 const isOpen = computed({
   get: () => props.isOpen,
-  set: (value) => emit('update:isOpen', value)
+  set: (value) => {
+    emit('update:isOpen', value)
+    // Reset to first page when modal is closed
+    if (!value) {
+      currentPage.value = 0
+    }
+  }
 })
 
 const hasChanges = computed(() => {
@@ -172,6 +216,31 @@ const displayData = computed(() => {
     })
   })
 })
+
+// Paginated data - only show a subset of rows at a time for performance
+const paginatedData = computed(() => {
+  const start = currentPage.value * maxRowsPerPage
+  const end = start + maxRowsPerPage
+  return displayData.value.slice(start, end)
+})
+
+// Get the actual row index in the full dataset (accounting for pagination)
+function getActualRowIndex(paginatedRowIndex: number): number {
+  return currentPage.value * maxRowsPerPage + paginatedRowIndex
+}
+
+// Pagination navigation
+function previousPage() {
+  if (currentPage.value > 0) {
+    currentPage.value--
+  }
+}
+
+function nextPage() {
+  if ((currentPage.value + 1) * maxRowsPerPage < displayData.value.length) {
+    currentPage.value++
+  }
+}
 
 // Helper functions for cell validation display
 function getCellClass(rowIndex: number, colIndex: number): string {
