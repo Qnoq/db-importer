@@ -15,6 +15,7 @@ declare module 'vue' {
     MappingActions: typeof import('./src/components/mapping/MappingActions.vue')['default']
     MappingCard: typeof import('./src/components/mapping/MappingCard.vue')['default']
     MappingHeader: typeof import('./src/components/mapping/MappingHeader.vue')['default']
+    PreviewDataModal: typeof import('./src/components/mapping/PreviewDataModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     StepperNav: typeof import('./src/components/StepperNav.vue')['default']

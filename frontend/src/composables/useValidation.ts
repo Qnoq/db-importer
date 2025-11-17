@@ -97,21 +97,23 @@ export function useValidation(
   }
 
   /**
-   * Preview data (first 20 rows with transformations applied)
+   * Preview data (all rows with transformations applied, only mapped columns)
    */
   const previewData = computed(() => {
-    return store.excelData.slice(0, 20).map(row => {
-      const newRow = [...row]
+    return store.excelData.map(row => {
+      const mappedRow: CellValue[] = []
       store.excelHeaders.forEach((header, idx) => {
         const dbField = localMapping.value[header]
         if (dbField) {
           const transform = store.transformations[dbField]
+          let value = row[idx]
           if (transform && transform !== 'none') {
-            newRow[idx] = applyTransformation(row[idx], transform) as CellValue
+            value = applyTransformation(value, transform) as CellValue
           }
+          mappedRow.push(value)
         }
       })
-      return newRow
+      return mappedRow
     })
   })
 

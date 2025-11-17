@@ -45,13 +45,27 @@
         <div class="section-header flex justify-between items-center mb-4">
           <h3 class="section-title text-lg font-semibold text-gray-900 dark:text-white">Column Mapping</h3>
 
-          <!-- Mapping Actions Component (Auto-map & Clear All buttons) -->
-          <MappingActions
-            :is-restoring="isLoadingData"
-            :has-mapping="Object.keys(localMapping).length > 0"
-            @auto-map="autoMap"
-            @clear-all="showClearDialog = true"
-          />
+          <!-- Action Buttons (Preview, Auto-map & Clear All) -->
+          <div class="flex gap-2">
+            <UButton
+              v-if="!isLoadingData"
+              @click="showPreviewModal = true"
+              variant="soft"
+              color="info"
+              icon="i-heroicons-eye"
+              :disabled="validationErrors.length > 0 || Object.keys(localMapping).length === 0"
+            >
+              Preview Data
+            </UButton>
+
+            <!-- Mapping Actions Component (Auto-map & Clear All buttons) -->
+            <MappingActions
+              :is-restoring="isLoadingData"
+              :has-mapping="Object.keys(localMapping).length > 0"
+              @auto-map="autoMap"
+              @clear-all="showClearDialog = true"
+            />
+          </div>
         </div>
 
         <!-- Skeleton Loading State -->
@@ -110,17 +124,12 @@
           </div>
         </div>
 
-        <!-- ValidationSummary Component (Errors, Warnings, Preview) -->
+        <!-- ValidationSummary Component (Errors, Warnings) -->
         <ValidationSummary
           v-if="store.hasExcelData && store.hasSelectedTable"
           :validation-errors="validationErrors"
           :transformation-warnings="transformationWarnings"
           :server-validation-errors="serverValidationErrors"
-          :show-preview="showPreview"
-          :preview-data="previewData"
-          :mapped-headers="mappedHeaders"
-          :cell-validations="cellValidations"
-          @update:show-preview="showPreview = $event"
         />
 
         <!-- GenerateSQLPanel Component (Action Buttons) -->
@@ -131,7 +140,6 @@
           :is-loading="loading"
           :error="error"
           :is-authenticated="authStore.isAuthenticated"
-          @preview-data="showPreview = !showPreview"
           @generate-sql="generateSQL"
           @generate-and-save="generateAndSave"
         />
@@ -144,6 +152,14 @@
       :transformation-label="transformPreviewColumn && fieldTransformations[transformPreviewColumn] ? transformations[fieldTransformations[transformPreviewColumn]]?.label : ''"
       :transformation-description="transformPreviewColumn && fieldTransformations[transformPreviewColumn] ? transformations[fieldTransformations[transformPreviewColumn]]?.description : ''"
       :preview-data="getTransformPreview(transformPreviewColumn || '')"
+    />
+
+    <!-- PreviewDataModal Component -->
+    <PreviewDataModal
+      v-model:is-open="showPreviewModal"
+      :preview-data="previewData"
+      :mapped-headers="mappedHeaders"
+      :cell-validations="cellValidations"
     />
 
     <!-- Clear Mappings Confirmation Modal -->
@@ -165,7 +181,7 @@
           <UButton @click="showClearDialog = false" color="neutral" variant="soft">
             Cancel
           </UButton>
-          <UButton @click="confirmClearMappings" color="error">
+          <UButton @click="confirmClearMappings(); showClearDialog = false" color="error">
             Clear All
           </UButton>
         </div>
@@ -184,6 +200,7 @@ import MappingCard from '../components/mapping/MappingCard.vue'
 import ValidationSummary from '../components/mapping/ValidationSummary.vue'
 import GenerateSQLPanel from '../components/mapping/GenerateSQLPanel.vue'
 import TransformPreviewModal from '../components/mapping/TransformPreviewModal.vue'
+import PreviewDataModal from '../components/mapping/PreviewDataModal.vue'
 import { useMappingStore, Field } from '../store/mappingStore'
 import { useAuthStore } from '../store/authStore'
 import { useImportStore } from '../store/importStore'
@@ -239,7 +256,6 @@ const {
   loading,
   error,
   serverValidationErrors,
-  showPreview,
   generateSQL,
   generateAndSave,
   downloadSQL
@@ -260,6 +276,7 @@ const isLoadingData = computed(() => {
 const showClearDialog = ref(false)
 const transformPreviewColumn = ref<string | null>(null)
 const showTransformPreview = ref(false)
+const showPreviewModal = ref(false)
 
 // Scroll button state
 const showScrollButton = ref(false)
