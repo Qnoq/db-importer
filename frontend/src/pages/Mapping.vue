@@ -103,25 +103,50 @@
             </div>
           </div>
 
-          <!-- Actual Mapping Content with MappingCard Components -->
-          <div v-else-if="store.hasExcelData && store.hasSelectedTable" class="mapping-list space-y-3">
-            <MappingCard
-              v-for="(field, index) in store.selectedTable?.fields"
-              :key="index"
-              :field="field"
-              :selected-excel-column="getMappedExcelColumn(field.name)"
-              :excel-headers="store.excelHeaders"
-              :selected-transformation="fieldTransformations[field.name] || 'none'"
-              :available-transformations="getTransformationOptions(field)"
-              :has-warning="hasYearWarning(field.name)"
-              :is-mapped="!!getMappedExcelColumn(field.name)"
-              :sample-value="getMappedExcelColumn(field.name) ? getSampleValue(getMappedExcelColumn(field.name)!) : undefined"
-              :is-auto-increment="isAutoIncrementField(field)"
-              @update:selected-excel-column="(value) => onFieldMappingChange(field.name, value)"
-              @update:selected-transformation="(value) => store.updateTransformation(field.name, value)"
-              @preview-transformation="showTransformPreviewForField(field.name)"
-              @skip-field="toggleSkipField(field.name)"
-            />
+          <!-- Actual Mapping Content with MappingCard Components (Virtual Scrolling) -->
+          <div v-else-if="store.hasExcelData && store.hasSelectedTable" class="mapping-list">
+            <div
+              ref="scrollParentRef"
+              :style="{ height: virtualScrollHeight, overflow: 'auto' }"
+              class="space-y-3"
+            >
+              <div
+                :style="{
+                  height: `${virtualizer.getTotalSize()}px`,
+                  width: '100%',
+                  position: 'relative'
+                }"
+              >
+                <div
+                  v-for="virtualRow in virtualizer.getVirtualItems()"
+                  :key="virtualRow.index"
+                  :style="{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start}px)`,
+                    marginBottom: '12px'
+                  }"
+                >
+                  <MappingCard
+                    :field="store.selectedTable!.fields[virtualRow.index]"
+                    :selected-excel-column="getMappedExcelColumn(store.selectedTable!.fields[virtualRow.index].name)"
+                    :excel-headers="store.excelHeaders"
+                    :selected-transformation="fieldTransformations[store.selectedTable!.fields[virtualRow.index].name] || 'none'"
+                    :available-transformations="getTransformationOptions(store.selectedTable!.fields[virtualRow.index])"
+                    :has-warning="hasYearWarning(store.selectedTable!.fields[virtualRow.index].name)"
+                    :is-mapped="!!getMappedExcelColumn(store.selectedTable!.fields[virtualRow.index].name)"
+                    :sample-value="getMappedExcelColumn(store.selectedTable!.fields[virtualRow.index].name) ? getSampleValue(getMappedExcelColumn(store.selectedTable!.fields[virtualRow.index].name)!) : undefined"
+                    :is-auto-increment="isAutoIncrementField(store.selectedTable!.fields[virtualRow.index])"
+                    @update:selected-excel-column="(value) => onFieldMappingChange(store.selectedTable!.fields[virtualRow.index].name, value)"
+                    @update:selected-transformation="(value) => store.updateTransformation(store.selectedTable!.fields[virtualRow.index].name, value)"
+                    @preview-transformation="showTransformPreviewForField(store.selectedTable!.fields[virtualRow.index].name)"
+                    @skip-field="toggleSkipField(store.selectedTable!.fields[virtualRow.index].name)"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -198,6 +223,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useVirtualizer } from '@tanstack/vue-virtual'
 import StepperNav from '../components/StepperNav.vue'
 import MappingHeader from '../components/mapping/MappingHeader.vue'
 import MappingActions from '../components/mapping/MappingActions.vue'
@@ -291,6 +317,24 @@ const isNearBottom = ref(false)
 // Validation summary reference
 const validationSummaryRef = ref<HTMLElement | null>(null)
 
+// Virtual scrolling setup
+const scrollParentRef = ref<HTMLElement | null>(null)
+const virtualScrollHeight = computed(() => {
+  const fieldCount = store.selectedTable?.fields.length || 0
+  // Limite la hauteur: max 800px ou hauteur de viewport - 400px
+  const maxHeight = Math.min(800, window.innerHeight - 400)
+  return fieldCount > 10 ? `${maxHeight}px` : 'auto'
+})
+
+const virtualizer = useVirtualizer({
+  get count() {
+    return store.selectedTable?.fields.length || 0
+  },
+  getScrollElement: () => scrollParentRef.value,
+  estimateSize: () => 180, // Hauteur estimée d'une MappingCard en pixels
+  overscan: 5, // Nombre d'éléments à rendre avant/après la zone visible
+})
+
 // Lifecycle hooks
 onMounted(() => {
   console.timeEnd('⏱️ [STEP 3→4] Navigation time')
@@ -325,6 +369,11 @@ onMounted(() => {
 
   console.timeEnd('⏱️ [STEP 4] Total Page Load')
   console.log('✅ [STEP 4] Page fully loaded and ready')
+
+  // Log virtual scrolling info
+  if (store.selectedTable && store.selectedTable.fields.length > 10) {
+    console.log(`📜 [STEP 4] Virtual scrolling enabled for ${store.selectedTable.fields.length} fields`)
+  }
 })
 
 onUnmounted(() => {
