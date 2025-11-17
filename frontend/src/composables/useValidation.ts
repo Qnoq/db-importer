@@ -38,8 +38,19 @@ export function useValidation(
       }
     }
 
-    // Apply transformations to data
-    const transformedData = store.excelData.map(row => {
+    // First apply dataOverrides to get the final data
+    const dataWithOverrides = store.excelData.map((row, rowIndex) => {
+      return row.map((cell, colIndex) => {
+        const key = `${rowIndex}-${colIndex}`
+        if (store.dataOverrides[key]) {
+          return store.dataOverrides[key].value as CellValue
+        }
+        return cell
+      })
+    })
+
+    // Then apply transformations to data
+    const transformedData = dataWithOverrides.map(row => {
       const newRow = [...row]
       store.excelHeaders.forEach((header, idx) => {
         const dbField = localMapping.value[header]
@@ -100,13 +111,17 @@ export function useValidation(
    * Preview data (all rows with transformations applied, only mapped columns)
    */
   const previewData = computed(() => {
-    return store.excelData.map(row => {
+    return store.excelData.map((row, rowIndex) => {
       const mappedRow: CellValue[] = []
       store.excelHeaders.forEach((header, idx) => {
         const dbField = localMapping.value[header]
         if (dbField) {
+          // First check if there's an override for this cell
+          const key = `${rowIndex}-${idx}`
+          let value = store.dataOverrides[key] ? (store.dataOverrides[key].value as CellValue) : row[idx]
+
+          // Then apply transformation if any
           const transform = store.transformations[dbField]
-          let value = row[idx]
           if (transform && transform !== 'none') {
             value = applyTransformation(value, transform) as CellValue
           }
