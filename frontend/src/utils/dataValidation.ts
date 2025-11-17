@@ -43,6 +43,18 @@ export function validateCell(
 
   // Check NULL constraint
   if (!field.nullable && (value === null || value === undefined || String(value).trim() === '')) {
+    // For date/time fields, NULL is often acceptable even if marked NOT NULL
+    // Treat as warning instead of error
+    if (isDateTimeType(fieldType)) {
+      return {
+        ...baseValidation,
+        valid: true,
+        severity: 'warning',
+        message: `Field "${field.name}" is NULL (marked as NOT NULL in schema)`,
+        suggestion: 'Database will need to handle NULL dates'
+      }
+    }
+
     return {
       ...baseValidation,
       valid: false,
