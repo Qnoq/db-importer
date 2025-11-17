@@ -2,8 +2,16 @@ import { defineStore } from 'pinia'
 import { nextTick } from 'vue'
 import { useAuthStore } from './authStore'
 import { useMappingStore } from './mappingStore'
-import type { Table } from './mappingStore'
+import type { Table, CellValue } from './mappingStore'
 import { apiClient, ApiError } from '../utils/apiClient'
+import type {
+  SaveSchemaRequest,
+  SaveSchemaResponse,
+  SaveTableSelectionRequest,
+  SaveDataFileRequest,
+  SaveMappingRequest,
+  GetSessionResponse
+} from '../types/api'
 
 export interface WorkflowSessionState {
   loading: boolean
@@ -38,11 +46,13 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
       this.error = null
 
       try {
-        const data = await apiClient.post('/api/v1/workflow/session/schema', {
+        const requestBody: SaveSchemaRequest = {
           schemaContent,
           tables
-        })
-        this.sessionId = data.data.id
+        }
+
+        const response = await apiClient.post<{ data: SaveSchemaResponse }>('/api/v1/workflow/session/schema', requestBody)
+        this.sessionId = response.data.id
         this.lastSavedAt = new Date()
       } catch (error) {
         const errorMessage = error instanceof ApiError ? error.message : 'Failed to save schema'
@@ -68,7 +78,8 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
       this.error = null
 
       try {
-        await apiClient.post('/api/v1/workflow/session/table', { tableName })
+        const requestBody: SaveTableSelectionRequest = { tableName }
+        await apiClient.post('/api/v1/workflow/session/table', requestBody)
         this.lastSavedAt = new Date()
       } catch (error) {
         const errorMessage = error instanceof ApiError ? error.message : 'Failed to save table selection'
@@ -82,7 +93,7 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
     /**
      * Save data file information (Step 3)
      */
-    async saveDataFile(fileName: string, headers: string[], sampleData: any[][]): Promise<void> {
+    async saveDataFile(fileName: string, headers: string[], sampleData: CellValue[][]): Promise<void> {
       const authStore = useAuthStore()
 
       if (!authStore.isAuthenticated) {
@@ -96,11 +107,13 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
         // Limit sample data to 50 rows
         const limitedSampleData = sampleData.slice(0, 50)
 
-        await apiClient.post('/api/v1/workflow/session/data', {
+        const requestBody: SaveDataFileRequest = {
           fileName,
           headers,
           sampleData: limitedSampleData
-        })
+        }
+
+        await apiClient.post('/api/v1/workflow/session/data', requestBody)
         this.lastSavedAt = new Date()
       } catch (error) {
         const errorMessage = error instanceof ApiError ? error.message : 'Failed to save data file'
@@ -125,10 +138,12 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
       this.error = null
 
       try {
-        await apiClient.post('/api/v1/workflow/session/mapping', {
+        const requestBody: SaveMappingRequest = {
           mapping,
           transformations
-        })
+        }
+
+        await apiClient.post('/api/v1/workflow/session/mapping', requestBody)
         this.lastSavedAt = new Date()
       } catch (error) {
         const errorMessage = error instanceof ApiError ? error.message : 'Failed to save mapping'
@@ -142,7 +157,7 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
     /**
      * Get active workflow session
      */
-    async getSession(): Promise<any | null> {
+    async getSession(): Promise<GetSessionResponse | null> {
       const authStore = useAuthStore()
 
       if (!authStore.isAuthenticated) {
@@ -153,11 +168,11 @@ export const useWorkflowSessionStore = defineStore('workflowSession', {
       this.error = null
 
       try {
-        const data = await apiClient.get('/api/v1/workflow/session')
+        const response = await apiClient.get<{ data: GetSessionResponse }>('/api/v1/workflow/session')
 
-        if (data.data) {
-          this.sessionId = data.data.id
-          return data.data
+        if (response.data) {
+          this.sessionId = response.data.id
+          return response.data
         }
 
         return null
