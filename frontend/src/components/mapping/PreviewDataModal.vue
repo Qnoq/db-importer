@@ -103,7 +103,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useMappingStore } from '../../store/mappingStore'
-import { useToast } from '../../composables/useToast'
 import type { CellValue, ValidationResult } from '../../store/mappingStore'
 
 interface Props {
@@ -192,7 +191,11 @@ function saveEdit(row: number, col: number) {
   // Update the store with the new value
   store.updateCellValue(row, col, newValue)
 
-  toast.success('Cell updated', `Row ${row + 1}, Column ${col + 1} updated`)
+  toast.add({
+    title: 'Cell updated',
+    description: `Row ${row + 1}, Column ${col + 1} updated`,
+    color: 'success'
+  })
 
   cancelEdit()
 }
@@ -204,6 +207,10 @@ function cancelEdit() {
 
 function resetChanges() {
   store.resetDataOverrides()
-  toast.info('Changes reset', 'All edits have been reverted')
+  toast.add({
+    title: 'Changes reset',
+    description: 'All edits have been reverted',
+    color: 'info'
+  })
 }
 </script>
