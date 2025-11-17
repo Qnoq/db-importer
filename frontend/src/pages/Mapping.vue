@@ -132,6 +132,7 @@
           :validation-errors="validationErrors"
           :transformation-warnings="transformationWarnings"
           :server-validation-errors="serverValidationErrors"
+          :cell-validations="cellValidations"
         />
 
         <!-- GenerateSQLPanel Component (Action Buttons) -->
@@ -373,10 +374,14 @@ function scrollToTopOrBottom() {
  */
 function scrollToValidationSummary() {
   if (validationSummaryRef.value) {
-    validationSummaryRef.value.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    })
+    // Access the root HTML element of the component
+    const el = (validationSummaryRef.value as { $el: HTMLElement }).$el
+    if (el) {
+      el.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+    }
   }
 }
 </script>
