@@ -23,7 +23,6 @@ export function useSQLGeneration(
   const loading = ref(false)
   const error = ref('')
   const serverValidationErrors = ref<string[]>([])
-  const showPreview = ref(false)
 
   /**
    * Generate SQL
@@ -296,7 +295,6 @@ export function useSQLGeneration(
     loading,
     error,
     serverValidationErrors,
-    showPreview,
     generateSQL,
     generateAndSave,
     downloadSQL

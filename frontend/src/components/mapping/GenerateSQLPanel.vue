@@ -3,16 +3,6 @@
     <!-- Action Buttons -->
     <div v-if="!isRestoring" class="bottom-actions flex flex-wrap gap-4 mb-6">
       <UButton
-        @click="$emit('preview-data')"
-        size="lg"
-        variant="soft"
-        color="info"
-        icon="i-heroicons-eye"
-        :disabled="hasValidationErrors"
-      >
-        Preview Data
-      </UButton>
-      <UButton
         @click="$emit('generate-sql')"
         size="lg"
         color="primary"
@@ -38,8 +28,8 @@
 
     <!-- Action Buttons Skeleton -->
     <div v-else class="bottom-actions flex flex-wrap gap-4 mb-6">
-      <USkeleton class="h-12 w-64 rounded-lg" />
       <USkeleton class="h-12 w-40 rounded-lg" />
+      <USkeleton class="h-12 w-52 rounded-lg" />
     </div>
 
     <!-- Loading Indicator -->
@@ -79,7 +69,6 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 defineEmits<{
-  'preview-data': []
   'generate-sql': []
   'generate-and-save': []
 }>()
