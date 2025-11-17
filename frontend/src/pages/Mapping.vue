@@ -143,8 +143,10 @@
           :is-loading="loading"
           :error="error"
           :is-authenticated="authStore.isAuthenticated"
+          :has-mapping-errors="validationErrors.length > 0 || Object.keys(localMapping).length === 0"
           @generate-sql="generateSQL"
           @generate-and-save="generateAndSave"
+          @preview-data="showPreviewModal = true"
         />
     </div>
 
@@ -162,7 +164,7 @@
       v-model:is-open="showPreviewModal"
       :preview-data="previewData"
       :mapped-headers="mappedHeaders"
-      :cell-validations="cellValidations"
+      :cell-validations="previewCellValidations"
     />
 
     <!-- Clear Mappings Confirmation Modal -->
@@ -245,6 +247,7 @@ const {
   transformationWarnings,
   previewData,
   mappedHeaders,
+  previewCellValidations,
   validateData,
   getCellValidationClass,
   getCellValidationMessage,

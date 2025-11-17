@@ -132,6 +132,36 @@ export function useValidation(
   })
 
   /**
+   * Remap cell validations to match preview column indices
+   * Preview only shows mapped columns, so column indices are different
+   */
+  const previewCellValidations = computed(() => {
+    const remappedValidations = new Map<string, ValidationResult>()
+
+    // Create mapping from original column index to preview column index
+    const originalToPreviewIndex = new Map<number, number>()
+    let previewIndex = 0
+    store.excelHeaders.forEach((header, originalIndex) => {
+      const dbColumn = localMapping.value[header]
+      if (dbColumn) {
+        originalToPreviewIndex.set(originalIndex, previewIndex)
+        previewIndex++
+      }
+    })
+
+    // Remap validations with new column indices
+    cellValidations.value.forEach((validation, key) => {
+      const previewColIndex = originalToPreviewIndex.get(validation.columnIndex)
+      if (previewColIndex !== undefined) {
+        const newKey = `${validation.rowIndex}-${previewColIndex}`
+        remappedValidations.set(newKey, validation)
+      }
+    })
+
+    return remappedValidations
+  })
+
+  /**
    * Format cell value for display
    */
   function formatCellValue(value: unknown): string {
@@ -248,6 +278,7 @@ export function useValidation(
     transformationWarnings,
     previewData,
     mappedHeaders,
+    previewCellValidations,
     validateData,
     getCellValidationClass,
     getCellValidationMessage,
