@@ -103,25 +103,70 @@
             </div>
           </div>
 
-          <!-- Actual Mapping Content with MappingCard Components -->
+          <!-- Progressive Loading Overlay -->
+          <div v-if="isProgressiveLoading && store.hasExcelData && store.hasSelectedTable" class="relative">
+            <div class="fixed inset-0 bg-slate-900/50 dark:bg-slate-950/70 backdrop-blur-sm z-40 flex items-center justify-center">
+              <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-8 max-w-md mx-4">
+                <div class="flex flex-col items-center space-y-6">
+                  <!-- Animated Spinner -->
+                  <div class="relative w-20 h-20">
+                    <div class="absolute inset-0 border-4 border-green-200 dark:border-green-900 rounded-full"></div>
+                    <div class="absolute inset-0 border-4 border-green-600 dark:border-green-500 rounded-full border-t-transparent animate-spin"></div>
+                  </div>
+
+                  <!-- Loading Text -->
+                  <div class="text-center space-y-2">
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white">
+                      Loading Column Mappings
+                    </h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">
+                      Preparing {{ store.selectedTable?.fields.length }} database fields...
+                    </p>
+                  </div>
+
+                  <!-- Progress Bar -->
+                  <div class="w-full">
+                    <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-2">
+                      <span>{{ renderedFieldsCount }} / {{ store.selectedTable?.fields.length || 0 }}</span>
+                      <span>{{ Math.round((renderedFieldsCount / (store.selectedTable?.fields.length || 1)) * 100) }}%</span>
+                    </div>
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                      <div
+                        class="bg-gradient-to-r from-green-500 to-green-600 h-2 rounded-full transition-all duration-300 ease-out"
+                        :style="{ width: `${(renderedFieldsCount / (store.selectedTable?.fields.length || 1)) * 100}%` }"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actual Mapping Content with MappingCard Components (Progressive Rendering) -->
           <div v-else-if="store.hasExcelData && store.hasSelectedTable" class="mapping-list space-y-3">
-            <MappingCard
-              v-for="(field, index) in store.selectedTable?.fields"
-              :key="index"
-              :field="field"
-              :selected-excel-column="getMappedExcelColumn(field.name)"
-              :excel-headers="store.excelHeaders"
-              :selected-transformation="fieldTransformations[field.name] || 'none'"
-              :available-transformations="getTransformationOptions(field)"
-              :has-warning="hasYearWarning(field.name)"
-              :is-mapped="!!getMappedExcelColumn(field.name)"
-              :sample-value="getMappedExcelColumn(field.name) ? getSampleValue(getMappedExcelColumn(field.name)!) : undefined"
-              :is-auto-increment="isAutoIncrementField(field)"
-              @update:selected-excel-column="(value) => onFieldMappingChange(field.name, value)"
-              @update:selected-transformation="(value) => store.updateTransformation(field.name, value)"
-              @preview-transformation="showTransformPreviewForField(field.name)"
-              @skip-field="toggleSkipField(field.name)"
-            />
+            <TransitionGroup
+              name="fade-slide"
+              tag="div"
+              class="space-y-3"
+            >
+              <MappingCard
+                v-for="(field, index) in visibleFields"
+                :key="field.name"
+                :field="field"
+                :selected-excel-column="getMappedExcelColumn(field.name)"
+                :excel-headers="store.excelHeaders"
+                :selected-transformation="fieldTransformations[field.name] || 'none'"
+                :available-transformations="getTransformationOptions(field)"
+                :has-warning="hasYearWarning(field.name)"
+                :is-mapped="!!getMappedExcelColumn(field.name)"
+                :sample-value="getMappedExcelColumn(field.name) ? getSampleValue(getMappedExcelColumn(field.name)!) : undefined"
+                :is-auto-increment="isAutoIncrementField(field)"
+                @update:selected-excel-column="(value) => onFieldMappingChange(field.name, value)"
+                @update:selected-transformation="(value) => store.updateTransformation(field.name, value)"
+                @preview-transformation="showTransformPreviewForField(field.name)"
+                @skip-field="toggleSkipField(field.name)"
+              />
+            </TransitionGroup>
           </div>
         </div>
 
@@ -284,12 +329,69 @@ const transformPreviewColumn = ref<string | null>(null)
 const showTransformPreview = ref(false)
 const showPreviewModal = ref(false)
 
+// Progressive rendering state
+const isProgressiveLoading = ref(false)
+const renderedFieldsCount = ref(0)
+const visibleFields = computed(() => {
+  if (!store.selectedTable?.fields) return []
+  return store.selectedTable.fields.slice(0, renderedFieldsCount.value)
+})
+
 // Scroll button state
 const showScrollButton = ref(false)
 const isNearBottom = ref(false)
 
 // Validation summary reference
 const validationSummaryRef = ref<HTMLElement | null>(null)
+
+/**
+ * Progressive rendering: Render cards in batches for better UX
+ */
+function progressivelyRenderCards() {
+  const totalFields = store.selectedTable?.fields.length || 0
+
+  // For small tables (<=10 fields), show immediately without progressive loading
+  if (totalFields <= 10) {
+    renderedFieldsCount.value = totalFields
+    isProgressiveLoading.value = false
+    console.log('📊 [STEP 4] Small table - rendering all fields immediately')
+    return
+  }
+
+  // For larger tables, use progressive rendering
+  console.time('⏱️ [STEP 4] Progressive rendering')
+  console.log(`📊 [STEP 4] Progressive rendering ${totalFields} fields...`)
+
+  isProgressiveLoading.value = true
+  renderedFieldsCount.value = 0
+
+  const BATCH_SIZE = 12 // Render 12 cards per batch
+  const BATCH_DELAY = 30 // 30ms delay between batches for smooth rendering
+
+  let currentBatch = 0
+  const totalBatches = Math.ceil(totalFields / BATCH_SIZE)
+
+  const renderNextBatch = () => {
+    if (currentBatch >= totalBatches) {
+      isProgressiveLoading.value = false
+      console.timeEnd('⏱️ [STEP 4] Progressive rendering')
+      console.log('✅ [STEP 4] All fields rendered')
+      return
+    }
+
+    const nextCount = Math.min((currentBatch + 1) * BATCH_SIZE, totalFields)
+    renderedFieldsCount.value = nextCount
+    currentBatch++
+
+    // Use requestAnimationFrame for smooth rendering
+    requestAnimationFrame(() => {
+      setTimeout(renderNextBatch, BATCH_DELAY)
+    })
+  }
+
+  // Start rendering
+  renderNextBatch()
+}
 
 // Lifecycle hooks
 onMounted(() => {
@@ -325,6 +427,9 @@ onMounted(() => {
 
   console.timeEnd('⏱️ [STEP 4] Total Page Load')
   console.log('✅ [STEP 4] Page fully loaded and ready')
+
+  // Start progressive rendering
+  progressivelyRenderCards()
 })
 
 onUnmounted(() => {
@@ -403,3 +508,29 @@ function scrollToValidationSummary() {
   }
 }
 </script>
+
+<style scoped>
+/* Fade and slide up transition for progressive rendering */
+.fade-slide-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.fade-slide-leave-active {
+  transition: all 0.2s ease-in;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Smooth transition for the fade-slide group */
+.fade-slide-move {
+  transition: transform 0.3s ease;
+}
+</style>

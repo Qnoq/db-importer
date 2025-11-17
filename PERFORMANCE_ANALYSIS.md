@@ -1,5 +1,51 @@
 # Analyse de Performance - Import Excel
 
+## ✨ Optimisations Implémentées
+
+### Progressive Rendering avec Loading UX (IMPLÉMENTÉ)
+
+**Problème identifié :** Lors de tests avec 2523 lignes × 55 colonnes, la navigation Step 3 → 4 prenait **947ms**, dont la majorité était due au rendu de 55 composants `MappingCard` simultanément, créant une impression de "freeze" de l'application.
+
+**Solution implémentée :** Rendu progressif par batch avec overlay de loading élégant
+
+#### Fonctionnalités :
+- ✅ **Overlay de loading professionnel** avec spinner animé, barre de progression et compteur
+- ✅ **Rendu par batch** : 12 cartes toutes les 30ms pour éviter de bloquer le thread UI
+- ✅ **Transitions fluides** : animations fade + slide-up pour chaque carte
+- ✅ **Mode adaptatif** :
+  - Tables ≤ 10 colonnes → rendu immédiat (pas de loading)
+  - Tables > 10 colonnes → rendu progressif avec overlay
+- ✅ **Performance optimisée** : utilise `requestAnimationFrame` pour des rendus synchronisés avec le refresh rate du navigateur
+
+#### UX/Design :
+- Modal de loading centrée avec backdrop blur
+- Spinner double cercle animé (vert)
+- Barre de progression avec gradient animé
+- Compteur de champs : "X / Y" avec pourcentage
+- Transitions douces pour chaque carte qui apparaît
+
+**Impact sur la perception de performance :**
+- ✅ Plus de freeze visible - l'utilisateur voit immédiatement un feedback
+- ✅ Chargement progressif donne une impression de rapidité
+- ✅ Animation fluide améliore l'expérience utilisateur
+- ✅ Barre de progression rassure l'utilisateur sur l'avancement
+
+**Comment vérifier :**
+Consultez la console du navigateur, vous verrez :
+```
+📊 [STEP 4] Progressive rendering 55 fields...
+⏱️ [STEP 4] Progressive rendering: XXXms
+✅ [STEP 4] All fields rendered
+```
+
+**Code source :**
+- `frontend/src/pages/Mapping.vue:332-338` - État du rendu progressif
+- `frontend/src/pages/Mapping.vue:347-394` - Fonction `progressivelyRenderCards()`
+- `frontend/src/pages/Mapping.vue:106-143` - Overlay de loading
+- `frontend/src/pages/Mapping.vue:512-536` - Styles CSS pour transitions
+
+---
+
 ## 🎯 Objectif
 
 Ce document explique comment identifier les goulots d'étranglement de performance lors de l'import de fichiers Excel volumineux (2000+ lignes), notamment lors de la transition de l'**Étape 3** (Upload Data) vers l'**Étape 4** (Mapping).
