@@ -29,10 +29,10 @@
         class="preview-table-wrapper overflow-x-auto max-h-[70vh] overflow-y-auto"
       >
         <table class="min-w-full border-collapse">
-          <thead class="bg-gray-100 dark:bg-gray-800 sticky top-0 z-10">
+          <thead class="bg-gray-100 dark:bg-gray-800 sticky top-0 z-20 shadow-sm">
             <tr>
-              <th class="px-3 py-2 text-left text-xs font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700">Row</th>
-              <th v-for="(header, idx) in mappedHeaders" :key="idx" class="px-3 py-2 text-left text-xs font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700">
+              <th class="px-3 py-2 text-left text-xs font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">Row</th>
+              <th v-for="(header, idx) in mappedHeaders" :key="idx" class="px-3 py-2 text-left text-xs font-semibold text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800">
                 {{ header }}
               </th>
             </tr>
@@ -125,7 +125,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 import { useMappingStore } from '../../store/mappingStore'
 import type { CellValue, ValidationResult } from '../../store/mappingStore'
 
@@ -241,17 +241,28 @@ function loadMoreRows() {
 
   isLoadingMore.value = true
 
-  // Simulate slight loading delay for smooth UX (can be removed if too slow)
-  setTimeout(() => {
+  // Save current scroll position before loading more rows
+  const savedScrollTop = scrollContainer.value?.scrollTop || 0
+
+  // Use requestAnimationFrame for smooth loading without setTimeout
+  requestAnimationFrame(() => {
     const newCount = Math.min(
       visibleRowCount.value + loadMoreCount,
       displayData.value.length
     )
     visibleRowCount.value = newCount
-    isLoadingMore.value = false
 
     console.log(`📊 [Preview Modal] Loaded ${newCount} / ${displayData.value.length} rows`)
-  }, 100)
+
+    // Restore scroll position after DOM updates to prevent jump
+    nextTick(() => {
+      if (scrollContainer.value) {
+        // Maintain the exact scroll position to prevent jumping
+        scrollContainer.value.scrollTop = savedScrollTop
+      }
+      isLoadingMore.value = false
+    })
+  })
 }
 
 // Helper functions for cell validation display
