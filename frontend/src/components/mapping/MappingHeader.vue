@@ -80,12 +80,22 @@
             <span class="text-green-600 dark:text-green-400 font-medium">
               ✓ {{ validationStats.validRowCount }} valid
             </span>
-            <span v-if="validationStats.warningCount > 0" class="text-amber-600 dark:text-amber-400 font-medium">
+            <button
+              v-if="validationStats.warningCount > 0"
+              @click="$emit('scroll-to-validation')"
+              class="text-amber-600 dark:text-amber-400 font-medium hover:text-amber-700 dark:hover:text-amber-300 underline decoration-dotted cursor-pointer transition-colors"
+              title="Click to view warning details"
+            >
               ⚠ {{ validationStats.warningCount }} warnings
-            </span>
-            <span v-if="validationStats.errorCount > 0" class="text-red-600 dark:text-red-400 font-medium">
+            </button>
+            <button
+              v-if="validationStats.errorCount > 0"
+              @click="$emit('scroll-to-validation')"
+              class="text-red-600 dark:text-red-400 font-medium hover:text-red-700 dark:hover:text-red-300 underline decoration-dotted cursor-pointer transition-colors"
+              title="Click to view error details"
+            >
               ✕ {{ validationStats.errorCount }} errors
-            </span>
+            </button>
           </div>
         </div>
       </template>
@@ -144,5 +154,6 @@ withDefaults(defineProps<Props>(), {
 
 defineEmits<{
   'start-over': []
+  'scroll-to-validation': []
 }>()
 </script>

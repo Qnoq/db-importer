@@ -38,6 +38,7 @@
         :data-row-count="store.excelData.length"
         :validation-stats="validationStats"
         @start-over="router.push('/')"
+        @scroll-to-validation="scrollToValidationSummary"
       />
 
       <!-- Column Mapping Section -->
@@ -126,6 +127,7 @@
 
         <!-- ValidationSummary Component (Errors, Warnings) -->
         <ValidationSummary
+          ref="validationSummaryRef"
           v-if="store.hasExcelData && store.hasSelectedTable"
           :validation-errors="validationErrors"
           :transformation-warnings="transformationWarnings"
@@ -282,6 +284,9 @@ const showPreviewModal = ref(false)
 const showScrollButton = ref(false)
 const isNearBottom = ref(false)
 
+// Validation summary reference
+const validationSummaryRef = ref<HTMLElement | null>(null)
+
 // Lifecycle hooks
 onMounted(() => {
   // Initialize localMapping from store first (for session restoration)
@@ -359,6 +364,18 @@ function scrollToTopOrBottom() {
     window.scrollTo({
       top: document.documentElement.scrollHeight,
       behavior: 'smooth'
+    })
+  }
+}
+
+/**
+ * Scroll to validation summary section
+ */
+function scrollToValidationSummary() {
+  if (validationSummaryRef.value) {
+    validationSummaryRef.value.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
     })
   }
 }
