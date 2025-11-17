@@ -14,6 +14,11 @@ export interface Table {
 // Type for cell values in Excel/CSV data
 export type CellValue = string | number | boolean | null | undefined
 
+export interface ValidationResult {
+  severity: 'error' | 'warning' | 'info'
+  message: string
+}
+
 export interface MappingState {
   tables: Table[]
   selectedTable: Table | null
@@ -21,6 +26,7 @@ export interface MappingState {
   excelHeaders: string[]
   mapping: Record<string, string>
   transformations: Record<string, string>
+  dataOverrides: Record<string, Record<string, any>>
 }
 
 const STORAGE_KEY = 'db-importer-state'
@@ -81,7 +87,8 @@ export const useMappingStore = defineStore('mapping', {
         excelData: [], // Excel data is not persisted due to size
         excelHeaders: stored.excelHeaders || [],
         mapping: stored.mapping || {},
-        transformations: stored.transformations || {}
+        transformations: stored.transformations || {},
+        dataOverrides: {}
       }
     }
 
@@ -91,7 +98,8 @@ export const useMappingStore = defineStore('mapping', {
       excelData: [],
       excelHeaders: [],
       mapping: {},
-      transformations: {}
+      transformations: {},
+      dataOverrides: {}
     }
   },
 
@@ -132,6 +140,18 @@ export const useMappingStore = defineStore('mapping', {
       this.persist()
     },
 
+    updateCellValue(rowIndex: number, colIndex: number, value: any) {
+      const key = `${rowIndex}-${colIndex}`
+      if (!this.dataOverrides[key]) {
+        this.dataOverrides[key] = {}
+      }
+      this.dataOverrides[key] = { value }
+    },
+
+    resetDataOverrides() {
+      this.dataOverrides = {}
+    },
+
     reset() {
       this.tables = []
       this.selectedTable = null
@@ -139,6 +159,7 @@ export const useMappingStore = defineStore('mapping', {
       this.excelHeaders = []
       this.mapping = {}
       this.transformations = {}
+      this.dataOverrides = {}
       this.clearStorage()
     },
 
@@ -164,6 +185,19 @@ export const useMappingStore = defineStore('mapping', {
     // Get the number of mapped columns
     mappedColumnsCount: (state) => {
       return Object.values(state.mapping).filter(v => v !== '').length
+    },
+
+    // Get final data with overrides applied
+    finalData: (state) => {
+      return state.excelData.map((row, rowIndex) => {
+        return row.map((cell, colIndex) => {
+          const key = `${rowIndex}-${colIndex}`
+          if (state.dataOverrides[key]) {
+            return state.dataOverrides[key].value
+          }
+          return cell
+        })
+      })
     },
 
     // Check if all required (NOT NULL) fields are mapped

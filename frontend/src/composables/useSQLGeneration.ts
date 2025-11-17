@@ -35,8 +35,19 @@ export function useSQLGeneration(
     loading.value = true
 
     try {
-      // Apply transformations to all data
-      const transformedData = store.excelData.map(row => {
+      // First, apply dataOverrides to get the final data
+      const dataWithOverrides = store.excelData.map((row, rowIndex) => {
+        return row.map((cell, colIndex) => {
+          const key = `${rowIndex}-${colIndex}`
+          if (store.dataOverrides[key]) {
+            return store.dataOverrides[key].value as CellValue
+          }
+          return cell
+        })
+      })
+
+      // Then apply transformations to all data
+      const transformedData = dataWithOverrides.map(row => {
         const newRow = [...row]
         store.excelHeaders.forEach((header, idx) => {
           const dbField = localMapping.value[header]
@@ -135,8 +146,19 @@ export function useSQLGeneration(
     loading.value = true
 
     try {
-      // Apply transformations to all data
-      const transformedData = store.excelData.map(row => {
+      // First, apply dataOverrides to get the final data
+      const dataWithOverrides = store.excelData.map((row, rowIndex) => {
+        return row.map((cell, colIndex) => {
+          const key = `${rowIndex}-${colIndex}`
+          if (store.dataOverrides[key]) {
+            return store.dataOverrides[key].value as CellValue
+          }
+          return cell
+        })
+      })
+
+      // Then apply transformations to all data
+      const transformedData = dataWithOverrides.map(row => {
         const newRow = [...row]
         store.excelHeaders.forEach((header, idx) => {
           const dbField = localMapping.value[header]
