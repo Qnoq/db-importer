@@ -8,7 +8,7 @@
         <div>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Data Preview with Validation (Editable)</h3>
           <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Showing {{ previewData.length }} rows with transformations applied - Double-click any cell to edit
+            Showing {{ displayData.length }} rows with transformations applied - Double-click any cell to edit
           </p>
         </div>
         <UBadge color="blue" variant="soft">
@@ -29,7 +29,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(row, rowIndex) in previewData" :key="rowIndex" class="border-t border-gray-200 dark:border-gray-700">
+            <tr v-for="(row, rowIndex) in displayData" :key="rowIndex" class="border-t border-gray-200 dark:border-gray-700">
               <td class="px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700">{{ rowIndex + 1 }}</td>
               <td
                 v-for="(cell, colIndex) in row"
@@ -138,6 +138,41 @@ const changeCount = computed(() => {
   return Object.keys(store.dataOverrides).length
 })
 
+// Create mapping from preview column index to original column index
+// This follows the same logic as previewData creation in useValidation.ts
+const previewToOriginalIndex = computed(() => {
+  const mapping = new Map<number, number>()
+  let previewIndex = 0
+
+  // Iterate through excelHeaders to find which columns are mapped
+  store.excelHeaders.forEach((header, originalIndex) => {
+    const dbField = store.mapping[header]
+    if (dbField) {
+      // This column is mapped, so it appears in the preview
+      mapping.set(previewIndex, originalIndex)
+      previewIndex++
+    }
+  })
+
+  return mapping
+})
+
+// Reactive preview data that updates when overrides change
+const displayData = computed(() => {
+  return props.previewData.map((row, rowIndex) => {
+    return row.map((cell, colIndex) => {
+      // Get the original column index for this preview column
+      const originalColIndex = previewToOriginalIndex.value.get(colIndex) ?? colIndex
+      const key = `${rowIndex}-${originalColIndex}`
+
+      if (store.dataOverrides[key]) {
+        return store.dataOverrides[key].value as CellValue
+      }
+      return cell
+    })
+  })
+})
+
 // Helper functions for cell validation display
 function getCellClass(rowIndex: number, colIndex: number): string {
   const key = `${rowIndex}-${colIndex}`
@@ -188,13 +223,19 @@ function saveEdit(row: number, col: number) {
 
   const newValue = editingValue.value
 
-  // Update the store with the new value
-  store.updateCellValue(row, col, newValue)
+  // Get the original column index for this preview column
+  const originalColIndex = previewToOriginalIndex.value.get(col) ?? col
+
+  // Update the store with the new value using the original column index
+  store.updateCellValue(row, originalColIndex, newValue)
 
   toast.add({
     title: 'Cell updated',
     description: `Row ${row + 1}, Column ${col + 1} updated`,
-    color: 'success'
+    color: 'green',
+    ui: {
+      container: 'z-[9999]'
+    }
   })
 
   cancelEdit()
@@ -210,7 +251,10 @@ function resetChanges() {
   toast.add({
     title: 'Changes reset',
     description: 'All edits have been reverted',
-    color: 'info'
+    color: 'blue',
+    ui: {
+      container: 'z-[9999]'
+    }
   })
 }
 </script>
