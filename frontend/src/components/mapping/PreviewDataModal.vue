@@ -146,7 +146,6 @@ const emit = defineEmits<{
 }>()
 
 const store = useMappingStore()
-const toast = useToast()
 
 // Editing state
 const editingCell = ref<{ row: number; col: number } | null>(null)
@@ -324,15 +323,6 @@ function saveEdit(row: number, col: number) {
   // Update the store with the new value using the original column index
   store.updateCellValue(row, originalColIndex, newValue)
 
-  toast.add({
-    title: 'Cell updated',
-    description: `Row ${row + 1}, Column ${col + 1} updated`,
-    color: 'green',
-    ui: {
-      container: 'z-[99999]'
-    }
-  })
-
   cancelEdit()
 }
 
@@ -343,13 +333,5 @@ function cancelEdit() {
 
 function resetChanges() {
   store.resetDataOverrides()
-  toast.add({
-    title: 'Changes reset',
-    description: 'All edits have been reverted',
-    color: 'blue',
-    ui: {
-      container: 'z-[99999]'
-    }
-  })
 }
 </script>
