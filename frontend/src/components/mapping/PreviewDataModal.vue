@@ -3,7 +3,7 @@
     v-model:open="isOpen"
     :ui="{
       content: 'sm:max-w-7xl',
-      body: '!overflow-y-visible !max-h-none'
+      body: '!overflow-hidden'
     }"
   >
     <template #header>
@@ -11,7 +11,7 @@
         <div>
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Data Preview with Validation (Editable)</h3>
           <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Showing {{ visibleRowCount }} of {{ displayData.length }} rows with transformations applied - Double-click any cell to edit
+            Showing {{ visibleRowCount }} of {{ displayData.length }} rows with transformations applied
           </p>
         </div>
         <div class="flex items-center gap-2">
@@ -21,6 +21,14 @@
           <UBadge color="blue" variant="soft">
             Double-click to edit
           </UBadge>
+          <UButton
+            @click="isOpen = false"
+            color="gray"
+            variant="ghost"
+            icon="i-heroicons-x-mark-20-solid"
+            square
+            size="xs"
+          />
         </div>
       </div>
     </template>
@@ -329,7 +337,7 @@ function saveEdit(row: number, col: number) {
     description: `Row ${row + 1}, Column ${col + 1} updated`,
     color: 'green',
     ui: {
-      container: 'z-[9999]'
+      container: 'z-[99999]'
     }
   })
 
@@ -348,7 +356,7 @@ function resetChanges() {
     description: 'All edits have been reverted',
     color: 'blue',
     ui: {
-      container: 'z-[9999]'
+      container: 'z-[99999]'
     }
   })
 }
