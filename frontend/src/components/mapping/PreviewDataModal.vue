@@ -21,14 +21,6 @@
           <UBadge color="blue" variant="soft">
             Double-click to edit
           </UBadge>
-          <UButton
-            @click="isOpen = false"
-            color="gray"
-            variant="ghost"
-            icon="i-heroicons-x-mark-20-solid"
-            square
-            size="xs"
-          />
         </div>
       </div>
     </template>
