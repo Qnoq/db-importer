@@ -29,7 +29,7 @@
       <div
         ref="scrollContainer"
         @scroll="handleScroll"
-        class="preview-table-wrapper overflow-x-auto max-h-[70vh] overflow-y-auto"
+        class="preview-table-wrapper overflow-x-auto max-h-[60vh] overflow-y-auto"
       >
         <table class="min-w-full border-collapse">
           <thead class="bg-gray-100 dark:bg-gray-800 sticky top-0 z-20 shadow-sm">
