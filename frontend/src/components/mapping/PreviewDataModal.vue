@@ -7,21 +7,21 @@
     }"
   >
     <template #header>
-      <div class="relative">
-        <div>
+      <div class="flex flex-col gap-2">
+        <div class="flex items-center justify-between">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Data Preview with Validation (Editable)</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Showing {{ visibleRowCount }} of {{ displayData.length }} rows with transformations applied
-          </p>
+          <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+            <UBadge v-if="hasMoreRows" color="green" variant="soft">
+              Scroll down to load more
+            </UBadge>
+            <UBadge color="blue" variant="soft">
+              Double-click on cells to edit
+            </UBadge>
+          </div>
         </div>
-        <div class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          <UBadge v-if="hasMoreRows" color="green" variant="soft">
-            Scroll down to load more
-          </UBadge>
-          <UBadge color="blue" variant="soft">
-            Double-click to edit
-          </UBadge>
-        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          Showing {{ visibleRowCount }} of {{ displayData.length }} rows with transformations applied
+        </p>
       </div>
     </template>
 
