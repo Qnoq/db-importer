@@ -1,7 +1,10 @@
 <template>
   <UModal
     v-model:open="isOpen"
-    :ui="{ content: 'sm:max-w-7xl' }"
+    :ui="{
+      content: 'sm:max-w-7xl',
+      body: '!overflow-y-visible !max-h-none'
+    }"
   >
     <template #header>
       <div class="flex items-center justify-between">
